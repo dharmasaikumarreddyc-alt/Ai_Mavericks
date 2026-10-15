@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Remove the secondary top info bar (duplicate logo + search + 24/7 support).
+   The AI Mavericks logo, nav and icon row remain in the main bar below. */
+.header-info-bar {
+  display: none !important;
+}
+
+/* The template normally shows the brand logo in the (now-removed) info bar and
+   hides it in the main bar. Force the main-bar logo to show, top-left. */
+.site-header .main-bar .logo-header {
+  display: flex !important;
+  align-items: center;
+}
+.site-header .main-bar .logo-header img {
+  height: 44px !important;
+  width: auto !important;
+  max-width: 200px !important;
+}
+
+/* Header Height Reduction */
+.main-bar {
+  height: 70px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.main-bar .container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo Dimensions and Duplication Fix */
+.logo-header {
+  height: 60px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure only one logo is visible */
+.logo-header.logo-dark + .logo-header.logo-dark {
+  display: none !important;
+}
+
+.logo-header img {
+  max-height: 100%;
+  width: auto;
+}
+
+/* Tighten Navigation Links */
+.nav.navbar-nav > li > a {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  line-height: 50px;
+  display: flex;
+  align-items: center;
+}
+
+/* =====================================================================
+   THEME SYSTEM
+   Six selectable themes. Each overrides the template's accent variables
+   (--primary, --rgba-primary-*, --secondary). Midnight & Forest are dark:
+   they additionally re-skin the main surfaces via the shared dark block.
+   Switching is handled by <ThemeProvider /> which sets html[data-theme].
+   ===================================================================== */
+
+/* ---- Daylight (light, warm coral) — default ---- */
+html[data-theme="daylight"] {
+  --primary: #f2683c; --primary-hover: #d9542b; --primary-dark: #b8431f;
+  --secondary: #1f2937; --secondary-hover: #111827;
+  --rgba-primary-1: rgba(242,104,60,0.1); --rgba-primary-2: rgba(242,104,60,0.2);
+  --rgba-primary-3: rgba(242,104,60,0.3); --rgba-primary-4: rgba(242,104,60,0.4);
+  --rgba-primary-5: rgba(242,104,60,0.5); --rgba-primary-6: rgba(242,104,60,0.6);
+  --rgba-primary-7: rgba(242,104,60,0.7); --rgba-primary-8: rgba(242,104,60,0.8);
+  --rgba-primary-9: rgba(242,104,60,0.9);
+}
+
+/* ---- Ocean (light, blue) ---- */
+html[data-theme="ocean"] {
+  --primary: #2563eb; --primary-hover: #1d4ed8; --primary-dark: #1e40af;
+  --secondary: #0ea5e9; --secondary-hover: #0284c7;
+  --rgba-primary-1: rgba(37,99,235,0.1); --rgba-primary-2: rgba(37,99,235,0.2);
+  --rgba-primary-3: rgba(37,99,235,0.3); --rgba-primary-4: rgba(37,99,235,0.4);
+  --rgba-primary-5: rgba(37,99,235,0.5); --rgba-primary-6: rgba(37,99,235,0.6);
+  --rgba-primary-7: rgba(37,99,235,0.7); --rgba-primary-8: rgba(37,99,235,0.8);
+  --rgba-primary-9: rgba(37,99,235,0.9);
+}
+
+/* ---- Meadow (light, green) ---- */
+html[data-theme="meadow"] {
+  --primary: #16a34a; --primary-hover: #15803d; --primary-dark: #166534;
+  --secondary: #047857; --secondary-hover: #065f46;
+  --rgba-primary-1: rgba(22,163,74,0.1); --rgba-primary-2: rgba(22,163,74,0.2);
+  --rgba-primary-3: rgba(22,163,74,0.3); --rgba-primary-4: rgba(22,163,74,0.4);
+  --rgba-primary-5: rgba(22,163,74,0.5); --rgba-primary-6: rgba(22,163,74,0.6);
+  --rgba-primary-7: rgba(22,163,74,0.7); --rgba-primary-8: rgba(22,163,74,0.8);
+  --rgba-primary-9: rgba(22,163,74,0.9);
+}
+
+/* ---- Lavender (light, purple) ---- */
+html[data-theme="lavender"] {
+  --primary: #7c5cfc; --primary-hover: #6a47f0; --primary-dark: #5b34d6;
+  --secondary: #9333ea; --secondary-hover: #7e22ce;
+  --rgba-primary-1: rgba(124,92,252,0.1); --rgba-primary-2: rgba(124,92,252,0.2);
+  --rgba-primary-3: rgba(124,92,252,0.3); --rgba-primary-4: rgba(124,92,252,0.4);
+  --rgba-primary-5: rgba(124,92,252,0.5); --rgba-primary-6: rgba(124,92,252,0.6);
+  --rgba-primary-7: rgba(124,92,252,0.7); --rgba-primary-8: rgba(124,92,252,0.8);
+  --rgba-primary-9: rgba(124,92,252,0.9);
+}
+
+/* ---- Midnight (dark, rose accent) ---- */
+html[data-theme="midnight"] {
+  --primary: #fb7185; --primary-hover: #f43f5e; --primary-dark: #e11d48;
+  --secondary: #fb923c; --secondary-hover: #f97316;
+  --rgba-primary-1: rgba(251,113,133,0.12); --rgba-primary-2: rgba(251,113,133,0.2);
+  --rgba-primary-3: rgba(251,113,133,0.3); --rgba-primary-4: rgba(251,113,133,0.4);
+  --rgba-primary-5: rgba(251,113,133,0.5); --rgba-primary-6: rgba(251,113,133,0.6);
+  --rgba-primary-7: rgba(251,113,133,0.7); --rgba-primary-8: rgba(251,113,133,0.8);
+  --rgba-primary-9: rgba(251,113,133,0.9);
+  --surface: #0f172a; --surface-2: #1e293b; --surface-3: #273449;
+  --text: #e2e8f0; --text-muted: #94a3b8; --border-dark: #334155;
+}
+
+/* ---- Forest (dark, emerald accent) ---- */
+html[data-theme="forest"] {
+  --primary: #34d399; --primary-hover: #10b981; --primary-dark: #059669;
+  --secondary: #22c55e; --secondary-hover: #16a34a;
+  --rgba-primary-1: rgba(52,211,153,0.12); --rgba-primary-2: rgba(52,211,153,0.2);
+  --rgba-primary-3: rgba(52,211,153,0.3); --rgba-primary-4: rgba(52,211,153,0.4);
+  --rgba-primary-5: rgba(52,211,153,0.5); --rgba-primary-6: rgba(52,211,153,0.6);
+  --rgba-primary-7: rgba(52,211,153,0.7); --rgba-primary-8: rgba(52,211,153,0.8);
+  --rgba-primary-9: rgba(52,211,153,0.9);
+  --surface: #0c1b14; --surface-2: #14271d; --surface-3: #1f3b2c;
+  --text: #e3f2e9; --text-muted: #9bb3a6; --border-dark: #285238;
+}
+
+/* ---- Shared DARK skin (applies to midnight + forest) ---- */
+[data-theme="midnight"] body,
+[data-theme="forest"] body {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+}
+[data-theme="midnight"] .content-inner-1,
+[data-theme="forest"] .content-inner-1,
+[data-theme="midnight"] .page-content,
+[data-theme="forest"] .page-content,
+[data-theme="midnight"] main,
+[data-theme="forest"] main {
+  background-color: var(--surface) !important;
+}
+[data-theme="midnight"] .account-card,
+[data-theme="forest"] .account-card,
+[data-theme="midnight"] .card,
+[data-theme="forest"] .card,
+[data-theme="midnight"] .modal-content,
+[data-theme="forest"] .modal-content,
+[data-theme="midnight"] .offcanvas,
+[data-theme="forest"] .offcanvas {
+  background-color: var(--surface-2) !important;
+  border-color: var(--border-dark) !important;
+  color: var(--text) !important;
+}
+[data-theme="midnight"] .card-header,
+[data-theme="forest"] .card-header,
+[data-theme="midnight"] .bg-white,
+[data-theme="forest"] .bg-white,
+[data-theme="midnight"] .bg-light,
+[data-theme="forest"] .bg-light {
+  background-color: var(--surface-3) !important;
+  color: var(--text) !important;
+  border-color: var(--border-dark) !important;
+}
+[data-theme="midnight"] h1, [data-theme="midnight"] h2, [data-theme="midnight"] h3,
+[data-theme="midnight"] h4, [data-theme="midnight"] h5, [data-theme="midnight"] h6,
+[data-theme="forest"] h1, [data-theme="forest"] h2, [data-theme="forest"] h3,
+[data-theme="forest"] h4, [data-theme="forest"] h5, [data-theme="forest"] h6,
+[data-theme="midnight"] .title, [data-theme="forest"] .title,
+[data-theme="midnight"] p, [data-theme="forest"] p,
+[data-theme="midnight"] span, [data-theme="forest"] span,
+[data-theme="midnight"] label, [data-theme="forest"] label,
+[data-theme="midnight"] li, [data-theme="forest"] li {
+  color: var(--text);
+}
+[data-theme="midnight"] .text-muted, [data-theme="forest"] .text-muted {
+  color: var(--text-muted) !important;
+}
+[data-theme="midnight"] .form-control, [data-theme="forest"] .form-control,
+[data-theme="midnight"] .form-select, [data-theme="forest"] .form-select,
+[data-theme="midnight"] .input-group-text, [data-theme="forest"] .input-group-text {
+  background-color: var(--surface-3) !important;
+  color: var(--text) !important;
+  border-color: var(--border-dark) !important;
+}
+[data-theme="midnight"] .form-control::placeholder, [data-theme="forest"] .form-control::placeholder {
+  color: var(--text-muted) !important;
+}
+[data-theme="midnight"] .border-bottom, [data-theme="forest"] .border-bottom,
+[data-theme="midnight"] hr, [data-theme="forest"] hr {
+  border-color: var(--border-dark) !important;
+}
+[data-theme="midnight"] .btn-outline-secondary, [data-theme="forest"] .btn-outline-secondary {
+  color: var(--text) !important;
+  border-color: var(--border-dark) !important;
+}
+[data-theme="midnight"] .site-header, [data-theme="forest"] .site-header,
+[data-theme="midnight"] .main-bar, [data-theme="forest"] .main-bar,
+[data-theme="midnight"] .header-info-bar, [data-theme="forest"] .header-info-bar,
+[data-theme="midnight"] .site-footer, [data-theme="forest"] .site-footer,
+[data-theme="midnight"] footer, [data-theme="forest"] footer {
+  background-color: var(--surface-2) !important;
+  color: var(--text) !important;
+}
+/* Keep "primary" accents readable on dark */
+[data-theme="midnight"] .text-primary, [data-theme="forest"] .text-primary { color: var(--primary) !important; }
+
+/* =====================================================================
+   THEME PICKER (floating control rendered by <ThemeProvider />)
+   Uses its own variables so it looks right in every theme.
+   ===================================================================== */
+.theme-fab {
+  position: fixed; left: 20px; bottom: 20px; z-index: 9999;
+  width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--primary, #f2683c); color: #fff; font-size: 20px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s ease;
+}
+.theme-fab:hover { transform: scale(1.08); }
+.theme-pop {
+  position: fixed; left: 20px; bottom: 84px; z-index: 9999;
+  width: 230px; background: #fff; color: #1f2937; border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.28); padding: 8px; overflow: hidden;
+}
+[data-theme="midnight"] .theme-pop, [data-theme="forest"] .theme-pop {
+  background: var(--surface-2); color: var(--text);
+}
+.theme-pop-title { font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; opacity: .6; padding: 6px 10px; }
+.theme-opt {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: none; border: none; cursor: pointer; padding: 9px 10px;
+  border-radius: 10px; font-size: 14px; color: inherit; text-align: left;
+}
+.theme-opt:hover { background: rgba(127,127,127,0.12); }
+.theme-opt .swatch {
+  width: 24px; height: 24px; border-radius: 7px; flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+}
+.theme-opt .check { margin-left: auto; color: var(--primary); }
+
+/* Blinking cursor for the streamed agent log */
+.agent-cursor { animation: agent-blink 1s steps(1) infinite; color: var(--primary); }
+@keyframes agent-blink { 50% { opacity: 0; } }
+
+/* Hide the template's floating "support" button (bottom-left headset). */
+.DZ-bt-support-now,
+.dz-bt-support,
+.support-now {
+  display: none !important;
+}
+
