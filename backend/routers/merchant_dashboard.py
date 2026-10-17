@@ -728,7 +728,11 @@ async def get_today_sales_forecast(
                 entry["hourUnits"].get(order_time.hour, 0) + quantity
             )
 
-    comparable_days = len(comparison_dates)
+    # Average only across comparable weekdays that actually have recorded orders.
+    # Treating every calendar occurrence as a zero-sales day materially understates
+    # demand when the prototype/demo history is sparse.
+    calendar_comparison_days = len(comparison_dates)
+    observed_comparable_days = len(matching_history_dates)
     expected_items = []
     for entry in item_totals.values():
         hour_units = entry.pop("hourUnits")
@@ -740,7 +744,7 @@ async def get_today_sales_forecast(
                 "historicalUnits": entry["historicalUnits"],
                 "historicalOrders": entry["historicalOrders"],
                 "estimatedUnitsPerComparableDay": math.ceil(
-                    entry["historicalUnits"] / max(comparable_days, 1)
+                    entry["historicalUnits"] / max(observed_comparable_days, 1)
                 ),
                 "typicalPeakHour": peak_hour,
                 "typicalPeakTime": _format_hour(peak_hour),
@@ -768,7 +772,8 @@ async def get_today_sales_forecast(
             "timezone": timezone_name,
             "weekday": now_local.strftime("%A"),
             "forecastWindow": window_label,
-            "comparisonWeeks": comparable_days,
+            "comparisonWeeks": 0,
+            "calendarComparisonOccurrences": calendar_comparison_days,
             "historyWeeksWithOrders": 0,
             "sampleOrderCount": 0,
             "items": [],
@@ -799,7 +804,7 @@ async def get_today_sales_forecast(
         f"Today: {now_local.strftime('%A, %B %d')}; local time: {now_local.strftime('%I:%M %p')}; "
         f"time zone: {timezone_name}; forecast scope: {window_label}.\n"
         f"Matching weekday orders in scope: {matching_order_count} across "
-        f"{history_dates_with_orders} historical dates; calendar comparison occurrences: {comparable_days}.\n"
+        f"{history_dates_with_orders} historical dates; calendar comparison occurrences: {calendar_comparison_days}.\n"
         f"Historical product evidence:\n{product_evidence}"
     )
 
@@ -848,7 +853,8 @@ async def get_today_sales_forecast(
         "timezone": timezone_name,
         "weekday": now_local.strftime("%A"),
         "forecastWindow": window_label,
-        "comparisonWeeks": comparable_days,
+        "comparisonWeeks": observed_comparable_days,
+        "calendarComparisonOccurrences": calendar_comparison_days,
         "historyWeeksWithOrders": history_dates_with_orders,
         "sampleOrderCount": matching_order_count,
         "items": expected_items,

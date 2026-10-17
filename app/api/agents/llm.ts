@@ -37,7 +37,11 @@ export function buildChatRequest(): ChatRequest | null {
   if (GOOGLE_API_KEY) return {
     url: `${GOOGLE_BASE_URL}/chat/completions`,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GOOGLE_API_KEY}` },
-    modelField: GOOGLE_MODEL, supportsTemperature: true, provider: 'google-gemini',
+    modelField: GOOGLE_MODEL,
+    // Gemini 3.6+ ignores/deprecates custom sampling controls. Omitting them keeps
+    // requests compatible with current Gemini behavior and future validation.
+    supportsTemperature: false,
+    provider: 'google-gemini',
   };
   if (USE_AZURE) return {
     url: `${AZURE_ENDPOINT}/openai/deployments/${AZURE_DEPLOYMENT}/chat/completions?api-version=${AZURE_API_VERSION}`,
@@ -133,7 +137,7 @@ export async function geminiMultimodalJSON<T = Record<string, unknown>>(
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: `${AI_SAFETY_POLICY}\n\n${system}`.slice(0, 24_000) }] },
           contents: [{ role: 'user', parts }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+          generationConfig: { responseMimeType: 'application/json' },
         }),
         signal: controller.signal,
       },

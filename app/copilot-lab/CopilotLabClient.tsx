@@ -281,7 +281,7 @@ export default function CopilotLabClient() {
                 <div className="copilot-basket">
                   {result.basket.map((item) => (
                     <article key={item.id}>
-                      <div className="copilot-product-image"><img src={item.image} alt="" /><span>{Math.round(item.confidence * 100)}% fit</span></div>
+                      <div className="copilot-product-image"><img src={item.image} alt="" /><span>Gemini-ranked match</span></div>
                       <div className="copilot-product-body">
                         {item.substitution && <p className="copilot-substitution"><i className="fas fa-arrows-rotate" /> Substitute for {item.substitution.for} · approval required</p>}
                         <small>{item.merchantName} · {item.id}</small>
