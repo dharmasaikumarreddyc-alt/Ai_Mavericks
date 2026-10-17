@@ -35,6 +35,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/vendor/nouislider/nouislider.min.css" />
         <link rel="stylesheet" href="/css/style.css" />
         <link rel="stylesheet" href="/css/skin/skin-1.css" />
+        <link rel="stylesheet" href="/css/loopora-legacy-parity.css" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
