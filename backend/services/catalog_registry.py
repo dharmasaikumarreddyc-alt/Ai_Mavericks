@@ -37,6 +37,16 @@ GROCERY_MERCHANTS = {
                 "image": "/images/products/biryani.jpg",
             },
             {
+                "id": "fm-biryani-fresh-base",
+                "name": "Biryani Fresh Base Pack",
+                "price": 6.99,
+                "category": "Recipe Kits",
+                "description": "Onions, tomatoes, yogurt, mint and coriander. Add your preferred protein or vegetables.",
+                "tags": ["biryani", "ingredients", "onion", "tomato", "yogurt", "mint", "coriander", "fresh"],
+                "available": True,
+                "image": "/images/products/mediterranean-salad.jpg",
+            },
+            {
                 "id": "fm-biryani-chicken",
                 "name": "Chicken Biryani Fresh Ingredients Pack",
                 "price": 13.99,
