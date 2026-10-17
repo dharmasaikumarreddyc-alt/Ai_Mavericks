@@ -1,0 +1,58 @@
+name: Final jury landing polish
+
+on:
+  push:
+    branches: [chatgpt/final-jury-polish]
+
+permissions:
+  contents: write
+
+jobs:
+  patch-once:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/final-jury-polish
+          fetch-depth: 0
+      - name: Patch restored landing copy without changing layout
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('app/page.tsx')
+          text = path.read_text()
+          replacements = {
+              "title: 'Agentic AI Checkout | Home',": "title: 'Aisle AI — Closed-Loop Commerce Copilot',",
+              "description: 'Experience the future of local shopping with AI-powered product discovery and automated checkout. Connect with local merchants, discover fresh products, and enjoy seamless AI-driven purchasing.',": "description: 'A governed Gemini commerce copilot connecting grounded customer discovery, deterministic validation, explicit approval, persistent fulfillment, and merchant intelligence.',",
+              "Smart AI agents find the best from <span>local merchants</span> near you!": "Gemini proposes grounded options; <span>deterministic controls</span> verify commerce facts before you approve.",
+              "<h6 className=\"price text-primary\">$80</h6>": "<h6 className=\"price text-primary\">Synthetic demo</h6>",
+              "<a href=\"https://www.instagram.com/dexignzone/\" target=\"_blank\">Instagram</a>": "<Link href=\"/copilot-lab\">Live Copilot</Link>",
+              "<a href=\"https://www.facebook.com/dexignzone\" target=\"_blank\">Facebook</a>": "<Link href=\"/evidence\">Evidence</Link>",
+              "<a href=\"https://twitter.com/dexignzones\" target=\"_blank\">twitter</a>": "<Link href=\"/trust\">Trust</Link>",
+              "<a href=\"#\" className=\"service-btn btn-dark\">Let's talk</a>": "<Link href=\"/copilot-lab\" className=\"service-btn btn-dark\">Live Copilot</Link>",
+              "<a className=\"icon-button\" href=\"shop-with-category.html\">": "<Link className=\"icon-button\" href=\"/shop\">",
+              "\t\t\t</a>\n\t\t</div>\t\n\t\t{/* Featured Section End */}": "\t\t\t</Link>\n\t\t</div>\t\n\t\t{/* Featured Section End */}",
+              "<a className=\"icon-button\" href=\"#\">": "<Link className=\"icon-button\" href=\"/copilot-lab\">",
+              "\t\t\t\t\t\t</a>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t\t<div className=\"dz-features-wrapper overflow-hidden\">": "\t\t\t\t\t\t</Link>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t\t<div className=\"dz-features-wrapper overflow-hidden\">",
+              "We're growing with 6.3k trusted local merchants": "One governed loop from customer intent to merchant action",
+              "<a className=\"icon-button d-md-inline-block d-none\" href=\"blog-tag.html\">": "<Link className=\"icon-button d-md-inline-block d-none\" href=\"/evidence\">",
+              "\t\t\t\t\t\t</a>\n\t\t\t\t\t</div>\t\n\t\t\t\t</div>\t\n\t\t\t</div>\t": "\t\t\t\t\t\t</Link>\n\t\t\t\t\t</div>\t\n\t\t\t\t</div>\t\n\t\t\t</div>\t",
+              "<a href=\"#\" className=\"companies-wrapper\">": "<a href=\"/evidence\" className=\"companies-wrapper\">",
+          }
+
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Missing expected landing fragment: {old[:90]}')
+              text = text.replace(old, new)
+
+          path.write_text(text)
+      - name: Remove one-shot workflow and push result
+        run: |
+          rm .github/workflows/final-jury-polish-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx .github/workflows/final-jury-polish-once.yml
+          git commit -m "Polish restored landing for jury accuracy"
+          git push origin HEAD:chatgpt/final-jury-polish
