@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 const port = process.env.E2E_PORT || '3100';
-const baseUrl = `http://127.0.0.1:${port}`;
+const baseUrl = `http://localhost:${port}`;
 const child = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['start', '--', '-p', port], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: { ...process.env, PORT: port },
@@ -44,7 +44,7 @@ try {
     scenario: 'model-outage',
   });
   const fallback = await fallbackResponse.json();
-  if (!fallbackResponse.ok || fallback.success !== true) throw new Error('Fallback copilot request failed.');
+  if (!fallbackResponse.ok || fallback.success !== true) throw new Error(`Fallback copilot request failed: ${fallback.error || fallbackResponse.status}`);
   if (fallback.mode !== 'deterministic-fallback') throw new Error('Model-outage scenario did not use deterministic fallback.');
   if (!fallback.totals?.withinBudget) throw new Error('Fallback basket exceeded budget.');
   if (!fallback.governance?.customerConfirmationRequired || fallback.governance?.autonomousChanges) {
