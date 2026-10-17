@@ -5,14 +5,16 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Keep lint focused on application-owned source. Vendored/minified assets are
-  // third-party distribution files and should not determine our code-quality gate.
+  // Keep lint focused on application-owned source. Vendored/minified and
+  // template distribution assets are restored byte-for-byte for UI parity and
+  // should not determine the application code-quality gate.
   globalIgnores([
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
     "public/vendor/**",
+    "public/js/**",
   ]),
   {
     // These rules are useful signals but are not correctness failures for the
