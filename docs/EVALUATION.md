@@ -8,6 +8,25 @@ The backend evaluation suite covers catalog retrieval, PII redaction, input norm
 
 These checks validate application controls only. They do not measure Gemini quality, user conversion, production latency, or production security.
 
+## Deterministic commerce guard regression
+
+Run the frontend commerce-invariant suite against a running application:
+
+```bash
+npm run eval:commerce-guards
+```
+
+It checks:
+
+- Smart Cart actually enforces `maxMerchants` instead of only truncating a summary.
+- A top-level Smart Cart optimization objective is propagated into the selection contract.
+- Smart Cart reports normalized scoring and constraint metadata.
+- Budget Shop uses the same USD convention as the synthetic catalog.
+- The selected Budget Shop basket cannot exceed the user's total budget, even with flexible item allocations.
+- Invalid merchant caps and negative budgets fail closed with HTTP 400 responses.
+
+These are deterministic commerce-safety checks. They are intentionally reported separately from live-model quality.
+
 ## Live Gemini evaluation
 
 `evidence/gemini_cases.json` contains representative and adversarial shopping missions covering areas such as:
@@ -34,7 +53,13 @@ A valid Gemini key is required. The runner refuses to treat deterministic fallba
 
 ## Reproducible supporting evidence
 
-`backend/evidence/impact_benchmark.py` provides a transparent modeled comparison of shopping interaction counts. It is a workflow model, not a human timing or conversion study.
+`backend/evidence/impact_benchmark.py` provides a transparent modeled comparison of shopping interaction counts. Across its 20 declared synthetic workflow scenarios, the benchmark models 160 baseline interactions versus 83 Loopora interactions: a mean modeled reduction of **46.1%**. This is a workflow-model result, not an observed human timing, conversion, or revenue study.
+
+Reproduce it with:
+
+```bash
+python backend/evidence/impact_benchmark.py
+```
 
 `backend/evidence/forecast_backtest.py` evaluates the prototype's directional forecasting method on held-out synthetic data. It is not production forecast accuracy evidence.
 
@@ -45,7 +70,7 @@ A valid Gemini key is required. The runner refuses to treat deterministic fallba
 ## Evidence rules
 
 - Do not present deterministic checks as Gemini-quality scores.
-- Do not present modeled interaction reduction as observed user improvement.
+- Do not present the modeled 46.1% interaction reduction as observed user improvement.
 - Do not present synthetic forecast metrics as production forecasting accuracy.
 - Do not claim successful model behavior until the live Gemini runner records it.
 - Keep synthetic/demo data clearly labelled in the UI and submission materials.
