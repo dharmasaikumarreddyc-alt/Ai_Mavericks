@@ -23,12 +23,16 @@ async function waitForReady() {
   throw new Error(`Next.js app did not become ready.\n${output}`);
 }
 
-async function post(payload) {
-  return fetch(`${baseUrl}/api/agents/retail-copilot`, {
+async function postAgent(path, payload) {
+  return fetch(`${baseUrl}/api/agents/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
     body: JSON.stringify(payload),
   });
+}
+
+async function post(payload) {
+  return postAgent('retail-copilot', payload);
 }
 
 async function stopServer() {
@@ -71,7 +75,45 @@ try {
   const blocked = await blockedResponse.json();
   if (blockedResponse.status !== 400 || blocked.blocked !== true) throw new Error('Prompt-injection smoke case was not blocked.');
 
-  console.log('E2E smoke passed: page render, deterministic outage recovery, budget control, human confirmation boundary, and injection block.');
+  // Voice concierge recipe-shopping path: cooking intent must become a grocery
+  // mission, not a restaurant order for the cooked dish.
+  const assistantResponse = await postAgent('assistant', {
+    message: 'I need ingredients to make vegetarian biryani',
+  });
+  const assistant = await assistantResponse.json();
+  if (!assistantResponse.ok || assistant.intent !== 'order') {
+    throw new Error('Voice concierge did not classify recipe ingredients as a shopping order.');
+  }
+
+  const recipeQuery = assistant.orderQuery || 'ingredients to make vegetarian biryani';
+  const discoverResponse = await postAgent('discover', { query: recipeQuery });
+  const discover = await discoverResponse.json();
+  const recipeMerchant = discover?.results?.merchants?.[0];
+  if (!discoverResponse.ok || recipeMerchant?.id !== 'loopora-fresh-market') {
+    throw new Error('Recipe shopping did not route to the bounded grocery merchant.');
+  }
+
+  const inventoryResponse = await postAgent('inventory', {
+    merchantId: recipeMerchant.id,
+    query: recipeQuery,
+  });
+  const inventory = await inventoryResponse.json();
+  const recipeProducts = inventory?.results?.products || [];
+  const ingredientPlan = inventory?.results?.recipePlan?.ingredients || [];
+  if (!inventoryResponse.ok || recipeProducts.length !== 2) {
+    throw new Error('Recipe inventory did not produce the expected grounded two-part basket.');
+  }
+  if (!recipeProducts.some((product) => product.id === 'fm-biryani-pantry')) {
+    throw new Error('Recipe basket is missing the authoritative biryani pantry kit.');
+  }
+  if (!recipeProducts.some((product) => product.id === 'fm-biryani-veg')) {
+    throw new Error('Vegetarian recipe basket did not choose the vegetarian fresh pack.');
+  }
+  if (!ingredientPlan.some((ingredient) => String(ingredient).toLowerCase().includes('rice'))) {
+    throw new Error('Recipe analysis did not identify rice as an ingredient need.');
+  }
+
+  console.log('E2E smoke passed: page render, deterministic outage recovery, budget control, human confirmation boundary, injection block, and grounded recipe-shopping voice flow.');
 } finally {
   await stopServer();
 }
