@@ -16,8 +16,9 @@ export default function StyleLoader() {
       '/vendor/lightgallery/dist/css/lg-thumbnail.css',
       '/vendor/lightgallery/dist/css/lg-zoom.css',
       '/vendor/nouislider/nouislider.min.css',
-      '/css/style.css',
+      '/css/loopora-base.css',
       '/css/skin/skin-1.css',
+      '/css/loopora-legacy-parity.css',
     ];
 
     stylesheets.forEach((href) => {
@@ -30,9 +31,8 @@ export default function StyleLoader() {
       }
     });
 
-    // The original Pixio landing is intentionally retained for visual parity.
-    // Repoint the few legacy template-only anchors so every visible CTA stays
-    // inside the real Loopora prototype rather than navigating to dead .html pages.
+    // Keep legacy layout-compatible anchors inside the Loopora product so
+    // visible calls to action never navigate to dead template pages.
     if (pathname === '/') {
       const replacements: Array<[string, string]> = [
         ['a.service-btn[href="#"]', '/copilot-lab'],
