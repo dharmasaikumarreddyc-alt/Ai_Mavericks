@@ -24,7 +24,6 @@ export default function Header() {
       setCartCount(0);
       return;
     }
-
     try {
       const response = await fetch(`${optionalBackendUrl}/cart`, {
         headers: { Authorization: `Bearer ${session.token}` },
@@ -41,9 +40,7 @@ export default function Header() {
     void refreshSession();
     const refresh = () => void refreshSession();
     const closeProfile = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setProfileOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) setProfileOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -51,7 +48,6 @@ export default function Header() {
         setProfileOpen(false);
       }
     };
-
     window.addEventListener('authChanged', refresh);
     window.addEventListener('cartUpdated', refresh);
     document.addEventListener('mousedown', closeProfile);
@@ -85,11 +81,8 @@ export default function Header() {
     router.replace('/');
   };
 
-  const isActive = (href: string) =>
-    pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
-
-  const navClass = (href: string) =>
-    `${styles.navLink} ${isActive(href) ? styles.activeLink : ''}`.trim();
+  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+  const navClass = (href: string) => `${styles.navLink} ${isActive(href) ? styles.activeLink : ''}`.trim();
 
   return (
     <header className={styles.header}>
@@ -105,33 +98,16 @@ export default function Header() {
             <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
             <span>CartPilot</span>
           </Link>
-          <Link href="/copilot-lab" className={navClass('/copilot-lab')}>Live Copilot</Link>
-          <Link href="/evidence" className={navClass('/evidence')}>Evidence</Link>
-          <Link href="/trust" className={navClass('/trust')}>Trust</Link>
           <Link href="/merchant/login" className={navClass('/merchant')}>Merchant</Link>
         </nav>
 
         <div className={styles.actions}>
           <form className={styles.searchForm} role="search" onSubmit={submitSearch}>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              type="search"
-              className={styles.searchInput}
-              aria-label="Search products"
-              placeholder="Search products"
-            />
-            <button className={styles.searchButton} type="submit" aria-label="Search">
-              <i className="fas fa-search" aria-hidden="true" />
-            </button>
+            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" className={styles.searchInput} aria-label="Search products" placeholder="Search products" />
+            <button className={styles.searchButton} type="submit" aria-label="Search"><i className="fas fa-search" aria-hidden="true" /></button>
           </form>
 
-          <Link
-            href="/cart-pilot"
-            className={`${styles.iconButton} ${styles.desktopMic}`}
-            aria-label="Open voice AI concierge"
-            title="Voice AI Concierge"
-          >
+          <Link href="/cart-pilot" className={`${styles.iconButton} ${styles.desktopMic}`} aria-label="Open voice AI concierge" title="Voice AI Concierge">
             <i className="fas fa-microphone" aria-hidden="true" />
           </Link>
 
@@ -142,14 +118,7 @@ export default function Header() {
 
           {userName ? (
             <div className={styles.profileWrap} ref={profileRef}>
-              <button
-                type="button"
-                className={styles.profileButton}
-                onClick={() => setProfileOpen((current) => !current)}
-                aria-expanded={profileOpen}
-                aria-haspopup="menu"
-                aria-label="Account menu"
-              >
+              <button type="button" className={styles.profileButton} onClick={() => setProfileOpen((current) => !current)} aria-expanded={profileOpen} aria-haspopup="menu" aria-label="Account menu">
                 <i className="far fa-user" aria-hidden="true" />
               </button>
               {profileOpen && (
@@ -162,22 +131,11 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <Link href="/login" className={styles.iconButton} aria-label="Sign in" title="Sign in">
-              <i className="far fa-user" aria-hidden="true" />
-            </Link>
+            <Link href="/login" className={styles.iconButton} aria-label="Sign in" title="Sign in"><i className="far fa-user" aria-hidden="true" /></Link>
           )}
 
-          <button
-            type="button"
-            className={`${styles.menuButton} ${menuOpen ? styles.menuButtonOpen : ''}`}
-            onClick={() => setMenuOpen((current) => !current)}
-            aria-expanded={menuOpen}
-            aria-controls="loopora-mobile-menu"
-            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          >
-            <span />
-            <span />
-            <span />
+          <button type="button" className={`${styles.menuButton} ${menuOpen ? styles.menuButtonOpen : ''}`} onClick={() => setMenuOpen((current) => !current)} aria-expanded={menuOpen} aria-controls="loopora-mobile-menu" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}>
+            <span /><span /><span />
           </button>
         </div>
       </div>
@@ -185,37 +143,15 @@ export default function Header() {
       {menuOpen && (
         <div className={styles.mobilePanel} id="loopora-mobile-menu">
           <form className={styles.mobileSearch} role="search" onSubmit={submitSearch}>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              type="search"
-              className={styles.searchInput}
-              aria-label="Search products"
-              placeholder="Search products or coffee, breakfast…"
-            />
-            <button className={styles.searchButton} type="submit" aria-label="Search">
-              <i className="fas fa-search" aria-hidden="true" />
-            </button>
+            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" className={styles.searchInput} aria-label="Search products" placeholder="Search products or coffee, breakfast…" />
+            <button className={styles.searchButton} type="submit" aria-label="Search"><i className="fas fa-search" aria-hidden="true" /></button>
           </form>
-
-          <div className={styles.mobileAiBadge}>
-            <i className="fas fa-sparkles" aria-hidden="true" /> AI shopping
-          </div>
-
+          <div className={styles.mobileAiBadge}><i className="fas fa-sparkles" aria-hidden="true" /> AI shopping</div>
           <nav className={styles.mobileNav} aria-label="Mobile navigation">
-            <Link href="/cart-pilot" className={`${styles.navCta} ${isActive('/cart-pilot') ? styles.activeCta : ''}`}>
-              <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
-              <span>Open CartPilot</span>
-            </Link>
-            <Link href="/copilot-lab" className={navClass('/copilot-lab')}>
-              <i className="fas fa-flask" aria-hidden="true" />
-              <span>Live Copilot Lab</span>
-            </Link>
+            <Link href="/cart-pilot" className={`${styles.navCta} ${isActive('/cart-pilot') ? styles.activeCta : ''}`}><i className="fas fa-wand-magic-sparkles" aria-hidden="true" /><span>Open CartPilot</span></Link>
             <div className={styles.mobileDivider} />
             <Link href="/" className={navClass('/')}>Home</Link>
             <Link href="/shop" className={navClass('/shop')}>Marketplace</Link>
-            <Link href="/evidence" className={navClass('/evidence')}>Evidence &amp; Architecture</Link>
-            <Link href="/trust" className={navClass('/trust')}>Trust &amp; Governance</Link>
             <Link href="/merchant/login" className={navClass('/merchant')}>Merchant Portal</Link>
           </nav>
         </div>
