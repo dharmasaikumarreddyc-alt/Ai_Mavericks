@@ -4,6 +4,7 @@ Revision ID: e58f7b2c9a11
 Revises: d42a8e3f619b
 Create Date: 2026-10-17
 """
+from datetime import datetime
 from typing import Sequence, Union
 
 from alembic import op
@@ -35,7 +36,7 @@ def upgrade() -> None:
                 "address": "180 Demo Market St, Atlanta, GA 30326",
                 "category": "Groceries",
                 "is_demo": True,
-                "created_at": sa.func.now(),
+                "created_at": datetime.utcnow(),
             }
         ],
     )
