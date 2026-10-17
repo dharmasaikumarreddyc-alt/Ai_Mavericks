@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3000';
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const cases = JSON.parse(await readFile(new URL('../evidence/gemini_cases.json', import.meta.url), 'utf8'));
 
 function containsExpectedTag(payload, expectedTags) {
