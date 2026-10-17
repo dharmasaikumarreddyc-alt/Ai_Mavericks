@@ -1,0 +1,991 @@
+/* Loopora legacy UI parity layer.
+   Keep the restored Pixio marketplace visual language authoritative while
+   preserving the current Loopora application logic and governed AI flows. */
+
+html,
+body,
+button,
+input,
+textarea,
+select {
+  font-family: "DM Sans", Roboto, Arial, sans-serif !important;
+}
+
+body {
+  background: #fff !important;
+  color: #24262b;
+}
+
+.legacy-ai-surface {
+  background: #fafafa !important;
+}
+
+.legacy-modern-page {
+  background: #fafafa !important;
+  color: #24262b !important;
+}
+
+.legacy-eyebrow {
+  font-size: .72rem;
+  letter-spacing: .14em;
+}
+
+.legacy-page-banner {
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  background-position: center;
+  background-size: cover;
+}
+
+.legacy-page-banner .dz-bnr-inr-entry {
+  padding: 54px 0;
+}
+
+/* --------------------------------------------------------------------------
+   Header: restore the original marketplace navigation hierarchy.
+   -------------------------------------------------------------------------- */
+.legacy-loopora-header {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #fff;
+  border-bottom: 1px solid #ededed;
+}
+
+.legacy-loopora-header .main-bar {
+  min-height: 72px !important;
+  height: auto !important;
+  background: #fff;
+}
+
+.legacy-loopora-header .main-bar .container {
+  min-height: 72px;
+}
+
+.legacy-loopora-header .logo-header {
+  min-width: 150px;
+}
+
+.legacy-loopora-header .logo-header img {
+  width: 165px !important;
+  max-width: 165px !important;
+  height: auto !important;
+  max-height: 42px !important;
+}
+
+.legacy-loopora-header .browse-category-menu {
+  position: relative;
+  margin: 0 14px 0 4px;
+}
+
+.legacy-loopora-header .category-btn {
+  min-height: 46px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  background: #f6f6f6 !important;
+  color: #24262b;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.legacy-loopora-header .category-menu-items {
+  position: absolute;
+  z-index: 1005;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 245px;
+  padding: 10px 0;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, .10);
+}
+
+.legacy-loopora-header .category-menu-items .navbar-nav {
+  display: block !important;
+  width: 100%;
+}
+
+.legacy-loopora-header .category-menu-items li,
+.legacy-loopora-header .category-menu-items a {
+  display: block;
+  width: 100%;
+}
+
+.legacy-loopora-header .category-menu-items a {
+  padding: 10px 18px !important;
+  color: #444 !important;
+  line-height: 1.35 !important;
+}
+
+.legacy-loopora-header .category-menu-items a:hover {
+  color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08));
+}
+
+.legacy-primary-nav > li > a {
+  min-height: 70px;
+  padding-left: 11px !important;
+  padding-right: 11px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
+.legacy-primary-nav > li.active > a,
+.legacy-primary-nav > li > a:hover {
+  color: var(--primary) !important;
+}
+
+.legacy-primary-nav .sub-menu {
+  border-top: 2px solid var(--primary);
+}
+
+.legacy-primary-nav .sub-menu a {
+  color: #424242 !important;
+}
+
+.legacy-primary-nav .sub-menu a:hover {
+  color: var(--primary) !important;
+}
+
+.legacy-loopora-header .header-item-search .search-input {
+  min-width: 215px;
+  border: 1px solid #e4e4e4;
+  border-radius: 4px;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.legacy-loopora-header .header-item-search input {
+  min-height: 42px;
+  background: transparent !important;
+}
+
+.legacy-loopora-header .header-right .nav-link {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #24262b !important;
+}
+
+.legacy-loopora-header .header-right .nav-link:hover {
+  color: var(--primary) !important;
+}
+
+.legacy-cart-link {
+  position: relative;
+}
+
+.legacy-cart-count {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 2px 4px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 9px !important;
+}
+
+.legacy-profile-trigger {
+  cursor: pointer;
+}
+
+.legacy-profile-menu {
+  position: absolute;
+  z-index: 1010;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 210px;
+  padding: 10px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid #e7e7e7;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .12);
+}
+
+.legacy-profile-menu strong {
+  padding: 8px 10px 10px;
+  overflow: hidden;
+  border-bottom: 1px solid #eee;
+  color: #222;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legacy-profile-menu a,
+.legacy-profile-menu button {
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #555 !important;
+  font-size: 12px;
+  text-align: left;
+}
+
+.legacy-profile-menu a:hover,
+.legacy-profile-menu button:hover {
+  background: #f6f6f6;
+  color: var(--primary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Footer: retain the original widget rhythm but remove template-only content.
+   -------------------------------------------------------------------------- */
+.legacy-loopora-footer {
+  border-top: 1px solid #ececec;
+}
+
+.legacy-loopora-footer .footer-top {
+  padding-top: 65px;
+  padding-bottom: 42px;
+}
+
+.legacy-loopora-footer .footer-logo img {
+  width: 175px;
+  max-width: 100%;
+}
+
+.legacy-footer-copy {
+  margin: 18px 0;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.legacy-footer-boundaries p {
+  font-size: 12px !important;
+  line-height: 1.55;
+}
+
+.legacy-loopora-footer .widget_post .dz-media {
+  width: 62px;
+  height: 62px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.legacy-loopora-footer .widget_post .dz-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.legacy-loopora-footer .widget_post .name a {
+  color: #292929 !important;
+}
+
+.legacy-loopora-footer .widget_post .name a:hover,
+.legacy-loopora-footer .widget_services a:hover {
+  color: var(--primary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Legacy utility cards used by Evidence, Trust and Product pages.
+   -------------------------------------------------------------------------- */
+.legacy-evidence-card,
+.legacy-score-card,
+.legacy-limit-card,
+.legacy-command-card,
+.legacy-policy-card,
+.legacy-product-merchant-card,
+.legacy-product-proof {
+  border: 1px solid #e7e7e7 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  box-shadow: 0 7px 22px rgba(0, 0, 0, .035) !important;
+}
+
+.legacy-evidence-card {
+  padding: 24px !important;
+}
+
+.legacy-step-number {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .1));
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.legacy-architecture-card,
+.legacy-trust-card {
+  padding: 28px !important;
+  border: 1px solid #e7e7e7 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.legacy-architecture-card .icon-bx-sm,
+.legacy-trust-card .icon-bx-sm,
+.legacy-product-merchant-card .icon-bx-sm {
+  background: var(--primary) !important;
+}
+
+.legacy-architecture-card p,
+.legacy-trust-card p,
+.legacy-evidence-card p,
+.legacy-score-card p,
+.legacy-product-proof p {
+  line-height: 1.65;
+}
+
+.legacy-command-card code {
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 13px;
+  border-radius: 3px;
+  background: #f5f5f5;
+  color: #333;
+  overflow-x: auto;
+}
+
+/* Policy simulator remains functional but visually follows old account cards. */
+.legacy-policy-card .aisle-policy-card {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.legacy-policy-card .aisle-evidence-section-head {
+  margin-bottom: 24px !important;
+}
+
+.legacy-policy-card .aisle-evidence-section-head h2 {
+  color: #222 !important;
+  font-size: clamp(1.65rem, 3vw, 2.35rem) !important;
+  letter-spacing: -.025em !important;
+}
+
+.legacy-policy-card .aisle-evidence-section-head > div > p {
+  color: var(--primary) !important;
+}
+
+.legacy-policy-card .aisle-evidence-badge {
+  border-color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .1)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-policy-card .aisle-policy-layout {
+  gap: 20px !important;
+}
+
+.legacy-policy-card .aisle-policy-controls {
+  padding: 22px !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 4px !important;
+  background: #fafafa !important;
+}
+
+.legacy-policy-card .aisle-policy-controls label {
+  color: #444 !important;
+}
+
+.legacy-policy-card .aisle-policy-controls label > span {
+  border-color: #dcdcdc !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+}
+
+.legacy-policy-card .aisle-policy-controls input {
+  color: #222 !important;
+}
+
+.legacy-policy-card .aisle-policy-decision {
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: #444 !important;
+  box-shadow: none !important;
+}
+
+.legacy-policy-card .aisle-policy-decision h3 {
+  color: #222 !important;
+}
+
+.legacy-policy-card .aisle-policy-decision p,
+.legacy-policy-card .aisle-policy-decision li {
+  color: #666 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Product record: preserve provenance while matching the old shop/detail UI.
+   -------------------------------------------------------------------------- */
+.legacy-product-media-card {
+  padding: 18px;
+  border: 1px solid #e7e7e7;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.legacy-product-media-card .dz-media {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+}
+
+.legacy-product-media-card img {
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+}
+
+.legacy-product-demo-badge {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+}
+
+.aisle-product-actions {
+  margin: 26px 0 0 !important;
+}
+
+.aisle-product-actions > label {
+  margin-bottom: 8px !important;
+  color: #555 !important;
+  font-weight: 600 !important;
+}
+
+.aisle-product-actions > div {
+  display: flex !important;
+  align-items: stretch;
+  gap: 0 !important;
+  flex-wrap: wrap;
+}
+
+.aisle-product-actions > div > button:not(.btn),
+.aisle-product-actions > div > input {
+  width: 44px !important;
+  min-height: 44px;
+  border: 1px solid #ddd !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #333 !important;
+}
+
+.aisle-product-actions > div > input {
+  width: 58px !important;
+  text-align: center;
+}
+
+.aisle-product-actions .btn {
+  min-height: 44px;
+  margin-left: 12px !important;
+  border-radius: 3px !important;
+}
+
+.aisle-product-actions > p {
+  color: #b42318 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Live Copilot Lab: same product, same old marketplace palette.
+   The AI pipeline is unchanged; only presentation is normalized.
+   -------------------------------------------------------------------------- */
+.legacy-modern-page.copilot-lab {
+  background: #fafafa !important;
+}
+
+.legacy-modern-page .copilot-hero {
+  padding: 56px 0 34px !important;
+  background: transparent !important;
+  color: #24262b !important;
+  overflow: visible !important;
+}
+
+.legacy-modern-page .copilot-hero-grid {
+  gap: 38px !important;
+  align-items: center !important;
+}
+
+.legacy-modern-page .copilot-eyebrow {
+  color: var(--primary) !important;
+  letter-spacing: .13em;
+}
+
+.legacy-modern-page .copilot-eyebrow span {
+  background: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-hero h1 {
+  max-width: 820px !important;
+  color: #202020 !important;
+  font-size: clamp(2.6rem, 5vw, 4.7rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.045em !important;
+}
+
+.legacy-modern-page .copilot-lede {
+  color: #666 !important;
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+}
+
+.legacy-modern-page .copilot-hero-facts {
+  padding: 22px !important;
+  border: 1px solid #e3e3e3 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .05) !important;
+  backdrop-filter: none !important;
+}
+
+.legacy-modern-page .copilot-hero-facts span {
+  border: 1px solid #eeeeee;
+  border-radius: 3px !important;
+  background: #fafafa !important;
+  color: #333 !important;
+}
+
+.legacy-modern-page .copilot-hero-facts i {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-hero-facts small {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-workbench,
+.legacy-modern-page .copilot-close-loop {
+  padding-top: 48px !important;
+  padding-bottom: 68px !important;
+}
+
+.legacy-modern-page .copilot-section-title p {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-section-title h2,
+.legacy-modern-page .copilot-section-title.is-dark h2 {
+  color: #24262b !important;
+  font-size: clamp(1.85rem, 3.6vw, 3rem) !important;
+  letter-spacing: -.035em !important;
+}
+
+.legacy-modern-page .copilot-section-title > span,
+.legacy-modern-page .copilot-section-title.is-dark > span:not(.copilot-mode) {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-input-card {
+  border-color: #e3e3e3 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .045) !important;
+}
+
+.legacy-modern-page .copilot-image-panel {
+  border-color: #e7e7e7 !important;
+  background: #f7f7f7 !important;
+}
+
+.legacy-modern-page .copilot-drop {
+  border-color: var(--primary) !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-drop i {
+  border-radius: 4px !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .10)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-drop strong {
+  color: #222 !important;
+}
+
+.legacy-modern-page .copilot-sample,
+.legacy-modern-page .copilot-image-warning i,
+.legacy-modern-page .copilot-product-foot a,
+.legacy-modern-page .copilot-merchant-decision > a,
+.legacy-modern-page .copilot-governance > a {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-mission-panel textarea,
+.legacy-modern-page .copilot-fields input,
+.legacy-modern-page .copilot-fields select,
+.legacy-modern-page .copilot-fields label > span {
+  border-color: #ddd !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: none !important;
+}
+
+.legacy-modern-page .copilot-mission-panel textarea:focus,
+.legacy-modern-page .copilot-fields input:focus,
+.legacy-modern-page .copilot-fields select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px var(--rgba-primary-1, rgba(242, 104, 60, .10)) !important;
+}
+
+.legacy-modern-page .copilot-run {
+  border-radius: 3px !important;
+  background: var(--primary) !important;
+  box-shadow: none !important;
+}
+
+.legacy-modern-page .copilot-run:hover:not(:disabled) {
+  background: var(--primary-hover, var(--primary)) !important;
+}
+
+.legacy-modern-page .copilot-failure-switch {
+  border-color: #e3e3e3 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+}
+
+.legacy-modern-page .copilot-failure-switch label {
+  border-color: #e5e5e5 !important;
+  border-radius: 3px !important;
+  background: #fafafa !important;
+}
+
+.legacy-modern-page .copilot-failure-switch label.is-selected {
+  border-color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+}
+
+.legacy-modern-page .copilot-failure-switch input {
+  accent-color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-results {
+  padding: 62px 0 !important;
+  border-top: 1px solid #e6e6e6;
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff !important;
+  color: #555 !important;
+}
+
+.legacy-modern-page .copilot-mode {
+  border-color: #ddd !important;
+  background: #f7f7f7 !important;
+  color: #555 !important;
+}
+
+.legacy-modern-page .copilot-mode.is-live {
+  border-color: #9fd9bb !important;
+  background: #edf8f2 !important;
+  color: #17794d !important;
+}
+
+.legacy-modern-page .copilot-blocked {
+  border-color: #efb2aa !important;
+  border-radius: 4px !important;
+  background: #fff5f3 !important;
+}
+
+.legacy-modern-page .copilot-blocked > i,
+.legacy-modern-page .copilot-blocked small {
+  color: #b42318 !important;
+}
+
+.legacy-modern-page .copilot-blocked strong {
+  color: #7a271a !important;
+}
+
+.legacy-modern-page .copilot-blocked p {
+  color: #9c2f24 !important;
+}
+
+.legacy-modern-page .copilot-summary,
+.legacy-modern-page .copilot-budget,
+.legacy-modern-page .copilot-basket > article,
+.legacy-modern-page .copilot-trace,
+.legacy-modern-page .copilot-loop-grid > article,
+.legacy-modern-page .copilot-governance {
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  color: #444 !important;
+  box-shadow: none !important;
+}
+
+.legacy-modern-page .copilot-summary > span,
+.legacy-modern-page .copilot-budget > span,
+.legacy-modern-page .copilot-trace-head > span,
+.legacy-modern-page .copilot-product-body > small,
+.legacy-modern-page .copilot-evidence-list span {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-summary > p,
+.legacy-modern-page .copilot-budget strong,
+.legacy-modern-page .copilot-product-body h3,
+.legacy-modern-page .copilot-product-foot strong,
+.legacy-modern-page .copilot-trace-head h3,
+.legacy-modern-page .copilot-trace li strong,
+.legacy-modern-page .copilot-loop-grid h3 {
+  color: #24262b !important;
+}
+
+.legacy-modern-page .copilot-summary b {
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-summary > small {
+  color: #287d56 !important;
+}
+
+.legacy-modern-page .copilot-budget p,
+.legacy-modern-page .copilot-product-body > p:not(.copilot-substitution),
+.legacy-modern-page .copilot-trace li p,
+.legacy-modern-page .copilot-loop-grid p,
+.legacy-modern-page .copilot-governance ul {
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-budget > i {
+  background: #e7f6ee !important;
+  color: #198754 !important;
+}
+
+.legacy-modern-page .copilot-product-image > span {
+  background: rgba(33, 33, 33, .85) !important;
+  color: #fff !important;
+}
+
+.legacy-modern-page .copilot-product-foot,
+.legacy-modern-page .copilot-trace li {
+  border-color: #ececec !important;
+}
+
+.legacy-modern-page .copilot-substitution {
+  background: #fff7e6 !important;
+  color: #8a5a00 !important;
+}
+
+.legacy-modern-page .copilot-empty {
+  border-color: #ddd !important;
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-trace li > span {
+  background: #f3f3f3 !important;
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-trace li > b {
+  background: #e9f7ef !important;
+  color: #17794d !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-fallback > b {
+  background: #fff5df !important;
+  color: #8a5a00 !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-blocked > b {
+  background: #fff0ee !important;
+  color: #b42318 !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-required > b {
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-loop-grid article > span,
+.legacy-modern-page .copilot-governance > div {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-merchant-decision button {
+  border-color: var(--primary) !important;
+  border-radius: 3px !important;
+  background: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-merchant-decision button + button {
+  border-color: #d8d8d8 !important;
+  background: #fff !important;
+  color: #555 !important;
+}
+
+.legacy-modern-page .copilot-governance {
+  background: #fffaf7 !important;
+  border-color: #f1d2c5 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Merchant workspace: preserve the dedicated data layout but use the same
+   Loopora/Pixio accent instead of feeling like a separate green application.
+   -------------------------------------------------------------------------- */
+.merchant-dash-root,
+.merchant-login-root {
+  --merchant-green: var(--primary) !important;
+  --merchant-green-dark: var(--primary-hover, #d9542b) !important;
+  --merchant-line: #e7e7e7 !important;
+  background: #f8f8f8 !important;
+  font-family: "DM Sans", Roboto, Arial, sans-serif !important;
+}
+
+.merchant-dash-root .merchant-eyebrow,
+.merchant-login-root .merchant-eyebrow,
+.merchant-dash-root .merchant-forecast-kicker {
+  color: var(--primary) !important;
+}
+
+.merchant-dash-root .merchant-eyebrow > span {
+  background: var(--primary) !important;
+  box-shadow: 0 0 0 4px var(--rgba-primary-1, rgba(242, 104, 60, .1)) !important;
+}
+
+.merchant-dash-root .merchant-dash-tab.active,
+.merchant-login-root .merchant-field:focus-within {
+  border-color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.merchant-dash-root .merchant-dash-kpi-card,
+.merchant-dash-root .merchant-dash-glass-card,
+.merchant-dash-root .merchant-dash-store-bar,
+.merchant-dash-root .merchant-dash-tabs,
+.merchant-login-root .merchant-login-card {
+  border-radius: 6px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .035) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile parity: old menu remains usable, and AI voice/coplay routes cannot
+   disappear behind hover-only desktop behavior.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1199px) {
+  .legacy-loopora-header .logo-header img {
+    width: 145px !important;
+  }
+
+  .legacy-primary-nav > li > a {
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .legacy-loopora-header .main-bar,
+  .legacy-loopora-header .main-bar .container {
+    min-height: 64px !important;
+  }
+
+  .legacy-loopora-header .header-nav {
+    background: #fff !important;
+  }
+
+  .legacy-primary-nav > li > a {
+    min-height: auto;
+    padding: 12px 18px !important;
+    line-height: 1.35 !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > .sub-menu {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    margin: 0 14px 8px !important;
+    padding: 4px 0 5px 13px !important;
+    border: 0 !important;
+    border-left: 2px solid var(--primary) !important;
+    background: #fafafa !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > .sub-menu li a {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > a .fa-chevron-down {
+    display: none;
+  }
+
+  .legacy-profile-menu {
+    right: 0;
+  }
+
+  .legacy-page-banner {
+    min-height: 180px;
+  }
+
+  .legacy-modern-page .copilot-hero {
+    padding-top: 38px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .legacy-loopora-header .logo-header {
+    min-width: 118px;
+  }
+
+  .legacy-loopora-header .logo-header img {
+    width: 125px !important;
+    max-width: 125px !important;
+  }
+
+  .legacy-loopora-header .extra-nav {
+    margin-left: auto !important;
+  }
+
+  .legacy-loopora-header .header-right .nav-link {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 5px !important;
+  }
+
+  .legacy-page-banner .dz-bnr-inr-entry {
+    padding: 38px 0;
+  }
+
+  .legacy-page-banner h1 {
+    font-size: 32px !important;
+  }
+
+  .legacy-modern-page .copilot-hero h1 {
+    font-size: 2.65rem !important;
+  }
+
+  .legacy-modern-page .copilot-hero-facts {
+    grid-template-columns: 1fr !important;
+  }
+
+  .legacy-product-media-card .dz-media {
+    min-height: 340px;
+  }
+
+  .legacy-product-media-card img {
+    max-height: 360px;
+  }
+
+  .legacy-loopora-footer .footer-top {
+    padding-top: 44px;
+  }
+}
