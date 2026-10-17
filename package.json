@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e-smoke": "node scripts/e2e_smoke.mjs",
+    "eval:gemini": "node scripts/evaluate_gemini.mjs"
   },
   "dependencies": {
     "next": "16.4.2",
