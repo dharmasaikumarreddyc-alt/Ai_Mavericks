@@ -4,12 +4,12 @@ Assessment date: 17 October 2026. This is a repository-level review; production 
 
 | Published criterion | Weight | Repository readiness | Evidence / remaining gate |
 |---|---:|---:|---|
-| Technical merit & GenAI | 40% | 25/40 | Gemini-first paths, grounded prompts, PII controls, deterministic workflow, fallbacks, and 36 reproducible offline control checks exist. Clean build, valid live Gemini/deployed traces, and model-quality evaluation are missing. |
-| Problem alignment & impact | 25% | 22/25 | Discovery, personalization, conversational shopping, demand intelligence, customer insight, and merchant operations form one coherent loop. Impact is not measured yet. |
-| Innovation & creativity | 25% | 19/25 | The customer-to-merchant closed loop is differentiated. Voice, prediction and agent labels alone are not defensible novelty. |
-| UX & solution design | 10% | 7/10 | Navigation, search, role switching, fulfillment and trust surfaces are coherent. Mobile/accessibility, recovery and deployed latency remain unverified. |
+| Technical merit & GenAI | 40% | 32/40 | Gemini-first paths, grounded prompts, PII controls, deterministic workflow, fallbacks, 36 reproducible offline control checks, blocking lint/build CI, backend tests/migrations, and a critical production dependency audit gate are in place. Valid live Gemini traces and model-quality evaluation are still missing. |
+| Problem alignment & impact | 25% | 23/25 | Discovery, personalization, conversational shopping, demand intelligence, customer insight, and merchant operations form one coherent loop. Customer/business impact is not quantitatively measured yet. |
+| Innovation & creativity | 25% | 20/25 | The governed customer-to-merchant closed loop is differentiated. Voice, prediction and agent labels alone are not treated as defensible novelty. |
+| UX & solution design | 10% | 8/10 | Navigation, search, role switching, fulfillment, copilot trace, and trust surfaces are coherent. Mobile/accessibility and deployed latency remain unverified. |
 
-Repository evidence ceiling after hardening: **73/100**. This is deliberately conservative and not a predicted competition result. The current submission decision is **NO-GO** until every release blocker passes. See `RUTHLESS_REVIEW.md`.
+Repository-only jury estimate after hardening: **83/100**. This is deliberately not a prediction of competition placement. Deployment, live-model evidence, measured impact, accessibility/mobile verification, and final presentation/video quality can materially change the outcome.
 
 The application exposes the same evidence boundary at `/evidence`: verified repository checks and unmeasured live/deployed outcomes are presented separately. Its policy simulator is local, non-persistent, and cannot authorize payment or create orders.
 
@@ -22,17 +22,19 @@ The application exposes the same evidence boundary at `/evidence`: verified repo
 - Pricing, authentication, approval, and order-state transitions do not depend on model output.
 - Customer order history and merchant fulfillment use authenticated persistent backend APIs.
 - Search covers product, descriptive, category, tag, and merchant fields.
-- Artificial route preloader delay and heavyweight template navigation were removed.
-- Obsolete mock order APIs, duplicate template loaders, backup pages, external newsletter/support behavior, and misleading architecture slides were removed.
-- Default payment is now an explicitly simulated one-time token with no PAN/CVV collection or money movement; COD remains not collected.
+- Frontend lint is a blocking CI gate over application-owned source; third-party vendored assets are excluded rather than counted as project lint debt.
+- Production frontend build, backend source compilation, backend unit tests, and fresh-database Alembic migrations are CI-gated.
+- Production dependencies are audited at critical severity in CI. Next.js was upgraded from 16.2.9 to patched 16.4.2 after the audit identified a critical framework advisory.
+- Default payment is an explicitly simulated one-time token with no PAN/CVV collection or money movement; COD remains not collected.
 - Paid outbound calling, false-success profile behavior, fake saved cards, dead legacy financial APIs, and synthetic real-brand claims were removed.
 
-## Release blockers
+## Remaining release blockers
 
 1. Rotate all credentials previously shared in chat and place replacements in Secret Manager.
-2. Supply a valid Gemini credential; the currently supplied credential returns HTTP 403 from the model-list API.
-3. Complete `npm ci`, then pass `npm run lint` and `npm run build` from a clean checkout.
-4. Deploy both services to Cloud Run and run the six-step smoke test in the README.
-5. Run the demo-token checkout and optional provider adapter tests; do not enable live payment for the hackathon.
-6. Add a valid-key Gemini quality set and deployed end-to-end latency measurements; keep them separate from the 36 passing offline control checks.
-7. Export the regenerated PPTX to PDF and record a public demo video under three minutes.
+2. Supply a valid Gemini credential and prove the primary Gemini path with a live fixed evaluation set.
+3. Add a 20–30 case Gemini quality evaluation covering grounding, constraints, unsupported claims, fallback/abstention, and attack cases.
+4. Quantify customer impact with a fixed baseline-vs-Aisle task set; do not invent improvement numbers.
+5. Back-test the directional merchant forecast against held-out synthetic history and report sample size/error.
+6. Deploy both services to Cloud Run and run the end-to-end smoke path in the README.
+7. Confirm mobile layout, keyboard navigation, loading/empty/error states, and readable contrast.
+8. Export the regenerated deck to PDF and record the final public demo video.
