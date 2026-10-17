@@ -3,24 +3,26 @@ import { llmJSON, llmEnabled } from '../llm';
 import {
   merchantsDB,
   searchProducts,
-  getMerchantProducts,
   type Merchant,
   type Product,
 } from '../data';
 
 // POST /api/agents/smart-cart
-// Multi-Merchant Smart Cart Agent - AI combines orders from multiple merchants
-// to optimize for best price, rating, distance, or user preference.
+// Multi-Merchant Smart Cart Agent. The LLM parses intent, while merchant/product
+// selection is deterministic so optimization and merchant-cap constraints are auditable.
+
+type Optimization = 'price' | 'rating' | 'distance' | 'balanced';
+type ItemCriteria = 'best_price' | 'best_rating' | 'closest' | 'any';
 
 interface SmartCartRequest {
-  query: string; // e.g., "Get me coffee from the best rated place and cake from the cheapest bakery"
-  optimizeFor?: 'price' | 'rating' | 'distance' | 'balanced';
+  query: string;
+  optimizeFor?: Optimization;
   maxMerchants?: number;
 }
 
 interface ParsedItem {
   item: string;
-  criteria: 'best_price' | 'best_rating' | 'closest' | 'any';
+  criteria: ItemCriteria;
   merchantType?: string;
 }
 
@@ -37,6 +39,15 @@ interface CartItem {
   selectionReason: string;
 }
 
+interface Candidate {
+  parsedItemIndex: number;
+  parsedItem: ParsedItem;
+  merchant: Merchant;
+  product: Product;
+  criterion: ItemCriteria;
+  score: number;
+}
+
 interface SmartCartResponse {
   success: boolean;
   agent: string;
@@ -50,12 +61,27 @@ interface SmartCartResponse {
     prepTime: string;
     itemCount: number;
   }[];
+  unmatchedItems: string[];
   summary: {
     totalItems: number;
+    requestedItems: number;
     totalMerchants: number;
     subtotal: number;
     estimatedSavings: number;
-    optimizationStrategy: string;
+    optimizationStrategy: Optimization | 'per-item';
+  };
+  constraints: {
+    requestedMaxMerchants: number;
+    actualMerchants: number;
+    merchantCapSatisfied: boolean;
+    requestFulfilled: boolean;
+    optimizationApplied: Optimization | 'per-item';
+  };
+  execution: {
+    intentParser: 'gemini' | 'deterministic-fallback';
+    selectionEngine: 'deterministic';
+    normalizedScoring: true;
+    merchantCapEnforced: true;
   };
   aiInsights?: string;
 }
@@ -72,246 +98,321 @@ For each item, identify:
    - "any" if no specific preference
 3. merchantType: Optional hint about merchant type (e.g., "bakery", "cafe", "electronics store")
 
-Return JSON: { "items": [{ "item": "...", "criteria": "...", "merchantType": "..." }, ...] }
+Return JSON: { "items": [{ "item": "...", "criteria": "...", "merchantType": "..." }, ...] }`;
 
-Examples:
-- "coffee from the best cafe and pastries from a cheap bakery"
-  → { "items": [{ "item": "coffee", "criteria": "best_rating", "merchantType": "cafe" }, { "item": "pastries", "criteria": "best_price", "merchantType": "bakery" }] }
-- "I need a laptop and also some groceries"
-  → { "items": [{ "item": "laptop", "criteria": "any" }, { "item": "groceries", "criteria": "any" }] }`;
-
-// Parse user request using LLM
-async function parseRequest(query: string): Promise<ParsedItem[]> {
-  if (!llmEnabled()) {
-    return fallbackParse(query);
+async function parseRequest(query: string): Promise<{ items: ParsedItem[]; source: 'gemini' | 'deterministic-fallback' }> {
+  if (llmEnabled()) {
+    const result = await llmJSON<{ items: ParsedItem[] }>(PARSE_SYSTEM_PROMPT, query);
+    if (result?.items && Array.isArray(result.items) && result.items.length > 0) {
+      const items = result.items
+        .filter(item => item && typeof item.item === 'string' && item.item.trim())
+        .map(item => ({
+          item: item.item.trim(),
+          criteria: isItemCriteria(item.criteria) ? item.criteria : 'any',
+          merchantType: typeof item.merchantType === 'string' ? item.merchantType.trim() : undefined,
+        }));
+      if (items.length > 0) return { items, source: 'gemini' };
+    }
   }
 
-  const result = await llmJSON<{ items: ParsedItem[] }>(
-    PARSE_SYSTEM_PROMPT,
-    query
-  );
-
-  if (result?.items && Array.isArray(result.items)) {
-    return result.items;
-  }
-
-  return fallbackParse(query);
+  return { items: fallbackParse(query), source: 'deterministic-fallback' };
 }
 
-// Fallback keyword-based parsing
+function isItemCriteria(value: unknown): value is ItemCriteria {
+  return value === 'best_price' || value === 'best_rating' || value === 'closest' || value === 'any';
+}
+
 function fallbackParse(query: string): ParsedItem[] {
   const items: ParsedItem[] = [];
   const q = query.toLowerCase();
-
-  // Common product patterns
   const productPatterns = [
     'coffee', 'cake', 'pastry', 'pastries', 'bread', 'biryani', 'dosa',
     'phone', 'laptop', 'watch', 'shirt', 'dress', 'shoes',
     'milk', 'fruits', 'vegetables', 'groceries',
-    'skincare', 'perfume', 'makeup'
+    'skincare', 'perfume', 'makeup',
   ];
 
   for (const product of productPatterns) {
-    if (q.includes(product)) {
-      let criteria: ParsedItem['criteria'] = 'any';
+    if (!q.includes(product)) continue;
 
-      // Check surrounding context for criteria
-      const patterns = [
-        { keywords: ['cheap', 'cheapest', 'budget', 'affordable', 'lowest'], criteria: 'best_price' as const },
-        { keywords: ['best', 'top', 'rated', 'quality', 'popular'], criteria: 'best_rating' as const },
-        { keywords: ['near', 'close', 'closest', 'quick', 'fast'], criteria: 'closest' as const },
-      ];
-
-      for (const pattern of patterns) {
-        if (pattern.keywords.some(kw => q.includes(kw))) {
-          criteria = pattern.criteria;
-          break;
-        }
+    let criteria: ItemCriteria = 'any';
+    const patterns = [
+      { keywords: ['cheap', 'cheapest', 'budget', 'affordable', 'lowest'], criteria: 'best_price' as const },
+      { keywords: ['best', 'top', 'rated', 'quality', 'popular'], criteria: 'best_rating' as const },
+      { keywords: ['near', 'close', 'closest', 'quick', 'fast'], criteria: 'closest' as const },
+    ];
+    for (const pattern of patterns) {
+      if (pattern.keywords.some(keyword => q.includes(keyword))) {
+        criteria = pattern.criteria;
+        break;
       }
-
-      items.push({ item: product, criteria });
     }
+    items.push({ item: product, criteria });
   }
 
-  // If no specific products found, treat the whole query as one item
-  if (items.length === 0) {
-    items.push({ item: query, criteria: 'any' });
-  }
-
-  return items;
+  return items.length > 0 ? items : [{ item: query, criteria: 'any' }];
 }
 
-// Find best merchant for an item based on criteria
-async function findBestMerchant(
-  parsedItem: ParsedItem
-): Promise<{ merchant: Merchant; products: Product[] } | null> {
-  const { item, criteria, merchantType } = parsedItem;
+function criterionFor(item: ParsedItem, globalOptimization?: Optimization): ItemCriteria {
+  if (globalOptimization) {
+    if (globalOptimization === 'price') return 'best_price';
+    if (globalOptimization === 'rating') return 'best_rating';
+    if (globalOptimization === 'distance') return 'closest';
+    return 'any';
+  }
+  return item.criteria;
+}
 
-  // Find merchants with matching products
-  const merchantMatches: { merchant: Merchant; products: Product[]; score: number }[] = [];
+function numberFromDistance(distance: string): number {
+  const parsed = Number.parseFloat(distance);
+  return Number.isFinite(parsed) ? parsed : 999;
+}
 
-  for (const merchant of merchantsDB) {
-    if (!merchant.isOpen) continue;
+function normalize(value: number, min: number, max: number): number {
+  if (max <= min) return 0;
+  return (value - min) / (max - min);
+}
 
-    // Check if merchant type matches (if specified)
-    if (merchantType) {
-      const typeMatch = merchant.type.toLowerCase().includes(merchantType.toLowerCase()) ||
-        merchant.category.some(c => c.includes(merchantType.toLowerCase()));
-      if (!typeMatch) continue;
-    }
+function scoreCandidates(candidates: Omit<Candidate, 'score'>[]): Candidate[] {
+  if (candidates.length === 0) return [];
 
-    // Search for products
-    const products = await searchProducts(merchant.id, item);
-    if (products.length === 0) continue;
+  const prices = candidates.map(c => c.product.price);
+  const ratings = candidates.map(c => c.product.rating ?? c.merchant.rating);
+  const distances = candidates.map(c => numberFromDistance(c.merchant.distance));
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const minRating = Math.min(...ratings);
+  const maxRating = Math.max(...ratings);
+  const minDistance = Math.min(...distances);
+  const maxDistance = Math.max(...distances);
 
-    // Calculate score based on criteria
-    let score = 0;
-    const avgPrice = products.reduce((sum, p) => sum + p.price, 0) / products.length;
-    const avgRating = products.reduce((sum, p) => sum + (p.rating || merchant.rating), 0) / products.length;
-    const distance = parseFloat(merchant.distance);
+  return candidates.map(candidate => {
+    const priceCost = normalize(candidate.product.price, minPrice, maxPrice);
+    const ratingCost = 1 - normalize(candidate.product.rating ?? candidate.merchant.rating, minRating, maxRating);
+    const distanceCost = normalize(numberFromDistance(candidate.merchant.distance), minDistance, maxDistance);
 
-    switch (criteria) {
+    let score: number;
+    switch (candidate.criterion) {
       case 'best_price':
-        score = 1000 - avgPrice; // Lower price = higher score
+        score = priceCost;
         break;
       case 'best_rating':
-        score = avgRating * 100 + merchant.rating * 50;
+        score = ratingCost;
         break;
       case 'closest':
-        score = 100 - distance * 10; // Closer = higher score
+        score = distanceCost;
         break;
       default:
-        // Balanced: consider all factors
-        score = (avgRating * 20) + (100 - avgPrice / 10) + (50 - distance * 5);
+        // All terms are normalized before weighting, so dollars cannot dominate ratings/distance.
+        score = priceCost * 0.45 + ratingCost * 0.30 + distanceCost * 0.25;
     }
-
-    merchantMatches.push({ merchant, products, score });
-  }
-
-  // Sort by score and return best match
-  merchantMatches.sort((a, b) => b.score - a.score);
-  return merchantMatches[0] || null;
+    return { ...candidate, score };
+  });
 }
 
-// Generate selection reason
-function getSelectionReason(criteria: string, merchant: Merchant, product: Product): string {
-  switch (criteria) {
+async function buildCandidates(
+  parsedItems: ParsedItem[],
+  globalOptimization?: Optimization,
+): Promise<Candidate[][]> {
+  const groups: Candidate[][] = [];
+
+  for (let index = 0; index < parsedItems.length; index++) {
+    const parsedItem = parsedItems[index];
+    const criterion = criterionFor(parsedItem, globalOptimization);
+    const raw: Omit<Candidate, 'score'>[] = [];
+
+    for (const merchant of merchantsDB) {
+      if (!merchant.isOpen) continue;
+      if (parsedItem.merchantType) {
+        const hint = parsedItem.merchantType.toLowerCase();
+        const typeMatch = merchant.type.toLowerCase().includes(hint) ||
+          merchant.category.some(category => category.toLowerCase().includes(hint));
+        if (!typeMatch) continue;
+      }
+
+      const products = await searchProducts(merchant.id, parsedItem.item);
+      for (const product of products) {
+        if (!product.inStock || product.quantity <= 0) continue;
+        raw.push({ parsedItemIndex: index, parsedItem, merchant, product, criterion });
+      }
+    }
+
+    groups.push(scoreCandidates(raw));
+  }
+
+  return groups;
+}
+
+function combinations<T>(values: T[], maxSize: number): T[][] {
+  const output: T[][] = [];
+  const walk = (start: number, current: T[]) => {
+    if (current.length > 0) output.push([...current]);
+    if (current.length === maxSize) return;
+    for (let i = start; i < values.length; i++) {
+      current.push(values[i]);
+      walk(i + 1, current);
+      current.pop();
+    }
+  };
+  walk(0, []);
+  return output;
+}
+
+function chooseCart(candidatesByItem: Candidate[][], maxMerchants: number): Candidate[] {
+  const merchantIds = Array.from(new Set(candidatesByItem.flat().map(candidate => candidate.merchant.id)));
+  if (merchantIds.length === 0) return [];
+
+  const subsets = combinations(merchantIds, Math.min(maxMerchants, merchantIds.length));
+  let bestSelection: Candidate[] = [];
+  let bestCoverage = -1;
+  let bestScore = Number.POSITIVE_INFINITY;
+  let bestMerchantCount = Number.POSITIVE_INFINITY;
+
+  for (const subset of subsets) {
+    const allowed = new Set(subset);
+    const selection: Candidate[] = [];
+    let totalScore = 0;
+
+    for (const group of candidatesByItem) {
+      const candidate = group
+        .filter(option => allowed.has(option.merchant.id))
+        .sort((a, b) => a.score - b.score || a.product.price - b.product.price)[0];
+      if (candidate) {
+        selection.push(candidate);
+        totalScore += candidate.score;
+      }
+    }
+
+    const coverage = selection.length;
+    // Prefer complete/highest coverage first, then objective score, then fewer merchants.
+    if (
+      coverage > bestCoverage ||
+      (coverage === bestCoverage && totalScore < bestScore) ||
+      (coverage === bestCoverage && totalScore === bestScore && subset.length < bestMerchantCount)
+    ) {
+      bestSelection = selection;
+      bestCoverage = coverage;
+      bestScore = totalScore;
+      bestMerchantCount = subset.length;
+    }
+  }
+
+  return bestSelection;
+}
+
+function getSelectionReason(criterion: ItemCriteria, merchant: Merchant, product: Product): string {
+  switch (criterion) {
     case 'best_price':
-      return `Lowest price at $${product.price} from ${merchant.name}`;
+      return `Best normalized price match: $${product.price.toFixed(2)} from ${merchant.name}`;
     case 'best_rating':
-      return `Top rated (${product.rating || merchant.rating}★) from ${merchant.name}`;
+      return `Best normalized rating match: ${(product.rating ?? merchant.rating).toFixed(1)}★ from ${merchant.name}`;
     case 'closest':
-      return `Nearest option at ${merchant.distance} from ${merchant.name}`;
+      return `Closest eligible match: ${merchant.distance} from ${merchant.name}`;
     default:
-      return `Selected from ${merchant.name} (${merchant.rating}★, ${merchant.distance})`;
+      return `Balanced price, rating and distance match from ${merchant.name}`;
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: SmartCartRequest = await request.json();
-    const { query, optimizeFor = 'balanced', maxMerchants = 5 } = body;
+    const query = body.query;
+    const globalOptimization = body.optimizeFor;
+    const optimizationApplied: Optimization | 'per-item' = globalOptimization ?? 'per-item';
+    const rawMaxMerchants = body.maxMerchants ?? 5;
 
-    if (!query || typeof query !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Query is required' },
-        { status: 400 }
-      );
+    if (!query || typeof query !== 'string' || !query.trim()) {
+      return NextResponse.json({ success: false, error: 'Query is required' }, { status: 400 });
+    }
+    if (globalOptimization && !['price', 'rating', 'distance', 'balanced'].includes(globalOptimization)) {
+      return NextResponse.json({ success: false, error: 'Invalid optimizeFor value' }, { status: 400 });
+    }
+    if (!Number.isInteger(rawMaxMerchants) || rawMaxMerchants < 1 || rawMaxMerchants > 10) {
+      return NextResponse.json({ success: false, error: 'maxMerchants must be an integer between 1 and 10' }, { status: 400 });
     }
 
-    // Step 1: Parse the request using AI
-    const parsedItems = await parseRequest(query);
+    const { items: parsedItems, source: parserSource } = await parseRequest(query.trim());
+    const candidatesByItem = await buildCandidates(parsedItems, globalOptimization);
+    const selected = chooseCart(candidatesByItem, rawMaxMerchants);
 
-    if (parsedItems.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Could not understand the request' },
-        { status: 400 }
-      );
-    }
+    const selectedByIndex = new Map(selected.map(candidate => [candidate.parsedItemIndex, candidate]));
+    const unmatchedItems = parsedItems
+      .map((item, index) => selectedByIndex.has(index) ? null : item.item)
+      .filter((item): item is string => Boolean(item));
 
-    // Step 2: Find best merchants for each item
-    const cartItems: CartItem[] = [];
+    const cartItems: CartItem[] = selected.map(candidate => ({
+      productId: candidate.product.id,
+      merchantId: candidate.merchant.id,
+      merchantName: candidate.merchant.name,
+      name: candidate.product.name,
+      price: candidate.product.price,
+      quantity: 1,
+      image: candidate.product.image,
+      rating: candidate.product.rating ?? candidate.merchant.rating,
+      distance: candidate.merchant.distance,
+      selectionReason: getSelectionReason(candidate.criterion, candidate.merchant, candidate.product),
+    }));
+
     const merchantMap = new Map<string, { merchant: Merchant; itemCount: number }>();
     let estimatedSavings = 0;
-
-    for (const parsedItem of parsedItems) {
-      const match = await findBestMerchant(parsedItem);
-      if (!match) continue;
-
-      const { merchant, products } = match;
-
-      // Select the best product from this merchant
-      const product = products.sort((a, b) => {
-        if (parsedItem.criteria === 'best_price') return a.price - b.price;
-        if (parsedItem.criteria === 'best_rating') return (b.rating || 0) - (a.rating || 0);
-        return 0;
-      })[0];
-
-      // Calculate savings if there's an original price
-      if (product.originalPrice && product.originalPrice > product.price) {
-        estimatedSavings += product.originalPrice - product.price;
+    for (const candidate of selected) {
+      if (candidate.product.originalPrice && candidate.product.originalPrice > candidate.product.price) {
+        estimatedSavings += candidate.product.originalPrice - candidate.product.price;
       }
-
-      cartItems.push({
-        productId: product.id,
-        merchantId: merchant.id,
-        merchantName: merchant.name,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        image: product.image,
-        rating: product.rating || merchant.rating,
-        distance: merchant.distance,
-        selectionReason: getSelectionReason(parsedItem.criteria, merchant, product),
-      });
-
-      // Track merchants
-      const existing = merchantMap.get(merchant.id);
-      if (existing) {
-        existing.itemCount++;
-      } else {
-        merchantMap.set(merchant.id, { merchant, itemCount: 1 });
-      }
+      const existing = merchantMap.get(candidate.merchant.id);
+      if (existing) existing.itemCount += 1;
+      else merchantMap.set(candidate.merchant.id, { merchant: candidate.merchant, itemCount: 1 });
     }
 
-    // Build merchant summary
-    const merchants = Array.from(merchantMap.values())
-      .slice(0, maxMerchants)
-      .map(({ merchant, itemCount }) => ({
-        id: merchant.id,
-        name: merchant.name,
-        distance: merchant.distance,
-        prepTime: merchant.prepTime,
-        itemCount,
-      }));
+    const merchants = Array.from(merchantMap.values()).map(({ merchant, itemCount }) => ({
+      id: merchant.id,
+      name: merchant.name,
+      distance: merchant.distance,
+      prepTime: merchant.prepTime,
+      itemCount,
+    }));
 
-    // Calculate totals
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const requestFulfilled = unmatchedItems.length === 0;
 
-    // Generate AI insights if LLM is available
     let aiInsights: string | undefined;
     if (llmEnabled() && cartItems.length > 0) {
-      const insightPrompt = `Shopping cart summary: ${cartItems.map(i => `${i.name} from ${i.merchantName}`).join(', ')}. Total: $${subtotal}. Give a 1-sentence shopping tip or observation.`;
       const { llmChat } = await import('../llm');
+      const insightPrompt = `Shopping cart: ${cartItems.map(item => `${item.name} from ${item.merchantName}`).join(', ')}. Total: $${subtotal.toFixed(2)}. ${requestFulfilled ? 'All requested items matched.' : `Unmatched: ${unmatchedItems.join(', ')}.`} Give one concise shopping observation. Do not invent prices, discounts, or availability.`;
       aiInsights = (await llmChat([
-        { role: 'system', content: 'You are a helpful shopping assistant. Give brief, friendly tips.' },
-        { role: 'user', content: insightPrompt }
-      ], { temperature: 0.7 })) || undefined;
+        { role: 'system', content: 'You are a helpful shopping assistant. Use only facts in the supplied cart summary.' },
+        { role: 'user', content: insightPrompt },
+      ], { temperature: 0.4 })) || undefined;
     }
 
     const response: SmartCartResponse = {
-      success: true,
+      success: cartItems.length > 0,
       agent: 'MultiMerchantSmartCartAgent',
       timestamp: new Date().toISOString(),
       parsedRequest: parsedItems,
       cart: cartItems,
       merchants,
+      unmatchedItems,
       summary: {
         totalItems: cartItems.length,
+        requestedItems: parsedItems.length,
         totalMerchants: merchants.length,
-        subtotal,
-        estimatedSavings,
-        optimizationStrategy: optimizeFor,
+        subtotal: Number(subtotal.toFixed(2)),
+        estimatedSavings: Number(estimatedSavings.toFixed(2)),
+        optimizationStrategy: optimizationApplied,
+      },
+      constraints: {
+        requestedMaxMerchants: rawMaxMerchants,
+        actualMerchants: merchants.length,
+        merchantCapSatisfied: merchants.length <= rawMaxMerchants,
+        requestFulfilled,
+        optimizationApplied,
+      },
+      execution: {
+        intentParser: parserSource,
+        selectionEngine: 'deterministic',
+        normalizedScoring: true,
+        merchantCapEnforced: true,
       },
       aiInsights,
     };
@@ -319,9 +420,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Smart Cart Agent Error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
