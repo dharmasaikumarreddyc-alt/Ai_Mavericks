@@ -2,135 +2,121 @@
 
 > Turn every customer intent into an order, and every order into a merchant action.
 
-Loopora is a Gemini-powered retail experience for the Google AI Builder Cup. Customers can describe what they need, discover grounded products, build budget-aware carts, and confirm an order. Merchants receive the order, process it through a controlled fulfillment workflow, and use Gemini to turn demand and review evidence into decisions.
+Loopora is a Gemini-powered retail experience for the Google AI Builder Cup. Customers describe what they need, discover grounded products, build budget-aware carts, and explicitly confirm an order. Merchants receive the same persistent order, process it through a controlled fulfillment workflow, and use Gemini-assisted evidence to support operational decisions.
 
 ## Why it stands out
 
-Most commerce assistants end at a recommendation. Loopora closes the loop:
+Most commerce assistants stop at recommendation. Loopora closes the loop:
 
 ```text
-Customer intent → Gemini-assisted discovery → deterministic price/policy checks
-→ explicit confirmation → persistent order → merchant fulfillment
-→ grounded demand/review insight → merchant action
+Customer intent / optional image
+→ Gemini interpretation and planning
+→ application-owned commerce tools
+→ deterministic price / stock / budget validation
+→ explicit customer confirmation
+→ persistent order
+→ merchant fulfillment
+→ grounded merchant insight
+→ human-reviewed merchant action
 ```
 
-The product directly addresses conversational commerce, discovery, personalization, customer insight, demand planning, and operational efficiency without pretending the language model is a payment processor or source of truth.
+The model helps interpret, plan, rank, explain, and repair proposals. Deterministic services remain authoritative for product IDs, prices, stock, budgets, authentication, payments, order state, and operational changes.
 
-## Working capabilities
+## Core capabilities
 
-- Gemini 3.8 Flash is the primary model across customer agents and merchant insights, with labelled deterministic fallbacks.
-- Conversational/voice discovery, smart cart, budget shop, order prediction, and receipt narration.
-- A `/copilot-lab` multimodal journey: optional pantry/shelf/meal image, Gemini interpretation, deterministic catalog and budget validation, visible decision trace, stockout rescue, and separate customer/merchant approval.
-- Catalog search across product names, descriptions, categories, tags, and merchants.
-- Separate customer and merchant authentication with correct cross-role redirection.
-- Persistent customer checkout and merchant-visible orders.
-- One honest payment story: free simulated one-time card token or COD; no PAN/CVV collection and no money movement in default mode.
-- Guarded order states: `pending → confirmed → preparing → ready → dispatched → delivered`, with validated cancellation paths.
-- Merchant dashboard with order processing, operational KPIs, directional demand forecast, grounded review intelligence, and a persisted human-acceptance log for recommendations.
-- PII redaction, untrusted-input boundaries, deterministic controls, metadata-only AI telemetry, and a public `/trust` experience.
-- Same-origin, payload-size, and burst guards on browser-facing AI routes (prototype protection; production still needs managed edge quotas).
-- A live failure switch demonstrates model outage fallback, stockout recovery, and prompt-injection blocking without mutating operational state.
-- A public `/evidence` lab with real workflow ownership, architecture, reproducible offline results, unanswered evidence gaps, and a non-persistent policy simulator.
-- Grounded `/shop/[id]` product records with price, catalog, availability, and dietary provenance instead of broken template detail links.
-- Containerized Next.js and FastAPI services ready for Google Cloud Run.
+- Gemini 3.8 Flash as the primary GenAI model.
+- Multimodal retail copilot for text plus optional pantry, shelf, meal, or product images.
+- Bounded Gemini tool planning over catalog search, inventory checks, constraint validation, and substitution requests.
+- Deterministic validation of catalog IDs, price, stock, budget, dietary tags, and approval requirements.
+- Validator-to-repair flow for stockout recovery.
+- Visible decision trace that shows model, application, deterministic-control, and human ownership without exposing chain-of-thought.
+- Conversational and voice-assisted shopping flows.
+- Persistent authenticated customer checkout and merchant-visible orders.
+- Guarded order lifecycle: `pending → confirmed → preparing → ready → dispatched → delivered` with validated cancellation paths.
+- Merchant dashboard with order processing, directional demand evidence, grounded review intelligence, and human acceptance/rejection of recommendations.
+- Prompt-injection blocking, PII redaction, bounded model inputs, transparent fallback behavior, and public trust/evidence surfaces.
+- Simulated one-time payment token or COD in prototype mode; no PAN/CVV collection and no money movement in the default demo path.
 
-Card payment is deliberately marked `simulated`; COD is `not_collected`. Catalog, offers, ratings, merchant history, availability and forecasts are synthetic or directional and not guaranteed. See [GOVERNANCE.md](GOVERNANCE.md).
+Catalog, stock, merchant history, ratings, offers, and forecast data used in the prototype are synthetic or directional and are labelled accordingly.
 
 ## Architecture
 
 ```text
-Next.js on Cloud Run
+Next.js
   ├─ Customer + merchant experiences
-  ├─ Server-side Gemini agent routes
-  └─ Deterministic agent tools and fallbacks
+  ├─ Gemini retail copilot routes
+  ├─ Application-owned tools
+  └─ Deterministic validation / fallback
              │ authenticated HTTPS
-FastAPI on Cloud Run
+FastAPI
   ├─ Auth, cart, order and fulfillment APIs
-  ├─ Gemini merchant intelligence
-  ├─ Governance and role/ownership controls
-  └─ PostgreSQL (Neon for prototype; Cloud SQL-ready boundary)
-
-Secret Manager: Gemini key, database URL, JWT secret
+  ├─ Merchant intelligence
+  ├─ Governance / ownership controls
+  └─ PostgreSQL persistence
 ```
 
 ## Run locally
 
-Requirements: Node.js 20.9+ (Node 24 recommended), npm, and Python 3.10+.
+Requirements: Node.js 20.9+, npm, and Python 3.10+.
 
-```powershell
+```bash
 npm ci
-Copy-Item .env.example .env.local
-
-cd backend
-python -m venv venv
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
-Copy-Item .env.example .env
-.\venv\Scripts\python.exe main.py
-```
-
-In another terminal, from the repository root:
-
-```powershell
+cp .env.example .env.local
 npm run dev
 ```
 
-Add `GOOGLE_API_KEY` to both local env files. Never commit secrets. The web app runs on `http://localhost:3000`; API docs are at `http://localhost:8000/docs`.
+Backend:
+
+```bash
+cd backend
+python -m venv venv
+python -m pip install -r requirements.txt
+cp .env.example .env
+alembic upgrade head
+python main.py
+```
+
+Add `GOOGLE_API_KEY` to both local environment files. Never commit secrets.
+
+Frontend: `http://localhost:3000`
+
+Backend API docs: `http://localhost:8000/docs`
 
 ## Verification
 
-```powershell
+```bash
 npm run lint
 npm run build
 python -m unittest discover -s backend/tests -v
+npm run test:e2e-smoke
 ```
 
-Recommended demo smoke test:
+Live Gemini evaluation:
 
-1. Open `/copilot-lab`, load the synthetic image or upload a non-sensitive retail image, and run a budget-aware request.
-2. Inspect the live ownership trace, catalog evidence, deterministic total, and governance receipt.
-3. Switch to Stockout rescue and verify the replacement is proposed with customer approval required; switch to Attack test and verify it blocks before model access.
-4. Continue the grounded request to the concierge, sign in as a customer, and explicitly confirm checkout.
-5. Verify the card path says “simulated token” and “no money moved,” or use COD.
-6. Sign in as the linked merchant, advance the same order to Ready, and show the human-reviewed action log.
-7. Return to the customer account and verify the status, then show the Trust and Evidence pages.
-
-The latest small offline control/retrieval run is recorded in [EVAL_RESULTS.md](EVAL_RESULTS.md).
-It is intentionally not presented as a Gemini or production benchmark.
-
-## Deploy to Google Cloud Run
-
-Create these Secret Manager secrets first: `aisle-database-url`, `aisle-jwt-secret`, and `aisle-gemini-key`. Give the Cloud Run runtime service account Secret Manager access. Use a PostgreSQL async URL (for example `postgresql+asyncpg://...`) and a random JWT secret of at least 32 characters. The deployment keeps `PAYMENT_MODE=demo`, so it needs no paid gateway account.
-
-```powershell
-.\deploy-gcp.ps1 -ProjectId YOUR_GCP_PROJECT_ID
+```bash
+npm run eval:gemini
 ```
 
-The script validates that the required secrets exist, deploys the backend with production checks from its first revision, runs `alembic upgrade head` as a one-off Cloud Run Job, deploys the frontend, sets its generated HTTPS URL as the only CORS origin, and prints the readiness URL.
+The live evaluation requires a valid Gemini key and does not count deterministic fallback as successful live-model quality.
 
-To seed the synthetic merchant dashboard, also create `aisle-demo-merchant-email` and `aisle-demo-merchant-password` with new dedicated demo credentials, then run:
+## Judge demo path
 
-```powershell
-.\deploy-gcp.ps1 -ProjectId YOUR_GCP_PROJECT_ID -SeedDemo
-```
+1. Open `/copilot-lab`.
+2. Enter a constrained shopping mission and optionally add a non-sensitive retail image.
+3. Inspect Gemini planning, grounded products, deterministic totals, validator results, and the decision trace.
+4. Trigger Stockout rescue to show validator feedback and a bounded repair path.
+5. Trigger Attack test to show pre-model prompt-injection blocking.
+6. Continue to authenticated customer confirmation and create the order.
+7. Open the linked merchant experience and advance the same order through fulfillment.
+8. Show evidence-backed merchant insight and explicit human review.
+9. Use `/evidence` and `/trust` for architecture, evaluation boundaries, and governance.
 
-Never place those credential values in the script, repository, deck, screenshots, or demo video. The seeding job is idempotent and the generated records are explicitly marked as demo data.
+## Evidence and governance
 
-## Submission checklist
+- `docs/GENAI_ARCHITECTURE.md` — Gemini/tool/validator/human control architecture.
+- `docs/EVALUATION.md` — evaluation methodology and known evidence boundaries.
+- `docs/GOVERNANCE.md` — data, model, payment, and human-oversight controls.
+- `evidence/gemini_cases.json` — adversarial and representative Gemini evaluation cases.
+- `backend/evidence/` — reproducible deterministic impact and forecasting benchmarks.
 
-- Public repository with no secrets and hackathon-period history.
-- Working Cloud Run frontend and API URLs.
-- PDF deck that accurately labels simulated tokenization, synthetic data, and directional forecasts.
-- Public demo video under three minutes: intent → tools → confirmation → merchant order → insight → responsible AI.
-- Rotate every credential ever pasted into chat or a screenshot before submission.
-
-No competition result can be guaranteed; this repository is designed to maximize the published technical, alignment, innovation, and UX criteria while keeping claims verifiable.
-
-## Prototype cost boundary
-
-- The default payment demo is entirely local and free; no financial transaction occurs.
-- Gemini Developer API offers limited free access for eligible models/regions, with quota limits and data-use terms. The configured key must be valid for the selected model.
-- Neon has a free plan suitable for a small demo database, subject to current quotas.
-- Cloud Run has a usage-based free tier, but Google Cloud setup can still require a billing account and charges apply beyond free quotas or for related services/egress.
-- Razorpay is optional and disabled. Test mode does not move money; live transactions are not free and require merchant onboarding.
-
-Always verify current provider terms immediately before the demo or deployment.
+No competition result is guaranteed. The repository is designed to make its claims inspectable and to separate measured evidence from synthetic/demo behavior.
