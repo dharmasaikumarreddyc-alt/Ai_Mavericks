@@ -16,9 +16,8 @@ export default function StyleLoader() {
       '/vendor/lightgallery/dist/css/lg-thumbnail.css',
       '/vendor/lightgallery/dist/css/lg-zoom.css',
       '/vendor/nouislider/nouislider.min.css',
-      '/css/loopora-base.css',
+      '/css/style.css',
       '/css/skin/skin-1.css',
-      '/css/loopora-legacy-parity.css',
     ];
 
     stylesheets.forEach((href) => {
@@ -31,8 +30,8 @@ export default function StyleLoader() {
       }
     });
 
-    // Keep legacy layout-compatible anchors inside the Loopora product so
-    // visible calls to action never navigate to dead template pages.
+    // Preserve the original landing-page layout and interactions while keeping
+    // visible calls to action inside the Loopora prototype.
     if (pathname === '/') {
       const replacements: Array<[string, string]> = [
         ['a.service-btn[href="#"]', '/copilot-lab'],
