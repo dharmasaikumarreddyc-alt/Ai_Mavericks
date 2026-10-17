@@ -4,7 +4,6 @@ import StyleLoader from "./components/StyleLoader";
 import ScriptInitializer from "./components/ScriptInitializer";
 import ThemeProvider from "./components/ThemeProvider";
 import "./globals.css";
-import "./ui-polish.css";
 
 export const metadata: Metadata = {
   title: { default: "Loopora — Closed-Loop Commerce Copilot", template: "%s | Loopora" },
@@ -34,7 +33,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/vendor/lightgallery/dist/css/lg-thumbnail.css" />
         <link rel="stylesheet" href="/vendor/lightgallery/dist/css/lg-zoom.css" />
         <link rel="stylesheet" href="/vendor/nouislider/nouislider.min.css" />
-        <link rel="stylesheet" href="/css/loopora-base.css" />
+        <link rel="stylesheet" href="/css/style.css" />
         <link rel="stylesheet" href="/css/skin/skin-1.css" />
         <link rel="stylesheet" href="/css/loopora-legacy-parity.css" />
 
@@ -64,11 +63,13 @@ export default function RootLayout({
         <Script src="/vendor/countdown/jquery.countdown.js" strategy="lazyOnload" />
         <Script src="/vendor/wnumb/wNumb.js" strategy="lazyOnload" />
         <Script src="/vendor/nouislider/nouislider.min.js" strategy="lazyOnload" />
-        <Script src="/js/loopora-carousel.js" strategy="lazyOnload" />
+        <Script src="/js/dz.carousel.js" strategy="lazyOnload" />
         <Script src="/vendor/lightgallery/dist/lightgallery.min.js" strategy="lazyOnload" />
         <Script src="/vendor/group-slide/group-loop.js" strategy="lazyOnload" />
         <Script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js" strategy="lazyOnload" />
         <Script src="/vendor/lightgallery/dist/plugins/zoom/lg-zoom.min.js" strategy="lazyOnload" />
+        <Script src="/js/dz.ajax.js" strategy="lazyOnload" />
+        <Script src="/js/custom.min.js" strategy="lazyOnload" />
       </body>
     </html>
   );
