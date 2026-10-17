@@ -1,8 +1,8 @@
 """Products API - Serves product catalog from merchants."""
 
 from fastapi import APIRouter, HTTPException
-from typing import List, Optional
-from agents.base import MERCHANTS
+from typing import Optional
+from services.catalog_registry import MERCHANTS
 from services.catalog import search_catalog, transform_product
 
 router = APIRouter(prefix="/products", tags=["products"])
