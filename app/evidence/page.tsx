@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Preloader from '../components/Preloader';
+import LegacyPageBanner from '../components/LegacyPageBanner';
 import PolicySimulator from './PolicySimulator';
 
 export const metadata: Metadata = {
@@ -19,6 +21,13 @@ const workflow = [
   ['07', 'Review outcomes', 'Merchant', 'Directional insights become auditable recommendations accepted for staff review.'],
 ];
 
+const architecture = [
+  ['fa-user', 'Experience', 'Customer + merchant', 'Next.js routes, search, cart, order tracking and merchant workspace.'],
+  ['fa-wand-magic-sparkles', 'Assistance', 'Gemini adapter', 'Bounded evidence, PII filtering and labelled deterministic fallback.'],
+  ['fa-shield-halved', 'Control plane', 'FastAPI services', 'Auth, pricing, policy, payment verification and order state machine.'],
+  ['fa-database', 'Operational data', 'PostgreSQL', 'Users, carts, orders, reviews and merchant action audit.'],
+];
+
 const checks = [
   ['21/21', 'Catalog retrieval cases', 'Passed locally'],
   ['8/8', 'Order transition cases', 'Passed locally'],
@@ -27,78 +36,122 @@ const checks = [
 ];
 
 const unknowns = [
-  ['Live Gemini quality', 'Not verified', 'The supplied credential currently returns HTTP 403.'],
+  ['Live Gemini quality', 'Not verified', 'Requires a valid deployed Gemini credential and live evaluation run.'],
   ['Deployed p95 latency', 'Not measured', 'Local function timing is not production API latency.'],
-  ['Business uplift', 'Not measured', 'No conversion, waste, or revenue claim is made.'],
-  ['Forecast error', 'Not back-tested', 'Forecasts remain directional decision support.'],
+  ['Business uplift', 'Not measured', 'Modeled interaction reduction is not a real-user conversion claim.'],
+  ['Production forecast accuracy', 'Not measured', 'Synthetic held-out backtest is validation evidence, not production accuracy.'],
 ];
 
 export default function EvidencePage() {
   return (
     <div className="page-wraper">
+      <Preloader />
       <Header />
-      <main className="aisle-evidence-page">
-        <section className="aisle-evidence-hero">
+      <div className="page-content bg-light legacy-ai-surface">
+        <LegacyPageBanner title="Evidence & Architecture" current="Evidence" parentHref="/copilot-lab" parentLabel="AI Shopping" />
+
+        <section className="content-inner-1">
           <div className="container">
-            <p className="aisle-evidence-kicker">INSPECT THE SYSTEM</p>
-            <h1>Evidence before theatre.</h1>
-            <p>A transparent view of what Gemini may decide, what deterministic software controls, what people approve, and what has actually been tested.</p>
-            <div className="aisle-home-actions">
-              <Link className="btn btn-light" href="/copilot-lab">Run the live copilot</Link>
-              <Link className="btn btn-outline-light" href="/trust">Read governance</Link>
+            <div className="row align-items-end g-4 mb-5">
+              <div className="col-lg-8">
+                <div className="section-head style-1 mb-0">
+                  <span className="text-primary fw-bold text-uppercase legacy-eyebrow">Inspect the system</span>
+                  <h2 className="title mt-2">Evidence before theatre.</h2>
+                  <p className="mb-0">See what Gemini may propose, what deterministic software controls, what people approve, and what has actually been tested.</p>
+                </div>
+              </div>
+              <div className="col-lg-4 text-lg-end">
+                <div className="d-flex gap-2 flex-wrap justify-content-lg-end">
+                  <Link className="btn btn-secondary" href="/copilot-lab">Run live copilot</Link>
+                  <Link className="btn btn-outline-secondary" href="/trust">Trust & governance</Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="section-head style-1 mb-4">
+              <span className="text-primary fw-bold text-uppercase legacy-eyebrow">Control map</span>
+              <h3 className="title mt-2">One workflow. Explicit ownership at every step.</h3>
+            </div>
+            <div className="row g-3">
+              {workflow.map(([number, title, owner, body]) => (
+                <div className="col-xl-3 col-lg-4 col-md-6" key={number}>
+                  <article className="account-card h-100 legacy-evidence-card">
+                    <span className="legacy-step-number">{number}</span>
+                    <small className="text-primary fw-bold text-uppercase d-block mt-3">{owner}</small>
+                    <h5 className="mt-2 mb-2">{title}</h5>
+                    <p className="text-muted mb-0">{body}</p>
+                  </article>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="container aisle-evidence-section" aria-labelledby="workflow-title">
-          <div className="aisle-evidence-section-head">
-            <div><p>CONTROL MAP</p><h2 id="workflow-title">One workflow. Explicit ownership at every step.</h2></div>
-            <span className="aisle-evidence-badge">CLOSED LOOP</span>
-          </div>
-          <ol className="aisle-workflow-list">
-            {workflow.map(([number, title, owner, body]) => (
-              <li key={number}>
-                <span>{number}</span>
-                <div><small>{owner}</small><h3>{title}</h3><p>{body}</p></div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="aisle-architecture-section" aria-labelledby="architecture-title">
+        <section className="content-inner bg-white border-top border-bottom">
           <div className="container">
-            <div className="aisle-evidence-section-head is-light">
-              <div><p>REAL ARCHITECTURE</p><h2 id="architecture-title">AI proposes. Deterministic services commit.</h2></div>
-              <span className="aisle-evidence-badge">NO AUTONOMOUS PAYMENT</span>
+            <div className="section-head style-1 mb-4">
+              <span className="text-primary fw-bold text-uppercase legacy-eyebrow">Real architecture</span>
+              <h3 className="title mt-2">AI proposes. Deterministic services commit.</h3>
+              <p className="mb-0">No autonomous payment. No model-owned price, inventory or order-state authority.</p>
             </div>
-            <div className="aisle-architecture-flow" role="img" aria-label="Customer and merchant interfaces connect through Next.js, governed Gemini assistance, FastAPI controls, and PostgreSQL operational data">
-              <article><i className="fas fa-user" /><small>EXPERIENCE</small><h3>Customer + merchant</h3><p>Next.js routes, search, cart, order tracking, dashboard</p></article>
-              <b aria-hidden="true">→</b>
-              <article className="is-ai"><i className="fas fa-wand-magic-sparkles" /><small>ASSISTANCE</small><h3>Gemini adapter</h3><p>Bounded evidence, PII filtering, labelled deterministic fallback</p></article>
-              <b aria-hidden="true">→</b>
-              <article className="is-control"><i className="fas fa-shield-halved" /><small>CONTROL PLANE</small><h3>FastAPI services</h3><p>Auth, pricing, policy, payment verification, order state machine</p></article>
-              <b aria-hidden="true">→</b>
-              <article><i className="fas fa-database" /><small>OPERATIONAL DATA</small><h3>PostgreSQL</h3><p>Users, carts, orders, reviews, merchant action audit</p></article>
+            <div className="row g-3">
+              {architecture.map(([icon, label, title, body]) => (
+                <div className="col-xl-3 col-md-6" key={title}>
+                  <article className="icon-bx-wraper style-4 h-100 legacy-architecture-card">
+                    <div className="icon-bx-sm radius bg-primary mb-3"><i className={`fas ${icon} text-white`} /></div>
+                    <small className="text-primary fw-bold text-uppercase">{label}</small>
+                    <h5 className="mt-2">{title}</h5>
+                    <p className="text-muted mb-0">{body}</p>
+                  </article>
+                </div>
+              ))}
             </div>
-            <p className="aisle-architecture-note"><i className="fas fa-circle-info" /> Cloud Run and Secret Manager are deployment targets. A deployed production trace is still a release gate.</p>
+            <div className="alert alert-info mt-4 mb-0">
+              <i className="fas fa-circle-info me-2" /> Cloud Run and Secret Manager are deployment targets. A deployed production trace remains a release gate.
+            </div>
           </div>
         </section>
 
-        <section className="container aisle-evidence-section" aria-labelledby="evaluation-title">
-          <div className="aisle-evidence-section-head">
-            <div><p>REPRODUCIBLE OFFLINE EVIDENCE</p><h2 id="evaluation-title">Passed controls and unanswered questions stay separate.</h2></div>
-            <span className="aisle-evidence-badge is-pass">36 / 36 PASSED</span>
-          </div>
-          <div className="aisle-evaluation-grid">
-            {checks.map(([score, title, state]) => <article className="is-verified" key={title}><strong>{score}</strong><h3>{title}</h3><p><i className="fas fa-check-circle" /> {state}</p></article>)}
-            {unknowns.map(([title, state, detail]) => <article className="is-open" key={title}><strong>—</strong><h3>{title}</h3><p><b>{state}</b> · {detail}</p></article>)}
-          </div>
-          <div className="aisle-evaluation-command"><span>Reproduce the offline checks</span><code>python backend/run_evaluation.py</code><small>These results do not claim live-model quality, business impact, or deployed latency.</small></div>
-        </section>
+        <section className="content-inner-1">
+          <div className="container">
+            <div className="section-head style-1 mb-4">
+              <span className="text-primary fw-bold text-uppercase legacy-eyebrow">Reproducible offline evidence</span>
+              <h3 className="title mt-2">Passed controls and unanswered questions stay separate.</h3>
+            </div>
 
-        <div className="container aisle-evidence-section"><PolicySimulator /></div>
-      </main>
+            <div className="row g-3 mb-4">
+              {checks.map(([score, title, state]) => (
+                <div className="col-lg-3 col-md-6" key={title}>
+                  <article className="account-card h-100 border-success legacy-score-card">
+                    <strong className="display-6 text-success">{score}</strong>
+                    <h6 className="mt-3 mb-2">{title}</h6>
+                    <p className="mb-0 text-success"><i className="fas fa-check-circle me-1" /> {state}</p>
+                  </article>
+                </div>
+              ))}
+              {unknowns.map(([title, state, detail]) => (
+                <div className="col-lg-3 col-md-6" key={title}>
+                  <article className="account-card h-100 legacy-score-card">
+                    <strong className="display-6 text-muted">—</strong>
+                    <h6 className="mt-3 mb-2">{title}</h6>
+                    <p className="text-muted mb-0"><b>{state}</b> · {detail}</p>
+                  </article>
+                </div>
+              ))}
+            </div>
+
+            <div className="account-card mb-4 legacy-command-card">
+              <span className="fw-bold">Reproduce deterministic checks</span>
+              <code className="d-block mt-2">python backend/run_evaluation.py</code>
+              <small className="text-muted d-block mt-2">These results do not claim live-model quality, observed business impact, or deployed latency.</small>
+            </div>
+
+            <div className="account-card legacy-policy-card"><PolicySimulator /></div>
+          </div>
+        </section>
+      </div>
       <Footer />
+      <button className="scroltop" type="button" aria-label="Back to top"><i className="fas fa-arrow-up"></i></button>
     </div>
   );
 }
