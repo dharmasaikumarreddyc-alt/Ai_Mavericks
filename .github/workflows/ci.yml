@@ -34,10 +34,9 @@ jobs:
         run: npm run build
 
   frontend-lint:
-    name: Frontend lint baseline
+    name: Frontend lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
