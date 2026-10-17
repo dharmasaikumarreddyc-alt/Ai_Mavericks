@@ -36,6 +36,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check public branding and runtime references
+        run: npm run check:branding
+
       - name: Run full-stack Copilot smoke
         run: npm run test:e2e-smoke
 

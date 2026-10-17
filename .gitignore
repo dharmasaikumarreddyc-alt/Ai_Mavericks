@@ -15,6 +15,13 @@
 /.next/
 /out/
 
+# generated branding-sanitized runtime assets
+/public/css/style.css
+/public/css/loopora-legacy-parity.css
+/public/icons/loopora/commerce-icons.css
+/public/js/dz.carousel.js
+/public/js/custom.min.js
+
 # production
 /build
 
