@@ -35,6 +35,7 @@ export default function Home() {
               <div className="aisle-home-actions">
                 <Link className="btn btn-secondary" href="/cart-pilot">Try the AI concierge <i className="fas fa-arrow-right" /></Link>
                 <Link className="btn btn-outline-secondary" href="/shop">Search the catalog</Link>
+                <Link className="btn btn-outline-secondary" href="/evidence">Inspect the evidence</Link>
               </div>
               <div className="aisle-home-disclosures">
                 <span><i className="fas fa-database" /> Synthetic demo catalog</span>
@@ -61,7 +62,7 @@ export default function Home() {
         <section className="aisle-home-loop container" aria-labelledby="closed-loop-title">
           <div className="aisle-home-section-head">
             <div><p>THE DIFFERENTIATOR</p><h2 id="closed-loop-title">Closed-loop commerce, not another chatbot.</h2></div>
-            <Link href="/trust">See governance and limitations <i className="fas fa-arrow-right" /></Link>
+            <Link href="/evidence">Inspect workflow ownership <i className="fas fa-arrow-right" /></Link>
           </div>
           <div className="aisle-home-loop-grid">
             {loop.map(([number, title, description]) => (

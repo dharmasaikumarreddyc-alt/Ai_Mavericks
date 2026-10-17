@@ -11,6 +11,8 @@ Assessment date: 17 October 2026. This is a repository-level review; production 
 
 Repository evidence ceiling after hardening: **73/100**. This is deliberately conservative and not a predicted competition result. The current submission decision is **NO-GO** until every release blocker passes. See `RUTHLESS_REVIEW.md`.
 
+The application exposes the same evidence boundary at `/evidence`: verified repository checks and unmeasured live/deployed outcomes are presented separately. Its policy simulator is local, non-persistent, and cannot authorize payment or create orders.
+
 ## Implemented evidence
 
 - Gemini 3.8 Flash is selected before alternate providers.

@@ -28,6 +28,8 @@ The product directly addresses conversational commerce, discovery, personalizati
 - Merchant dashboard with order processing, operational KPIs, directional demand forecast, grounded review intelligence, and a persisted human-acceptance log for recommendations.
 - PII redaction, untrusted-input boundaries, deterministic controls, metadata-only AI telemetry, and a public `/trust` experience.
 - Same-origin, payload-size, and burst guards on browser-facing AI routes (prototype protection; production still needs managed edge quotas).
+- A public `/evidence` lab with real workflow ownership, architecture, reproducible offline results, unanswered evidence gaps, and a non-persistent policy simulator.
+- Grounded `/shop/[id]` product records with price, catalog, availability, and dietary provenance instead of broken template detail links.
 - Containerized Next.js and FastAPI services ready for Google Cloud Run.
 
 Card payment is deliberately marked `simulated`; COD is `not_collected`. Catalog, offers, ratings, merchant history, availability and forecasts are synthetic or directional and not guaranteed. See [GOVERNANCE.md](GOVERNANCE.md).

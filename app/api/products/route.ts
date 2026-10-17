@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { localProductsDB, localMerchantsDB } from '../agents/data';
 import { backendUrl, optionalBackendUrl } from '../../lib/backend';
+import { toCatalogProductView } from '../../lib/catalog-view';
 
 export interface Product {
   id: string | number;
@@ -17,27 +18,6 @@ export interface Product {
   location: string;
   rating: number;
   inStock: boolean;
-}
-
-// Transform local product to shop format
-function transformLocalProduct(p: any): Product {
-  const merchant = localMerchantsDB.find(m => m.id === p.merchantId);
-  return {
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    originalPrice: p.originalPrice,
-    discount: p.discount ? `${p.discount}%` : undefined,
-    image: p.image,
-    category: [p.category],
-    tags: p.tags,
-    description: p.description,
-    merchant: merchant?.name || 'Local Shop',
-    merchant_id: p.merchantId,
-    location: merchant?.address || 'Hyderabad',
-    rating: p.rating || merchant?.rating || 4.5,
-    inStock: p.inStock,
-  };
 }
 
 export async function GET(request: Request) {
@@ -75,7 +55,7 @@ export async function GET(request: Request) {
   try {
     const searchTerms = search?.split(/\s+/).filter(Boolean) ?? [];
     const products = localProductsDB
-      .map(transformLocalProduct)
+      .map(product => toCatalogProductView(product, localMerchantsDB))
       .filter(product => {
         const categoryMatches = !category || product.category.some(value => value.toLowerCase().includes(category));
         const searchableText = [

@@ -285,6 +285,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                             {isAdding ? 'Adding...' : 'Add To Cart'}
                           </button>
                         )}
+                        <Link className="btn btn-outline-secondary ms-2" href={`/shop/${product.id}`} onClick={onClose}>Full details</Link>
                       </div>
                       <div className="dz-info mb-0">
                         <ul>

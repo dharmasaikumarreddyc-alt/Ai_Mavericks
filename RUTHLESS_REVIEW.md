@@ -31,6 +31,8 @@ Provisional repository evidence ceiling: **73/100**, before deployment/demo pena
    telemetry, synthetic-data labels and public limitations are visible rather than buried.
 6. **Focused commerce:** product search, budget composition, order processing, reviews, demand
    outlook and merchant operations all address the published retail theme.
+7. **Inspectable evidence:** the application exposes workflow ownership, an accurate architecture,
+   offline checks versus unknowns, deterministic policy simulation, and grounded product records.
 
 ## What was hurting the product and was removed
 
@@ -76,8 +78,9 @@ Set budget alerts and quotas before any cloud deployment. “Has a free tier” 
    result covers deterministic offline controls only.
 2. **Outcome/variance follow-up (standout):** the merchant action card now persists acceptance for staff
    review; add a later outcome field so the demo can compare recommendation versus actual demand.
-3. **Richer provenance (high value):** the item inspector now exposes model versus fallback, catalog source,
-   deterministic pricing, and redaction scope; add matched constraints per item after the live model eval.
+3. **Richer provenance (partially complete):** item and product views expose catalog source,
+   deterministic pricing, availability boundaries, and redaction scope; add matched constraints per
+   AI-selected item after the live model eval.
 4. **Impact proof:** compare normal shopping versus Aisle on the same synthetic tasks—time,
    interactions, budget error and merchant handling time.
 5. **CSV catalog upload mock (optional):** show a free local preview and validation report. Do not

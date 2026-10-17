@@ -50,7 +50,7 @@ export default function Header() {
   };
 
   const nav = (href: string, label: string) => (
-    <Link className={pathname === href ? 'active' : ''} href={href} onMouseEnter={() => router.prefetch(href)}>{label}</Link>
+    <Link className={pathname === href || (href !== '/' && pathname.startsWith(`${href}/`)) ? 'active' : ''} href={href} onMouseEnter={() => router.prefetch(href)}>{label}</Link>
   );
 
   return (
@@ -64,6 +64,7 @@ export default function Header() {
           {nav('/', 'Home')}
           {nav('/shop', 'Marketplace')}
           {nav('/cart-pilot', 'AI Concierge')}
+          {nav('/evidence', 'Evidence')}
           {nav('/trust', 'Trust')}
         </nav>
         <form className="aisle-header-search" role="search" onSubmit={submitSearch}>

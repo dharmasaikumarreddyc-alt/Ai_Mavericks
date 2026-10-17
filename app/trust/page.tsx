@@ -26,7 +26,7 @@ export default function TrustPage() {
       <p className="aisle-trust-lead">Aisle AI connects shopping intent with merchant action while minimizing data, grounding recommendations, and requiring approval for consequential steps.</p>
       <div className="aisle-trust-grid">{controls.map(([title, body]) => <article key={title}><i className="fas fa-shield-halved" /><h2>{title}</h2><p>{body}</p></article>)}</div>
       <section className="aisle-trust-limit"><h2>Transparent prototype limitations</h2><p>The default tokenized-card experience is simulated and no money moves; COD is not collected. Catalog, offers, ratings, orders and analytics can be synthetic demo data. Forecasts are directional decision support. Availability must be verified by the merchant. AI output can be wrong and should be reviewed.</p></section>
-      <Link className="btn btn-secondary" href="/cart-pilot">Try the Gemini concierge</Link>
+      <div className="d-flex gap-2 flex-wrap"><Link className="btn btn-secondary" href="/cart-pilot">Try the Gemini concierge</Link><Link className="btn btn-outline-secondary" href="/evidence">Inspect evidence & architecture</Link></div>
     </div>
   </main><Footer /></div>;
 }
