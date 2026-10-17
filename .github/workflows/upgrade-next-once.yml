@@ -1,0 +1,48 @@
+name: Upgrade Next once
+
+on:
+  push:
+    branches:
+      - chatgpt/final-hardening
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: chatgpt/final-hardening
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Upgrade patched Next.js line
+        run: npm install --save-exact next@16.4.2 eslint-config-next@16.4.2
+
+      - name: Verify production dependency audit
+        run: npm audit --omit=dev --audit-level=critical
+
+      - name: Verify lint
+        run: npm run lint
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Commit lockfile upgrade and remove one-shot workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git rm .github/workflows/upgrade-next-once.yml
+          git commit -m "Upgrade Next.js to patched 16.4.2" || exit 0
+          git push origin HEAD:chatgpt/final-hardening
