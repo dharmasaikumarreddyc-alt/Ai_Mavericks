@@ -1,5 +1,5 @@
 /* Loopora legacy UI parity layer.
-   Keep the restored marketplace visual language authoritative while
+   Keep the restored Pixio marketplace visual language authoritative while
    preserving the current Loopora application logic and governed AI flows. */
 
 html,
@@ -547,172 +547,393 @@ body {
   border: 1px solid #e3e3e3 !important;
   border-radius: 5px !important;
   background: #fff !important;
-  color: #333 !important;
-  box-shadow: none !important;
-}
-
-.legacy-modern-page .copilot-hero-facts div {
-  border-bottom-color: #ededed !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .05) !important;
+  backdrop-filter: none !important;
 }
 
 .legacy-modern-page .copilot-hero-facts span {
-  color: #777 !important;
-}
-
-.legacy-modern-page .copilot-hero-facts strong {
-  color: #222 !important;
-}
-
-.legacy-modern-page .copilot-shell,
-.legacy-modern-page .copilot-main {
-  background: transparent !important;
-}
-
-.legacy-modern-page .copilot-panel,
-.legacy-modern-page .copilot-result-card,
-.legacy-modern-page .copilot-summary-card,
-.legacy-modern-page .copilot-result-panel {
-  border: 1px solid #e4e4e4 !important;
-  border-radius: 5px !important;
-  background: #fff !important;
-  color: #333 !important;
-  box-shadow: 0 7px 22px rgba(0, 0, 0, .035) !important;
-}
-
-.legacy-modern-page .copilot-panel-heading,
-.legacy-modern-page .copilot-panel-header {
-  border-bottom: 1px solid #ededed !important;
-  background: #fff !important;
-}
-
-.legacy-modern-page .copilot-panel h2,
-.legacy-modern-page .copilot-panel h3,
-.legacy-modern-page .copilot-result-card h2,
-.legacy-modern-page .copilot-result-card h3,
-.legacy-modern-page .copilot-summary-card h2,
-.legacy-modern-page .copilot-summary-card h3 {
-  color: #222 !important;
-}
-
-.legacy-modern-page .copilot-panel p,
-.legacy-modern-page .copilot-result-card p,
-.legacy-modern-page .copilot-summary-card p,
-.legacy-modern-page .copilot-result-panel p {
-  color: #666 !important;
-}
-
-.legacy-modern-page .copilot-chip,
-.legacy-modern-page .copilot-mode-button,
-.legacy-modern-page .copilot-example-button {
+  border: 1px solid #eeeeee;
   border-radius: 3px !important;
-  border-color: #dedede !important;
   background: #fafafa !important;
-  color: #444 !important;
+  color: #333 !important;
 }
 
-.legacy-modern-page .copilot-chip:hover,
-.legacy-modern-page .copilot-mode-button:hover,
-.legacy-modern-page .copilot-example-button:hover,
-.legacy-modern-page .copilot-mode-button.active,
-.legacy-modern-page .copilot-example-button.active {
-  border-color: var(--primary) !important;
-  background: var(--rgba-primary-1, rgba(242, 104, 60, .1)) !important;
+.legacy-modern-page .copilot-hero-facts i {
   color: var(--primary) !important;
 }
 
-.legacy-modern-page .copilot-textarea,
-.legacy-modern-page .copilot-input,
-.legacy-modern-page .copilot-select,
-.legacy-modern-page textarea,
-.legacy-modern-page input[type='text'],
-.legacy-modern-page input[type='number'] {
-  border-color: #dedede !important;
-  border-radius: 3px !important;
+.legacy-modern-page .copilot-hero-facts small {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-workbench,
+.legacy-modern-page .copilot-close-loop {
+  padding-top: 48px !important;
+  padding-bottom: 68px !important;
+}
+
+.legacy-modern-page .copilot-section-title p {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-section-title h2,
+.legacy-modern-page .copilot-section-title.is-dark h2 {
+  color: #24262b !important;
+  font-size: clamp(1.85rem, 3.6vw, 3rem) !important;
+  letter-spacing: -.035em !important;
+}
+
+.legacy-modern-page .copilot-section-title > span,
+.legacy-modern-page .copilot-section-title.is-dark > span:not(.copilot-mode) {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-input-card {
+  border-color: #e3e3e3 !important;
+  border-radius: 5px !important;
   background: #fff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .045) !important;
+}
+
+.legacy-modern-page .copilot-image-panel {
+  border-color: #e7e7e7 !important;
+  background: #f7f7f7 !important;
+}
+
+.legacy-modern-page .copilot-drop {
+  border-color: var(--primary) !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-drop i {
+  border-radius: 4px !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .10)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-drop strong {
   color: #222 !important;
 }
 
-.legacy-modern-page .copilot-primary-button,
-.legacy-modern-page .copilot-run-button,
-.legacy-modern-page .copilot-action-button {
+.legacy-modern-page .copilot-sample,
+.legacy-modern-page .copilot-image-warning i,
+.legacy-modern-page .copilot-product-foot a,
+.legacy-modern-page .copilot-merchant-decision > a,
+.legacy-modern-page .copilot-governance > a {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-mission-panel textarea,
+.legacy-modern-page .copilot-fields input,
+.legacy-modern-page .copilot-fields select,
+.legacy-modern-page .copilot-fields label > span {
+  border-color: #ddd !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: none !important;
+}
+
+.legacy-modern-page .copilot-mission-panel textarea:focus,
+.legacy-modern-page .copilot-fields input:focus,
+.legacy-modern-page .copilot-fields select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px var(--rgba-primary-1, rgba(242, 104, 60, .10)) !important;
+}
+
+.legacy-modern-page .copilot-run {
   border-radius: 3px !important;
   background: var(--primary) !important;
   box-shadow: none !important;
 }
 
-.legacy-modern-page .copilot-primary-button:hover,
-.legacy-modern-page .copilot-run-button:hover,
-.legacy-modern-page .copilot-action-button:hover {
-  background: var(--primary-hover) !important;
+.legacy-modern-page .copilot-run:hover:not(:disabled) {
+  background: var(--primary-hover, var(--primary)) !important;
 }
 
-.legacy-modern-page .copilot-secondary-button {
-  border-radius: 3px !important;
-  border-color: #d9d9d9 !important;
+.legacy-modern-page .copilot-failure-switch {
+  border-color: #e3e3e3 !important;
+  border-radius: 5px !important;
   background: #fff !important;
-  color: #444 !important;
 }
 
-.legacy-modern-page .copilot-trace,
-.legacy-modern-page .copilot-json,
-.legacy-modern-page pre,
-.legacy-modern-page code {
-  border-color: #e0e0e0 !important;
+.legacy-modern-page .copilot-failure-switch label {
+  border-color: #e5e5e5 !important;
+  border-radius: 3px !important;
+  background: #fafafa !important;
+}
+
+.legacy-modern-page .copilot-failure-switch label.is-selected {
+  border-color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+}
+
+.legacy-modern-page .copilot-failure-switch input {
+  accent-color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-results {
+  padding: 62px 0 !important;
+  border-top: 1px solid #e6e6e6;
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff !important;
+  color: #555 !important;
+}
+
+.legacy-modern-page .copilot-mode {
+  border-color: #ddd !important;
   background: #f7f7f7 !important;
-  color: #343434 !important;
+  color: #555 !important;
 }
 
-.legacy-modern-page .copilot-status-good,
-.legacy-modern-page .copilot-status-safe,
-.legacy-modern-page .copilot-success {
-  color: #227a4b !important;
+.legacy-modern-page .copilot-mode.is-live {
+  border-color: #9fd9bb !important;
+  background: #edf8f2 !important;
+  color: #17794d !important;
 }
 
-.legacy-modern-page .copilot-status-warn,
-.legacy-modern-page .copilot-warning {
-  color: #9a6811 !important;
+.legacy-modern-page .copilot-blocked {
+  border-color: #efb2aa !important;
+  border-radius: 4px !important;
+  background: #fff5f3 !important;
 }
 
-.legacy-modern-page .copilot-status-bad,
-.legacy-modern-page .copilot-error {
+.legacy-modern-page .copilot-blocked > i,
+.legacy-modern-page .copilot-blocked small {
   color: #b42318 !important;
 }
 
-/* Keep the hero/device area readable on smaller screens. */
+.legacy-modern-page .copilot-blocked strong {
+  color: #7a271a !important;
+}
+
+.legacy-modern-page .copilot-blocked p {
+  color: #9c2f24 !important;
+}
+
+.legacy-modern-page .copilot-summary,
+.legacy-modern-page .copilot-budget,
+.legacy-modern-page .copilot-basket > article,
+.legacy-modern-page .copilot-trace,
+.legacy-modern-page .copilot-loop-grid > article,
+.legacy-modern-page .copilot-governance {
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  color: #444 !important;
+  box-shadow: none !important;
+}
+
+.legacy-modern-page .copilot-summary > span,
+.legacy-modern-page .copilot-budget > span,
+.legacy-modern-page .copilot-trace-head > span,
+.legacy-modern-page .copilot-product-body > small,
+.legacy-modern-page .copilot-evidence-list span {
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-summary > p,
+.legacy-modern-page .copilot-budget strong,
+.legacy-modern-page .copilot-product-body h3,
+.legacy-modern-page .copilot-product-foot strong,
+.legacy-modern-page .copilot-trace-head h3,
+.legacy-modern-page .copilot-trace li strong,
+.legacy-modern-page .copilot-loop-grid h3 {
+  color: #24262b !important;
+}
+
+.legacy-modern-page .copilot-summary b {
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-summary > small {
+  color: #287d56 !important;
+}
+
+.legacy-modern-page .copilot-budget p,
+.legacy-modern-page .copilot-product-body > p:not(.copilot-substitution),
+.legacy-modern-page .copilot-trace li p,
+.legacy-modern-page .copilot-loop-grid p,
+.legacy-modern-page .copilot-governance ul {
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-budget > i {
+  background: #e7f6ee !important;
+  color: #198754 !important;
+}
+
+.legacy-modern-page .copilot-product-image > span {
+  background: rgba(33, 33, 33, .85) !important;
+  color: #fff !important;
+}
+
+.legacy-modern-page .copilot-product-foot,
+.legacy-modern-page .copilot-trace li {
+  border-color: #ececec !important;
+}
+
+.legacy-modern-page .copilot-substitution {
+  background: #fff7e6 !important;
+  color: #8a5a00 !important;
+}
+
+.legacy-modern-page .copilot-empty {
+  border-color: #ddd !important;
+  color: #777 !important;
+}
+
+.legacy-modern-page .copilot-trace li > span {
+  background: #f3f3f3 !important;
+  color: #666 !important;
+}
+
+.legacy-modern-page .copilot-trace li > b {
+  background: #e9f7ef !important;
+  color: #17794d !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-fallback > b {
+  background: #fff5df !important;
+  color: #8a5a00 !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-blocked > b {
+  background: #fff0ee !important;
+  color: #b42318 !important;
+}
+
+.legacy-modern-page .copilot-trace li.is-required > b {
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-loop-grid article > span,
+.legacy-modern-page .copilot-governance > div {
+  color: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-merchant-decision button {
+  border-color: var(--primary) !important;
+  border-radius: 3px !important;
+  background: var(--primary) !important;
+}
+
+.legacy-modern-page .copilot-merchant-decision button + button {
+  border-color: #d8d8d8 !important;
+  background: #fff !important;
+  color: #555 !important;
+}
+
+.legacy-modern-page .copilot-governance {
+  background: #fffaf7 !important;
+  border-color: #f1d2c5 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Merchant workspace: preserve the dedicated data layout but use the same
+   Loopora/Pixio accent instead of feeling like a separate green application.
+   -------------------------------------------------------------------------- */
+.merchant-dash-root,
+.merchant-login-root {
+  --merchant-green: var(--primary) !important;
+  --merchant-green-dark: var(--primary-hover, #d9542b) !important;
+  --merchant-line: #e7e7e7 !important;
+  background: #f8f8f8 !important;
+  font-family: "DM Sans", Roboto, Arial, sans-serif !important;
+}
+
+.merchant-dash-root .merchant-eyebrow,
+.merchant-login-root .merchant-eyebrow,
+.merchant-dash-root .merchant-forecast-kicker {
+  color: var(--primary) !important;
+}
+
+.merchant-dash-root .merchant-eyebrow > span {
+  background: var(--primary) !important;
+  box-shadow: 0 0 0 4px var(--rgba-primary-1, rgba(242, 104, 60, .1)) !important;
+}
+
+.merchant-dash-root .merchant-dash-tab.active,
+.merchant-login-root .merchant-field:focus-within {
+  border-color: var(--primary) !important;
+  background: var(--rgba-primary-1, rgba(242, 104, 60, .08)) !important;
+  color: var(--primary) !important;
+}
+
+.merchant-dash-root .merchant-dash-kpi-card,
+.merchant-dash-root .merchant-dash-glass-card,
+.merchant-dash-root .merchant-dash-store-bar,
+.merchant-dash-root .merchant-dash-tabs,
+.merchant-login-root .merchant-login-card {
+  border-radius: 6px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .035) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile parity: old menu remains usable, and AI voice/coplay routes cannot
+   disappear behind hover-only desktop behavior.
+   -------------------------------------------------------------------------- */
 @media (max-width: 1199px) {
-  .legacy-primary-nav > li > a {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-    font-size: 12px !important;
+  .legacy-loopora-header .logo-header img {
+    width: 145px !important;
   }
 
-  .legacy-loopora-header .header-item-search {
-    display: none !important;
+  .legacy-primary-nav > li > a {
+    padding-left: 9px !important;
+    padding-right: 9px !important;
   }
 }
 
 @media (max-width: 991px) {
-  .legacy-loopora-header .browse-category-menu {
-    display: none !important;
-  }
-
   .legacy-loopora-header .main-bar,
   .legacy-loopora-header .main-bar .container {
     min-height: 64px !important;
   }
 
-  .legacy-loopora-header .logo-header img {
-    width: 140px !important;
-  }
-
   .legacy-loopora-header .header-nav {
-    padding: 18px !important;
     background: #fff !important;
   }
 
   .legacy-primary-nav > li > a {
-    min-height: 42px;
-    color: #333 !important;
+    min-height: auto;
+    padding: 12px 18px !important;
+    line-height: 1.35 !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > .sub-menu {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    margin: 0 14px 8px !important;
+    padding: 4px 0 5px 13px !important;
+    border: 0 !important;
+    border-left: 2px solid var(--primary) !important;
+    background: #fafafa !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > .sub-menu li a {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .legacy-primary-nav .sub-menu-down > a .fa-chevron-down {
+    display: none;
+  }
+
+  .legacy-profile-menu {
+    right: 0;
+  }
+
+  .legacy-page-banner {
+    min-height: 180px;
   }
 
   .legacy-modern-page .copilot-hero {
@@ -721,40 +942,47 @@ body {
 }
 
 @media (max-width: 767px) {
-  .legacy-loopora-header .header-right {
-    gap: 2px;
-  }
-
-  .legacy-loopora-header .header-right .nav-link {
-    min-width: 35px;
-  }
-
-  .legacy-loopora-header .header-right .nav-link i {
-    font-size: 17px;
-  }
-
   .legacy-loopora-header .logo-header {
-    min-width: 122px;
+    min-width: 118px;
   }
 
   .legacy-loopora-header .logo-header img {
-    width: 120px !important;
+    width: 125px !important;
+    max-width: 125px !important;
   }
 
-  .legacy-page-banner {
-    min-height: 180px;
+  .legacy-loopora-header .extra-nav {
+    margin-left: auto !important;
+  }
+
+  .legacy-loopora-header .header-right .nav-link {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 5px !important;
   }
 
   .legacy-page-banner .dz-bnr-inr-entry {
-    padding: 36px 0;
+    padding: 38px 0;
   }
 
-  .legacy-product-media-card .dz-media {
-    min-height: 330px;
+  .legacy-page-banner h1 {
+    font-size: 32px !important;
   }
 
   .legacy-modern-page .copilot-hero h1 {
-    font-size: clamp(2rem, 12vw, 3.1rem) !important;
+    font-size: 2.65rem !important;
+  }
+
+  .legacy-modern-page .copilot-hero-facts {
+    grid-template-columns: 1fr !important;
+  }
+
+  .legacy-product-media-card .dz-media {
+    min-height: 340px;
+  }
+
+  .legacy-product-media-card img {
+    max-height: 360px;
   }
 
   .legacy-loopora-footer .footer-top {
