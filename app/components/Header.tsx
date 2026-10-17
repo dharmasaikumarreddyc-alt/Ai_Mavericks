@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { optionalBackendUrl } from '../lib/backend';
 import { clearAuthenticatedToken, getAuthenticatedSession } from '../lib/auth';
+import styles from './Header.module.css';
 
 export default function Header() {
   const router = useRouter();
@@ -12,9 +13,9 @@ export default function Header() {
   const [search, setSearch] = useState('');
   const [cartCount, setCartCount] = useState(0);
   const [userName, setUserName] = useState('');
-  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLLIElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const refreshSession = async () => {
     const session = await getAuthenticatedSession('customer');
@@ -23,6 +24,7 @@ export default function Header() {
       setCartCount(0);
       return;
     }
+
     try {
       const response = await fetch(`${optionalBackendUrl}/cart`, {
         headers: { Authorization: `Bearer ${session.token}` },
@@ -39,26 +41,38 @@ export default function Header() {
     void refreshSession();
     const refresh = () => void refreshSession();
     const closeProfile = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) setProfileOpen(false);
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
     };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        setProfileOpen(false);
+      }
+    };
+
     window.addEventListener('authChanged', refresh);
     window.addEventListener('cartUpdated', refresh);
     document.addEventListener('mousedown', closeProfile);
+    document.addEventListener('keydown', closeOnEscape);
     return () => {
       window.removeEventListener('authChanged', refresh);
       window.removeEventListener('cartUpdated', refresh);
       document.removeEventListener('mousedown', closeProfile);
+      document.removeEventListener('keydown', closeOnEscape);
     };
   }, []);
 
   useEffect(() => {
-    setCategoryOpen(false);
+    setMenuOpen(false);
     setProfileOpen(false);
   }, [pathname]);
 
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const value = search.trim();
+    setMenuOpen(false);
     router.push(value ? `/shop?search=${encodeURIComponent(value)}` : '/shop');
   };
 
@@ -71,141 +85,141 @@ export default function Header() {
     router.replace('/');
   };
 
-  const isActive = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
+
+  const navClass = (href: string) =>
+    `${styles.navLink} ${isActive(href) ? styles.activeLink : ''}`.trim();
 
   return (
-    <header className="site-header mo-left header style-2 legacy-loopora-header">
-      <div className="sticky-header main-bar-wraper navbar-expand-lg">
-        <div className="main-bar clearfix">
-          <div className="container clearfix d-lg-flex d-block align-items-center">
-            <div className="logo-header logo-dark">
-              <Link href="/" aria-label="Loopora home">
-                <img src="/images/logo.svg" alt="Loopora" />
-              </Link>
-            </div>
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.logo} aria-label="Loopora home">
+          <img src="/images/logo.svg" alt="Loopora" />
+        </Link>
 
-            <button
-              className="navbar-toggler collapsed navicon justify-content-end"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNavDropdown"
-              aria-controls="navbarNavDropdown"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span></span><span></span><span></span>
+        <nav className={styles.desktopNav} aria-label="Primary navigation">
+          <Link href="/" className={navClass('/')}>Home</Link>
+          <Link href="/shop" className={navClass('/shop')}>Marketplace</Link>
+          <Link href="/cart-pilot" className={`${styles.navCta} ${isActive('/cart-pilot') ? styles.activeCta : ''}`}>
+            <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
+            <span>CartPilot</span>
+          </Link>
+          <Link href="/copilot-lab" className={navClass('/copilot-lab')}>Live Copilot</Link>
+          <Link href="/evidence" className={navClass('/evidence')}>Evidence</Link>
+          <Link href="/trust" className={navClass('/trust')}>Trust</Link>
+          <Link href="/merchant/login" className={navClass('/merchant')}>Merchant</Link>
+        </nav>
+
+        <div className={styles.actions}>
+          <form className={styles.searchForm} role="search" onSubmit={submitSearch}>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              type="search"
+              className={styles.searchInput}
+              aria-label="Search products"
+              placeholder="Search products"
+            />
+            <button className={styles.searchButton} type="submit" aria-label="Search">
+              <i className="fas fa-search" aria-hidden="true" />
             </button>
+          </form>
 
-            <div className="header-nav w3menu navbar-collapse collapse justify-content-start" id="navbarNavDropdown">
-              <div className="logo-header d-lg-none">
-                <Link href="/"><img src="/images/logo.svg" alt="Loopora" /></Link>
-              </div>
+          <Link
+            href="/cart-pilot"
+            className={`${styles.iconButton} ${styles.desktopMic}`}
+            aria-label="Open voice AI concierge"
+            title="Voice AI Concierge"
+          >
+            <i className="fas fa-microphone" aria-hidden="true" />
+          </Link>
 
-              <div className="browse-category-menu d-none d-xl-block">
-                <button
-                  type="button"
-                  className="category-btn border-0"
-                  onClick={() => setCategoryOpen((current) => !current)}
-                  aria-expanded={categoryOpen}
-                >
-                  <div className="category-menu me-3"><span></span><span></span><span></span></div>
-                  <span className="category-btn-title">Browse Food &amp; Drinks</span>
-                  <span className="toggle-arrow ms-auto"><i className="icon feather icon-chevron-down"></i></span>
-                </button>
-                <div className="category-menu-items" style={{ display: categoryOpen ? 'block' : 'none' }}>
-                  <ul className="nav navbar-nav">
-                    <li><Link href="/shop?search=breakfast">Breakfast</Link></li>
-                    <li><Link href="/shop?search=coffee">Coffee &amp; Drinks</Link></li>
-                    <li><Link href="/shop?search=bakery">Bakery</Link></li>
-                    <li><Link href="/shop?search=healthy">Healthy Choices</Link></li>
-                  </ul>
+          <Link href="/cart" className={styles.iconButton} aria-label={`Cart with ${cartCount} items`}>
+            <i className="fas fa-shopping-basket" aria-hidden="true" />
+            {cartCount > 0 && <span className={styles.cartBadge}>{cartCount > 99 ? '99+' : cartCount}</span>}
+          </Link>
+
+          {userName ? (
+            <div className={styles.profileWrap} ref={profileRef}>
+              <button
+                type="button"
+                className={styles.profileButton}
+                onClick={() => setProfileOpen((current) => !current)}
+                aria-expanded={profileOpen}
+                aria-haspopup="menu"
+                aria-label="Account menu"
+              >
+                <i className="far fa-user" aria-hidden="true" />
+              </button>
+              {profileOpen && (
+                <div className={styles.profileMenu} role="menu">
+                  <strong className={styles.profileName}>{userName}</strong>
+                  <Link href="/account/dashboard" role="menuitem">My account</Link>
+                  <Link href="/account/orders" role="menuitem">Orders</Link>
+                  <button type="button" onClick={logout} role="menuitem">Sign out</button>
                 </div>
-              </div>
-
-              <ul className="nav navbar-nav legacy-primary-nav">
-                <li className={isActive('/') ? 'active' : ''}><Link href="/">Home</Link></li>
-                <li className={isActive('/shop') ? 'active' : ''}><Link href="/shop">Marketplace</Link></li>
-                <li className={`sub-menu-down ${isActive('/cart-pilot') || isActive('/copilot-lab') ? 'active' : ''}`}>
-                  <a href="#" onClick={(event) => event.preventDefault()}>
-                    <span>AI Shopping</span><i className="fas fa-chevron-down tabindex"></i>
-                  </a>
-                  <ul className="sub-menu">
-                    <li><Link href="/cart-pilot">Voice AI Concierge</Link></li>
-                    <li><Link href="/copilot-lab">Live Copilot Lab</Link></li>
-                  </ul>
-                </li>
-                <li className={`sub-menu-down ${isActive('/evidence') || isActive('/trust') ? 'active' : ''}`}>
-                  <a href="#" onClick={(event) => event.preventDefault()}>
-                    <span>How It Works</span><i className="fas fa-chevron-down tabindex"></i>
-                  </a>
-                  <ul className="sub-menu">
-                    <li><Link href="/evidence">Evidence &amp; Architecture</Link></li>
-                    <li><Link href="/trust">Trust &amp; Governance</Link></li>
-                  </ul>
-                </li>
-                <li className={pathname.startsWith('/merchant') ? 'active' : ''}><Link href="/merchant/login">Merchant</Link></li>
-              </ul>
-
-              <div className="dz-social-icon d-lg-none">
-                <ul>
-                  <li><Link href="/cart-pilot" aria-label="Voice AI concierge"><i className="fas fa-microphone"></i></Link></li>
-                  <li><Link href="/copilot-lab" aria-label="Live Copilot"><i className="fas fa-wand-magic-sparkles"></i></Link></li>
-                  <li><Link href="/trust" aria-label="Trust center"><i className="fas fa-shield-halved"></i></Link></li>
-                </ul>
-              </div>
+              )}
             </div>
+          ) : (
+            <Link href="/login" className={styles.iconButton} aria-label="Sign in" title="Sign in">
+              <i className="far fa-user" aria-hidden="true" />
+            </Link>
+          )}
 
-            <div className="extra-nav d-flex align-items-center ms-lg-auto">
-              <div className="extra-cell d-none d-xxl-block me-2">
-                <form className="header-item-search" role="search" onSubmit={submitSearch}>
-                  <div className="input-group search-input">
-                    <input
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                      type="search"
-                      className="form-control"
-                      aria-label="Search products"
-                      placeholder="Search products"
-                    />
-                    <button className="btn" type="submit" aria-label="Search"><i className="iconly-Light-Search text-secondary"></i></button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="extra-cell">
-                <ul className="navbar-nav header-right m-0 d-flex flex-row align-items-center">
-                  <li className="nav-item me-1 d-none d-md-block">
-                    <Link href="/cart-pilot" className="nav-link" aria-label="Voice AI Concierge" title="Voice AI Concierge"><i className="fas fa-microphone"></i></Link>
-                  </li>
-                  <li className="nav-item me-1">
-                    <Link href="/cart" className="nav-link legacy-cart-link" aria-label={`Cart with ${cartCount} items`}>
-                      <i className="flaticon flaticon-basket"></i>
-                      {cartCount > 0 && <span className="badge bg-primary legacy-cart-count">{cartCount}</span>}
-                    </Link>
-                  </li>
-                  {userName ? (
-                    <li className="nav-item position-relative" ref={profileRef}>
-                      <button type="button" className="nav-link legacy-profile-trigger border-0 bg-transparent" onClick={() => setProfileOpen((current) => !current)} aria-expanded={profileOpen} aria-label="Account menu">
-                        <i className="far fa-user"></i>
-                      </button>
-                      {profileOpen && (
-                        <div className="legacy-profile-menu">
-                          <strong>{userName}</strong>
-                          <Link href="/account/dashboard">My account</Link>
-                          <Link href="/account/orders">Orders</Link>
-                          <button type="button" onClick={logout}>Sign out</button>
-                        </div>
-                      )}
-                    </li>
-                  ) : (
-                    <li className="nav-item"><Link href="/login" className="nav-link" aria-label="Sign in" title="Sign in"><i className="far fa-user"></i></Link></li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          </div>
+          <button
+            type="button"
+            className={`${styles.menuButton} ${menuOpen ? styles.menuButtonOpen : ''}`}
+            onClick={() => setMenuOpen((current) => !current)}
+            aria-expanded={menuOpen}
+            aria-controls="loopora-mobile-menu"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className={styles.mobilePanel} id="loopora-mobile-menu">
+          <form className={styles.mobileSearch} role="search" onSubmit={submitSearch}>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              type="search"
+              className={styles.searchInput}
+              aria-label="Search products"
+              placeholder="Search products or coffee, breakfast…"
+            />
+            <button className={styles.searchButton} type="submit" aria-label="Search">
+              <i className="fas fa-search" aria-hidden="true" />
+            </button>
+          </form>
+
+          <div className={styles.mobileAiBadge}>
+            <i className="fas fa-sparkles" aria-hidden="true" /> AI shopping
+          </div>
+
+          <nav className={styles.mobileNav} aria-label="Mobile navigation">
+            <Link href="/cart-pilot" className={`${styles.navCta} ${isActive('/cart-pilot') ? styles.activeCta : ''}`}>
+              <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
+              <span>Open CartPilot</span>
+            </Link>
+            <Link href="/copilot-lab" className={navClass('/copilot-lab')}>
+              <i className="fas fa-flask" aria-hidden="true" />
+              <span>Live Copilot Lab</span>
+            </Link>
+            <div className={styles.mobileDivider} />
+            <Link href="/" className={navClass('/')}>Home</Link>
+            <Link href="/shop" className={navClass('/shop')}>Marketplace</Link>
+            <Link href="/evidence" className={navClass('/evidence')}>Evidence &amp; Architecture</Link>
+            <Link href="/trust" className={navClass('/trust')}>Trust &amp; Governance</Link>
+            <Link href="/merchant/login" className={navClass('/merchant')}>Merchant Portal</Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

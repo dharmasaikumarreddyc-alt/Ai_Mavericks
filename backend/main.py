@@ -86,7 +86,9 @@ async def security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), geolocation=(), payment=()"
+    # CartPilot's optional radius filter uses first-party browser geolocation.
+    # Keep camera/payment disabled while allowing location only to this origin.
+    response.headers["Permissions-Policy"] = "camera=(), geolocation=(self), payment=()"
     if request.url.path.startswith(("/auth", "/merchant", "/orders", "/cart", "/payments")):
         response.headers["Cache-Control"] = "no-store"
     return response
