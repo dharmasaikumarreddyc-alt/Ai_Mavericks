@@ -1,6 +1,6 @@
 """Pure deterministic catalog retrieval shared by APIs and offline evaluation."""
 
-from agents.base import MERCHANTS
+from services.catalog_registry import MERCHANTS
 
 
 def transform_product(product: dict, merchant: dict) -> dict:

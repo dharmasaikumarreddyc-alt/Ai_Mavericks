@@ -201,8 +201,8 @@ async function collectConfirmedCookingInstructions(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const response = await askQuestion(
       attempt === 0
-        ? 'Any cooking instructions for the restaurant? Say them now, or say no instructions.'
-        : 'Please tell me the cooking instructions again, or say no instructions.'
+        ? 'Any special instructions for the merchant? Say them now, or say no instructions.'
+        : 'Please tell me the special instructions again, or say no instructions.'
     );
     const instructions = response?.trim() || '';
     if (!instructions || /^(no|none|no instructions|nothing|no thanks|no,?\s+thanks)$/i.test(instructions)) {
@@ -214,7 +214,7 @@ async function collectConfirmedCookingInstructions(
     if (confirmed === 'yes') return instructions;
   }
 
-  await speakResponse("I couldn't confirm the cooking instructions, so I haven't added any. You can add them before checkout.");
+  await speakResponse("I couldn't confirm the special instructions, so I haven't added any. You can add them before checkout.");
   return null;
 }
 
@@ -2768,7 +2768,7 @@ export default function CartPilotClient() {
                         {(orderResult.order.cookingInstructions ||
                           orderResult.order.items.find((item) => item.cookingInstructions)?.cookingInstructions) && (
                           <div className="alert alert-light border mt-3 mb-0">
-                            <strong>Cooking instructions:</strong>
+                            <strong>Special instructions:</strong>
                             <p className="mb-0 mt-1">
                               {orderResult.order.cookingInstructions ||
                                 orderResult.order.items.find((item) => item.cookingInstructions)?.cookingInstructions}

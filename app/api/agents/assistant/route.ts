@@ -14,13 +14,13 @@ Respond with ONLY this JSON:
 {
   "intent": "order" | "chat" | "stop",
   "reply": "<what you say out loud>",
-  "orderQuery": "<for order intent: a concise normalized request, e.g. 'coffee and a vegan breakfast'; else empty>"
+  "orderQuery": "<for order intent: a concise normalized request; else empty>"
 }
 
 Rules:
-- "order": the user wants to buy / order / get food, drinks, groceries, etc. reply = a short friendly acknowledgement (max 12 words) like "Sure — let me find that near you." Set orderQuery.
+- "order": the user wants to buy / order / get food, drinks, groceries, ingredients, or supplies for cooking. Recipe-shopping language such as "I need ingredients to make biryani" is an order intent. Preserve the dish and variant words (e.g. chicken/vegetarian) in orderQuery instead of rewriting it as a cooked-food order. reply = a short friendly acknowledgement (max 12 words) like "Sure — let me build that grocery basket." Set orderQuery.
 - "stop": the user is ending the chat or thanking you to finish ("that's it", "that's all", "thanks, bye", "I'm done", "thank you"). reply = a warm, personable goodbye (max 14 words), e.g. "Anytime! It was lovely helping you. Talk soon!"
-- "chat": anything else — questions, small talk, "what can you do". reply = a concise, helpful spoken answer (max 40 words). If asked what you can do, mention you find and order from local coffee shops, restaurants, bakeries and grocery stores by voice.
+- "chat": anything else — questions, small talk, "what can you do". reply = a concise, helpful spoken answer (max 40 words). If asked what you can do, mention you find and order from local coffee shops, restaurants, bakeries and grocery stores by voice, including ingredient baskets for supported recipes.
 Be friendly and human, like a personal assistant.`;
 
 interface AssistantResult {
@@ -29,7 +29,7 @@ interface AssistantResult {
   orderQuery?: string;
 }
 
-const ORDER_HINT = /\b(order|buy|get me|grab|want|need|coffee|tea|breakfast|lunch|dinner|food|grocery|groceries|cake|pizza|biryani|snack|hungry|eat|drink)\b/i;
+const ORDER_HINT = /\b(order|buy|get me|grab|want|need|coffee|tea|breakfast|lunch|dinner|food|grocery|groceries|ingredient|ingredients|cook|cooking|recipe|prepare|make|cake|pizza|biryani|snack|hungry|eat|drink)\b/i;
 const STOP_HINT = /\b(that's it|thats it|that's all|thats all|stop|done|bye|goodbye|thank you|thanks|no more|nothing else|that is all)\b/i;
 
 function fallback(message: string): AssistantResult {
@@ -38,11 +38,16 @@ function fallback(message: string): AssistantResult {
     return { intent: 'stop', reply: 'Anytime! It was a pleasure helping you. Talk soon!' };
   }
   if (ORDER_HINT.test(m)) {
-    return { intent: 'order', reply: 'Sure — let me find that near you.', orderQuery: message };
+    const recipeShopping = /\b(ingredient|ingredients|cook|cooking|recipe|prepare|make)\b/i.test(message);
+    return {
+      intent: 'order',
+      reply: recipeShopping ? 'Sure — let me build that grocery basket.' : 'Sure — let me find that near you.',
+      orderQuery: message,
+    };
   }
   return {
     intent: 'chat',
-    reply: "I can find and order from local coffee shops, restaurants, bakeries and grocery stores. Just tell me what you're craving!",
+    reply: "I can find and order from local coffee shops, restaurants, bakeries and grocery stores. Just tell me what you're craving or cooking!",
   };
 }
 

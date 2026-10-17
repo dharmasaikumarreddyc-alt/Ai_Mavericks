@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';
 import Preloader from '../../components/Preloader';
 import LegacyPageBanner from '../../components/LegacyPageBanner';
 import { localMerchantsDB, localProductsDB } from '../../api/agents/data';
+import { groceryMerchant, groceryProducts } from '../../api/agents/grocery-data';
 import { toCatalogProductView } from '../../lib/catalog-view';
 import ProductDetailActions from './ProductDetailActions';
 
@@ -14,17 +15,36 @@ export const metadata: Metadata = {
   description: 'Inspect a synthetic catalog item, its merchant evidence, price authority, and availability limitations.',
 };
 
+const allProducts = [...localProductsDB, ...groceryProducts];
+const allMerchants = [...localMerchantsDB, groceryMerchant];
+
 export function generateStaticParams() {
-  return localProductsDB.map((product) => ({ id: product.id }));
+  return allProducts.map((product) => ({ id: product.id }));
+}
+
+function resolveSourceProduct(routeId: string) {
+  const exact = allProducts.find((product) => product.id === routeId);
+  if (exact) return exact;
+
+  // The Python products API exposes IDs as merchant_id + "_" + product_id.
+  // Keep the old visual detail route compatible with both that transport ID
+  // and the raw bounded catalog ID used by the agentic shopping flow.
+  const separator = routeId.indexOf('_');
+  if (separator <= 0) return undefined;
+  const merchantId = routeId.slice(0, separator);
+  const productId = routeId.slice(separator + 1);
+  return allProducts.find(
+    (product) => product.id === productId && product.merchantId === merchantId
+  );
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const sourceProduct = localProductsDB.find((product) => product.id === id);
+  const sourceProduct = resolveSourceProduct(id);
   if (!sourceProduct) notFound();
 
-  const product = toCatalogProductView(sourceProduct, localMerchantsDB);
-  const merchant = localMerchantsDB.find((candidate) => candidate.id === product.merchant_id);
+  const product = toCatalogProductView(sourceProduct, allMerchants);
+  const merchant = allMerchants.find((candidate) => candidate.id === product.merchant_id);
   const fullStars = Math.max(0, Math.min(5, Math.floor(product.rating || 0)));
 
   return (

@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchProducts, getMerchantProducts, merchantsDB, type Product } from '../data';
+import {
+  biryaniVariant,
+  deterministicBiryaniIngredients,
+  groceryMerchant,
+  groceryProducts,
+  isRecipeShoppingIntent,
+  type BiryaniVariant,
+} from '../grocery-data';
 import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/inventory
@@ -23,6 +31,20 @@ Respond with ONLY a JSON object:
   "spoken": "<one friendly sentence. If alternatives, say something like 'I couldn't find X, but Y is a great alternative. Would you like that instead?'>"
 }`;
 
+const RECIPE_SYSTEM_PROMPT = `You are a cooking-planning assistant inside a governed grocery marketplace.
+Analyze the customer's cooking request, but do NOT invent store inventory, prices, availability, offers, merchants, or medical/allergen claims.
+For this prototype you only handle biryani ingredient planning.
+
+Return ONLY JSON:
+{
+  "dish": "biryani",
+  "variant": "chicken" | "vegetarian" | "unspecified",
+  "ingredients": ["short ingredient name", "..."],
+  "summary": "one concise sentence explaining the ingredient plan"
+}
+
+Use common home-cooking ingredients. Keep the ingredient list practical (maximum 12). If the customer did not choose chicken or vegetarian, use "unspecified".`;
+
 interface LlmInventoryResult {
   items?: { id: string; reason: string; isAlternative?: boolean; originalRequest?: string }[];
   exactMatchFound?: boolean;
@@ -34,6 +56,102 @@ interface AiSelectResult {
   spoken?: string;
   exactMatchFound: boolean;
   alternatives: { productId: string; originalRequest: string; reason: string }[];
+}
+
+interface RecipePlanResult {
+  dish?: string;
+  variant?: BiryaniVariant;
+  ingredients?: string[];
+  summary?: string;
+}
+
+interface RecipePlan {
+  variant: BiryaniVariant;
+  ingredients: string[];
+  summary: string;
+  usedAI: boolean;
+}
+
+async function analyzeBiryaniRecipe(query: string): Promise<RecipePlan> {
+  const fallbackVariant = biryaniVariant(query);
+  const fallbackIngredients = deterministicBiryaniIngredients(query);
+  const fallback: RecipePlan = {
+    variant: fallbackVariant,
+    ingredients: fallbackIngredients,
+    summary: `A practical biryani basket needs ${fallbackIngredients.join(', ')}.`,
+    usedAI: false,
+  };
+
+  if (!llmEnabled()) return fallback;
+
+  try {
+    const result = await llmJSON<RecipePlanResult>(
+      RECIPE_SYSTEM_PROMPT,
+      `Customer cooking request: "${query}"`
+    );
+    const validVariant: BiryaniVariant =
+      result?.variant === 'chicken' || result?.variant === 'vegetarian' || result?.variant === 'unspecified'
+        ? result.variant
+        : fallbackVariant;
+    const ingredients = Array.isArray(result?.ingredients)
+      ? result.ingredients
+          .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+          .map((item) => item.trim().slice(0, 80))
+          .slice(0, 12)
+      : [];
+
+    return {
+      variant: validVariant,
+      ingredients: ingredients.length > 0 ? ingredients : fallbackIngredients,
+      summary:
+        typeof result?.summary === 'string' && result.summary.trim()
+          ? result.summary.trim().slice(0, 300)
+          : fallback.summary,
+      usedAI: true,
+    };
+  } catch {
+    // Recipe reasoning is helpful but not authoritative. If Gemini is unavailable,
+    // use the explicit deterministic biryani profile and keep checkout functional.
+    return fallback;
+  }
+}
+
+function productById(id: string): Product {
+  const product = groceryProducts.find((item) => item.id === id);
+  if (!product) throw new Error(`Missing bounded grocery product ${id}`);
+  return product;
+}
+
+async function recipeSelectProducts(query: string): Promise<AiSelectResult & { usedAI: boolean; ingredients: string[]; summary: string }> {
+  const plan = await analyzeBiryaniRecipe(query);
+  const variant = plan.variant === 'unspecified' ? biryaniVariant(query) : plan.variant;
+  const freshId =
+    variant === 'chicken'
+      ? 'fm-biryani-chicken'
+      : variant === 'vegetarian'
+        ? 'fm-biryani-veg'
+        : 'fm-biryani-fresh-base';
+
+  const pantry = productById('fm-biryani-pantry');
+  const fresh = productById(freshId);
+  const ingredientsText = plan.ingredients.slice(0, 10).join(', ');
+  const proteinNote =
+    variant === 'unspecified'
+      ? ' I kept protein optional because the customer did not choose chicken or vegetarian.'
+      : '';
+
+  return {
+    products: [
+      { ...pantry, aiReason: 'Covers the rice, spice and ghee portion of the analyzed biryani plan.' },
+      { ...fresh, aiReason: 'Covers the fresh ingredients for the selected biryani variant.' },
+    ],
+    spoken: `${plan.summary} I mapped ${ingredientsText} to two items actually listed at ${groceryMerchant.name}.${proteinNote} Prices and availability come from the catalog, not the model.`,
+    exactMatchFound: true,
+    alternatives: [],
+    usedAI: plan.usedAI,
+    ingredients: plan.ingredients,
+    summary: plan.summary,
+  };
 }
 
 async function aiSelectProducts(
@@ -91,6 +209,48 @@ export async function POST(request: NextRequest) {
 
     if (!merchantId || typeof merchantId !== 'string') {
       return NextResponse.json({ success: false, error: 'Merchant ID is required' }, { status: 400 });
+    }
+
+    if (merchantId === groceryMerchant.id) {
+      if (!query || typeof query !== 'string' || !isRecipeShoppingIntent(query)) {
+        return NextResponse.json({ success: false, error: 'This grocery prototype currently supports biryani ingredient missions.' }, { status: 422 });
+      }
+
+      const recipe = await recipeSelectProducts(query);
+      const configuredModel = llmDescriptor();
+      return NextResponse.json({
+        success: true,
+        agent: 'InventoryAgent',
+        mode: recipe.usedAI ? 'llm-recipe-plan' : llmEnabled() ? 'llm-fallback' : 'deterministic-recipe-plan',
+        merchantId,
+        merchantName: groceryMerchant.name,
+        query,
+        timestamp: new Date().toISOString(),
+        results: {
+          products: recipe.products,
+          count: recipe.products.length,
+          message: `Built a grounded biryani ingredient basket from ${groceryMerchant.name}.`,
+          spoken: recipe.spoken,
+          exactMatchFound: true,
+          hasAlternatives: false,
+          alternatives: [],
+          alternativeMessage: '',
+          recipePlan: {
+            dish: 'biryani',
+            ingredients: recipe.ingredients,
+            summary: recipe.summary,
+          },
+          provenance: {
+            selectionMode: recipe.usedAI ? 'model' : 'deterministic-fallback',
+            provider: recipe.usedAI ? configuredModel?.provider ?? null : null,
+            model: recipe.usedAI ? configuredModel?.model ?? null : null,
+            evidenceSource: recipe.usedAI
+              ? 'Gemini recipe planning mapped to bounded synthetic grocery catalog'
+              : 'deterministic biryani profile mapped to bounded synthetic grocery catalog',
+            piiControls: ['email pattern', 'phone pattern', 'payment-number pattern'],
+          },
+        },
+      });
     }
 
     const merchant = merchantsDB.find((m) => m.id === merchantId);
