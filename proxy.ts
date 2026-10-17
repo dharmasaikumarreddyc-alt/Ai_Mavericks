@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 30;
 const MAX_BODY_BYTES = 64 * 1024;
+const MAX_MULTIMODAL_BODY_BYTES = 768 * 1024;
 
 type RequestWindow = { startedAt: number; count: number };
 
@@ -28,7 +29,10 @@ export function proxy(request: NextRequest) {
   if (!Number.isFinite(contentLength) || contentLength < 0) {
     return jsonError(400, 'Invalid Content-Length header.');
   }
-  if (contentLength > MAX_BODY_BYTES) {
+  const bodyLimit = request.nextUrl.pathname === '/api/agents/retail-copilot'
+    ? MAX_MULTIMODAL_BODY_BYTES
+    : MAX_BODY_BYTES;
+  if (contentLength > bodyLimit) {
     return jsonError(413, 'Request body is too large.');
   }
 

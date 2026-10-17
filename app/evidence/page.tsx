@@ -44,7 +44,7 @@ export default function EvidencePage() {
             <h1>Evidence before theatre.</h1>
             <p>A transparent view of what Gemini may decide, what deterministic software controls, what people approve, and what has actually been tested.</p>
             <div className="aisle-home-actions">
-              <Link className="btn btn-light" href="/cart-pilot">Try the concierge</Link>
+              <Link className="btn btn-light" href="/copilot-lab">Run the live copilot</Link>
               <Link className="btn btn-outline-light" href="/trust">Read governance</Link>
             </div>
           </div>

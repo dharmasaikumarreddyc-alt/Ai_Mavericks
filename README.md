@@ -20,6 +20,7 @@ The product directly addresses conversational commerce, discovery, personalizati
 
 - Gemini 3.8 Flash is the primary model across customer agents and merchant insights, with labelled deterministic fallbacks.
 - Conversational/voice discovery, smart cart, budget shop, order prediction, and receipt narration.
+- A `/copilot-lab` multimodal journey: optional pantry/shelf/meal image, Gemini interpretation, deterministic catalog and budget validation, visible decision trace, stockout rescue, and separate customer/merchant approval.
 - Catalog search across product names, descriptions, categories, tags, and merchants.
 - Separate customer and merchant authentication with correct cross-role redirection.
 - Persistent customer checkout and merchant-visible orders.
@@ -28,6 +29,7 @@ The product directly addresses conversational commerce, discovery, personalizati
 - Merchant dashboard with order processing, operational KPIs, directional demand forecast, grounded review intelligence, and a persisted human-acceptance log for recommendations.
 - PII redaction, untrusted-input boundaries, deterministic controls, metadata-only AI telemetry, and a public `/trust` experience.
 - Same-origin, payload-size, and burst guards on browser-facing AI routes (prototype protection; production still needs managed edge quotas).
+- A live failure switch demonstrates model outage fallback, stockout recovery, and prompt-injection blocking without mutating operational state.
 - A public `/evidence` lab with real workflow ownership, architecture, reproducible offline results, unanswered evidence gaps, and a non-persistent policy simulator.
 - Grounded `/shop/[id]` product records with price, catalog, availability, and dietary provenance instead of broken template detail links.
 - Containerized Next.js and FastAPI services ready for Google Cloud Run.
@@ -84,12 +86,13 @@ python -m unittest discover -s backend/tests -v
 
 Recommended demo smoke test:
 
-1. Sign in as a customer and search for a product.
-2. Ask AI Concierge for a budget-aware order and inspect its grounded choices.
-3. Confirm checkout; verify the card path says “simulated token” and “no money moved,” or use COD.
-4. Sign in as the linked merchant; open Orders and advance the live order to Ready.
-5. Return to the customer account and verify the same status.
-6. Show Gemini demand/review insight, its evidence source, and the Trust page.
+1. Open `/copilot-lab`, load the synthetic image or upload a non-sensitive retail image, and run a budget-aware request.
+2. Inspect the live ownership trace, catalog evidence, deterministic total, and governance receipt.
+3. Switch to Stockout rescue and verify the replacement is proposed with customer approval required; switch to Attack test and verify it blocks before model access.
+4. Continue the grounded request to the concierge, sign in as a customer, and explicitly confirm checkout.
+5. Verify the card path says “simulated token” and “no money moved,” or use COD.
+6. Sign in as the linked merchant, advance the same order to Ready, and show the human-reviewed action log.
+7. Return to the customer account and verify the status, then show the Trust and Evidence pages.
 
 The latest small offline control/retrieval run is recorded in [EVAL_RESULTS.md](EVAL_RESULTS.md).
 It is intentionally not presented as a Gemini or production benchmark.

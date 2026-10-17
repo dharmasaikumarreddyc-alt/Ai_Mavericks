@@ -4,7 +4,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   experimental: {
-    proxyClientMaxBodySize: '64kb',
+    // Multimodal uploads are compressed in-browser and revalidated at the
+    // route boundary. Text-only agent routes retain a stricter proxy limit.
+    proxyClientMaxBodySize: '768kb',
   },
   async headers() {
     return [{

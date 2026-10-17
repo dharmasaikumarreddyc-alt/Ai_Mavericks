@@ -63,7 +63,7 @@ export default function Header() {
         <nav className="aisle-header-nav" aria-label="Primary navigation">
           {nav('/', 'Home')}
           {nav('/shop', 'Marketplace')}
-          {nav('/cart-pilot', 'AI Concierge')}
+          {nav('/copilot-lab', 'Live Copilot')}
           {nav('/evidence', 'Evidence')}
           {nav('/trust', 'Trust')}
         </nav>

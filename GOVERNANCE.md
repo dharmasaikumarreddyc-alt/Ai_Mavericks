@@ -11,6 +11,7 @@ Aisle AI supports product discovery, cart preparation, and merchant decision sup
 | Catalog, price, aggregate order metrics | Business | Grounding evidence | While merchant is active |
 | Email, phone, delivery address | Personal | Redacted or excluded | Until account/order deletion policy applies |
 | Review text | User-generated | Redacted and treated as untrusted | With the review record |
+| Optional retail image | User-provided | Gemini visual interpretation | Browser memory and request lifetime only in Aisle; provider handling follows Gemini API terms |
 | Credentials and raw payment numbers | Restricted | Never permitted | Secrets in Secret Manager; Aisle never stores PAN/CVV |
 | Synthetic payment token ID | Demo | Never model input | Stored with the demo order; explicitly marked simulated |
 | AI telemetry | Operational | Not model input | Feature/provider/outcome/sizes only; 30-day target |
@@ -20,6 +21,9 @@ Aisle AI supports product discovery, cart preparation, and merchant decision sup
 - Gemini receives bounded evidence plus a policy that prohibits invented products, prices, inventory, discounts, payments, and guarantees.
 - Email, phone, and payment-like values are redacted before model calls and filtered from outputs.
 - Review and customer text is treated as untrusted content to reduce prompt-injection risk.
+- Optional images are compressed in the browser, restricted to JPEG/PNG/WebP, bounded at both proxy and route layers, sent only on explicit submission, and never written to Aisle storage or logs.
+- Multimodal output is only a proposal: product IDs, current price, dietary tags, stock state, and budget are revalidated against the bounded catalog before display.
+- The live failure switch demonstrates model outage, stockout substitution, and injection blocking; it cannot bypass authentication or mutate commerce state.
 - Checkout requires explicit customer confirmation. Fulfillment uses a deterministic, merchant-authorized state machine.
 - Demo card checkout never renders a PAN/CVV field, creates a synthetic one-time token, reports `simulated`, and moves no money. COD reports `not_collected`.
 - The disabled-by-default Razorpay adapter creates the provider order server-side and verifies signature, captured state, order ID, amount, and currency before order creation.

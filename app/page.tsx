@@ -33,7 +33,7 @@ export default function Home() {
                 act on demand and feedback evidence.
               </p>
               <div className="aisle-home-actions">
-                <Link className="btn btn-secondary" href="/cart-pilot">Try the AI concierge <i className="fas fa-arrow-right" /></Link>
+                <Link className="btn btn-secondary" href="/copilot-lab">Run the live copilot <i className="fas fa-arrow-right" /></Link>
                 <Link className="btn btn-outline-secondary" href="/shop">Search the catalog</Link>
                 <Link className="btn btn-outline-secondary" href="/evidence">Inspect the evidence</Link>
               </div>

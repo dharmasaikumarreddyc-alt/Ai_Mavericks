@@ -1,4 +1,4 @@
-import { protectMessages, protectModelOutput } from './guardrails';
+import { AI_SAFETY_POLICY, protectMessages, protectModelOutput, redactPII } from './guardrails';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 const GOOGLE_MODEL = process.env.GOOGLE_MODEL || 'gemini-3.8-flash';
@@ -98,5 +98,67 @@ export async function llmJSON<T = Record<string, unknown>>(
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) try { return JSON.parse(match[0]) as T; } catch { /* deterministic fallback */ }
     return null;
+  }
+}
+
+const GEMINI_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+/**
+ * Calls Gemini's native generateContent endpoint for a single small image.
+ * The browser compresses the image first; this boundary validates it again and
+ * never writes the bytes to disk, logs, or application storage.
+ */
+export async function geminiMultimodalJSON<T = Record<string, unknown>>(
+  system: string,
+  user: string,
+  image?: { mimeType: string; data: string },
+  timeoutMs = 15_000,
+): Promise<T | null> {
+  if (!GOOGLE_API_KEY) return null;
+  if (image && (!GEMINI_IMAGE_TYPES.has(image.mimeType) || image.data.length > 600_000)) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const parts: Array<Record<string, unknown>> = [{ text: redactPII(user).slice(0, 14_000) }];
+    if (image) {
+      parts.unshift({ inlineData: { mimeType: image.mimeType, data: image.data } });
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GOOGLE_MODEL)}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GOOGLE_API_KEY },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: `${AI_SAFETY_POLICY}\n\n${system}`.slice(0, 24_000) }] },
+          contents: [{ role: 'user', parts }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+        }),
+        signal: controller.signal,
+      },
+    );
+    if (!response.ok) {
+      console.error('[llm:google-gemini-multimodal] request failed', response.status);
+      return null;
+    }
+
+    const payload = await response.json();
+    const raw = payload?.candidates?.[0]?.content?.parts
+      ?.map((part: { text?: unknown }) => typeof part.text === 'string' ? part.text : '')
+      .join('');
+    if (!raw) return null;
+    const protectedRaw = protectModelOutput(raw);
+    try {
+      return JSON.parse(protectedRaw) as T;
+    } catch {
+      const match = protectedRaw.match(/\{[\s\S]*\}/);
+      return match ? JSON.parse(match[0]) as T : null;
+    }
+  } catch (error) {
+    console.error('[llm:google-gemini-multimodal] request error', error instanceof Error ? error.name : 'unknown');
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
 }

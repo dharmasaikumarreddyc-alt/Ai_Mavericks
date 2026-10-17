@@ -16,6 +16,8 @@ The application exposes the same evidence boundary at `/evidence`: verified repo
 ## Implemented evidence
 
 - Gemini 3.8 Flash is selected before alternate providers.
+- The jury-facing copilot accepts an optional locally compressed retail image, exposes the live model/control ownership trace, and labels deterministic fallback when Gemini is unavailable.
+- Stockout and prompt-injection scenarios prove substitution approval and pre-model blocking without changing an order or inventory record.
 - Customer agent requests and merchant review content pass through safety/PII boundaries.
 - Pricing, authentication, approval, and order-state transitions do not depend on model output.
 - Customer order history and merchant fulfillment use authenticated persistent backend APIs.

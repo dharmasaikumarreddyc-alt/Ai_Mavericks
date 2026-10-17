@@ -488,6 +488,8 @@ export default function CartPilotClient() {
   useEffect(() => {
     loadAddresses();
     loadUsual();
+    const requestedMission = new URLSearchParams(window.location.search).get('request')?.trim();
+    if (requestedMission) setInputValue(requestedMission.slice(0, 600));
   }, []);
 
   const loadAddresses = async () => {
