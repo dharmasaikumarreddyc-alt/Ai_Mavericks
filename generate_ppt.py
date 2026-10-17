@@ -204,9 +204,9 @@ add_text(sl,
          size=13, color=DARK_GRAY)
 
 add_text(sl,
-         "Manual friction destroys conversion rates and user patience. E-commerce\n"
-         "remains a labour-intensive chore — and that is the problem Aisle AI\n"
-         "was built to solve.",
+         "Manual browsing and repeated comparison add friction to the shopping journey.\n"
+         "Aisle AI reduces those repeated steps by connecting grounded discovery,\n"
+         "explicit confirmation, and merchant operations in one governed flow.",
          Inches(7.4), Inches(3.35), Inches(5.5), Inches(1.0),
          size=13, color=GRAY)
 
