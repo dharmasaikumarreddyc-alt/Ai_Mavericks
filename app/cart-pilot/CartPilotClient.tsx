@@ -324,7 +324,7 @@ interface PaymentResult {
     tokenized?: boolean;
     moneyMoved?: boolean;
     demo?: boolean;
-    cardDataStoredByAisle?: boolean;
+    cardDataStoredByLoopora?: boolean;
   };
   loyalty: {
     pointsEarned: number;
@@ -1739,7 +1739,7 @@ export default function CartPilotClient() {
       <div className="dz-bnr-inr bg-secondary overlay-black-light" style={{ backgroundImage: "url('/images/background/bg1.jpg')" }}>
         <div className="container">
           <div className="dz-bnr-inr-entry">
-            <h1>Aisle AI Concierge</h1>
+            <h1>Loopora Concierge</h1>
             <nav aria-label="breadcrumb" className="breadcrumb-row">
               <ul className="breadcrumb">
                 <li className="breadcrumb-item"><a href="/">Home</a></li>
@@ -2762,7 +2762,7 @@ export default function CartPilotClient() {
                             Mode of payment: {orderResult.payment.method.toUpperCase()}
                           </span>
                           {orderResult.payment.tokenized === true && (
-                            <small className="text-muted">Tokenized · Aisle stores no card number</small>
+                            <small className="text-muted">Tokenized · Loopora stores no card number</small>
                           )}
                         </div>
                         {(orderResult.order.cookingInstructions ||

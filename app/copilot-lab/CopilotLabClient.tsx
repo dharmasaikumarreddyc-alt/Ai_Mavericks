@@ -188,7 +188,7 @@ export default function CopilotLabClient() {
             <p className="copilot-eyebrow"><span /> LIVE GOVERNED EXPERIENCE</p>
             <h1>Show Gemini a retail moment. See every decision.</h1>
             <p className="copilot-lede">
-              Upload a pantry, shelf, meal, or product image. Aisle AI turns visual and text intent into a catalog-grounded basket, rescues stockouts, and proposes a merchant action—without silently changing an order or moving money.
+              Upload a pantry, shelf, meal, or product image. Loopora turns visual and text intent into a catalog-grounded basket, rescues stockouts, and proposes a merchant action—without silently changing an order or moving money.
             </p>
           </div>
           <div className="copilot-hero-facts" aria-label="Safety boundaries">

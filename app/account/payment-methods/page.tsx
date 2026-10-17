@@ -53,7 +53,7 @@ export default function PaymentMethodsPage() {
                       <span className="badge bg-info text-dark mb-3">FREE PROTOTYPE MODE</span>
                       <h3>One safe payment story, without fake saved cards</h3>
                       <p className="text-muted">
-                        Aisle does not collect or store card numbers, CVVs, UPI IDs, or wallet credentials.
+                        Loopora does not collect or store card numbers, CVVs, UPI IDs, or wallet credentials.
                         The prototype checkout creates a simulated one-time provider token and clearly states
                         that no money moved.
                       </p>

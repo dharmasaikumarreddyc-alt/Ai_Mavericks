@@ -25,7 +25,7 @@ Status reflects repository evidence as of 17 October 2026. A checked item means 
 ## UX and solution design (10%)
 
 - [x] Original marketplace visual system, fonts, assets, animations, product cards, header/footer language, and landing experience are restored while current secured flows remain intact.
-- [x] Legacy template navigation/social/footer dead ends are removed or repointed to real Aisle AI routes.
+- [x] Legacy template navigation/social/footer dead ends are removed or repointed to real Loopora routes.
 - [ ] Complete a dedicated mobile + keyboard + contrast + loading/empty/error accessibility pass in a real browser.
 - [ ] Rehearse the final demo path under 2 minutes 30 seconds.
 

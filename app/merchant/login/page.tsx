@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import MerchantLoginClient from './MerchantLoginClient';
 
 export const metadata: Metadata = {
-  title: 'Merchant sign in | Aisle',
+  title: 'Merchant sign in | Loopora',
   description: 'Sign in to your private merchant business dashboard.',
 };
 

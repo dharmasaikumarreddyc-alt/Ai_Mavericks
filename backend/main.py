@@ -1,4 +1,4 @@
-"""Main FastAPI application for Aisle backend."""
+"""Main FastAPI application for Loopora backend."""
 
 from collections import defaultdict, deque
 from time import monotonic
@@ -35,8 +35,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Aisle API",
-    description="Backend API for the Aisle AI closed-loop commerce copilot",
+    title="Loopora API",
+    description="Backend API for the Loopora closed-loop commerce copilot",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -96,7 +96,7 @@ async def security_headers(request, call_next):
 async def root():
     """Root endpoint."""
     return {
-        "name": "Aisle API",
+        "name": "Loopora API",
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs"

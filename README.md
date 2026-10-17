@@ -1,12 +1,12 @@
-# Aisle AI — The Closed-Loop Commerce Copilot
+# Loopora — The Closed-Loop Commerce Copilot
 
 > Turn every customer intent into an order, and every order into a merchant action.
 
-Aisle AI is a Gemini-powered retail experience for the Google AI Builder Cup. Customers can describe what they need, discover grounded products, build budget-aware carts, and confirm an order. Merchants receive the order, process it through a controlled fulfillment workflow, and use Gemini to turn demand and review evidence into decisions.
+Loopora is a Gemini-powered retail experience for the Google AI Builder Cup. Customers can describe what they need, discover grounded products, build budget-aware carts, and confirm an order. Merchants receive the order, process it through a controlled fulfillment workflow, and use Gemini to turn demand and review evidence into decisions.
 
 ## Why it stands out
 
-Most commerce assistants end at a recommendation. Aisle AI closes the loop:
+Most commerce assistants end at a recommendation. Loopora closes the loop:
 
 ```text
 Customer intent → Gemini-assisted discovery → deterministic price/policy checks

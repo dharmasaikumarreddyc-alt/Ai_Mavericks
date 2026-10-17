@@ -7,7 +7,7 @@ import LoginClient from './LoginClient';
 
 export const metadata: Metadata = {
   title: 'Customer Login',
-  description: 'Sign in to your Aisle AI customer account.',
+  description: 'Sign in to your Loopora customer account.',
 };
 
 export default function LoginPage() {

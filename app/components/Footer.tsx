@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="col-xl-4 col-md-6 col-sm-12 wow fadeInUp" data-wow-delay="0.1s">
               <div className="widget widget_about me-2">
                 <div className="footer-logo logo-dark">
-                  <Link href="/"><img src="/images/logo.svg" alt="Aisle AI" /></Link>
+                  <Link href="/"><img src="/images/logo.svg" alt="Loopora" /></Link>
                 </div>
                 <p className="mb-3">
                   A governed closed-loop commerce prototype: Gemini interprets intent, deterministic systems verify commerce facts, and people approve consequential actions.

@@ -23,7 +23,7 @@ def baseline_interactions(s: Scenario) -> int:
 
 
 def aisle_interactions(s: Scenario) -> int:
-    """Modeled Aisle flow: describe need, review grounded basket, approve, checkout.
+    """Modeled Loopora flow: describe need, review grounded basket, approve, checkout.
 
     A substitution adds one explicit approval step. This is a modeled interaction
     count only; it is not a claim about measured human completion time.
@@ -71,7 +71,7 @@ def summarize():
 
 if __name__ == "__main__":
     result = summarize()
-    print("Aisle AI modeled interaction benchmark")
+    print("Loopora modeled interaction benchmark")
     print("NOTE: modeled workflow interactions; not observed human timing.")
     for key, value in result.items():
         print(f"{key}: {value}")

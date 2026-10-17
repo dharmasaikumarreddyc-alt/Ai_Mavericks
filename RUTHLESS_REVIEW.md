@@ -84,7 +84,7 @@ Set budget alerts and quotas before any cloud deployment. “Has a free tier” 
 3. **Richer provenance (partially complete):** item and product views expose catalog source,
    deterministic pricing, availability boundaries, matched reasoning, confidence, decision ownership,
    and redaction scope; validate these fields against a fixed live-model quality set.
-4. **Impact proof:** compare normal shopping versus Aisle on the same synthetic tasks—time,
+4. **Impact proof:** compare normal shopping versus Loopora on the same synthetic tasks—time,
    interactions, budget error and merchant handling time.
 5. **CSV catalog upload mock (optional):** show a free local preview and validation report. Do not
    add paid ingestion infrastructure until after the hackathon.

@@ -44,7 +44,7 @@ export default function MerchantSelectorClient() {
         </Link>
         <p className="merchant-portal-separate">Private merchant access · Customer accounts cannot open this dashboard</p>
       </div>
-      <footer className="merchant-login-footer"><span>© Aisle Merchant Workspace</span><Link href="/login">Customer sign in <i className="fas fa-arrow-right" /></Link></footer>
+      <footer className="merchant-login-footer"><span>© Loopora Merchant Workspace</span><Link href="/login">Customer sign in <i className="fas fa-arrow-right" /></Link></footer>
     </main>
   );
 }

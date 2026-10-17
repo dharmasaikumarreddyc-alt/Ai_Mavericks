@@ -32,7 +32,7 @@ def run_backtest():
 
 if __name__ == "__main__":
     result = run_backtest()
-    print("Aisle AI directional forecast backtest")
+    print("Loopora directional forecast backtest")
     print("NOTE: synthetic held-out data; not a production accuracy claim.")
     for key, value in result.items():
         print(f"{key}: {value}")

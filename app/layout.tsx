@@ -6,7 +6,7 @@ import ThemeProvider from "./components/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Aisle AI — Closed-Loop Commerce Copilot", template: "%s | Aisle AI" },
+  title: { default: "Loopora — Closed-Loop Commerce Copilot", template: "%s | Loopora" },
   description: "Gemini-powered conversational shopping and merchant intelligence, from customer intent to fulfillment insight.",
   icons: {
     icon: "/images/favicon.png",

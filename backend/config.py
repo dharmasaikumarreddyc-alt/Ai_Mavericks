@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     )
 
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
-    APP_NAME: str = "Aisle Backend"
+    APP_NAME: str = "Loopora Backend"
     DEBUG: bool = False
 
     # Database

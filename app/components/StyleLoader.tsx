@@ -32,7 +32,7 @@ export default function StyleLoader() {
 
     // The original Pixio landing is intentionally retained for visual parity.
     // Repoint the few legacy template-only anchors so every visible CTA stays
-    // inside the real Aisle AI prototype rather than navigating to dead .html pages.
+    // inside the real Loopora prototype rather than navigating to dead .html pages.
     if (pathname === '/') {
       const replacements: Array<[string, string]> = [
         ['a.service-btn[href="#"]', '/copilot-lab'],

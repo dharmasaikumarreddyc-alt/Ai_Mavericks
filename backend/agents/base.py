@@ -1,4 +1,4 @@
-"""Base utilities for Aisle Marketplace - Agentic AI Checkout."""
+"""Base utilities for Loopora Marketplace - Agentic AI Checkout."""
 # ============================================================
 # SYNTHETIC DEMO CATALOG - no affiliation with real merchants.
 # In production: use verified merchant onboarding and live inventory feeds.
@@ -7,7 +7,7 @@
 MERCHANTS = {
     "cafe-verde": {
         "id": "cafe-verde",
-        "name": "Aisle Coffee Lab",
+        "name": "Loopora Coffee Lab",
         "type": "Coffee Shop",
         "category": "Food & Beverage",
         "rating": 4.7,

@@ -64,7 +64,7 @@ async def payment_config():
         "onlineEnabled": settings.PAYMENT_MODE in {"demo", "razorpay"},
         "provider": "razorpay" if settings.PAYMENT_MODE == "razorpay" else "demo_token_vault",
         "moneyMoves": settings.PAYMENT_MODE == "razorpay",
-        "cardDataStoredByAisle": False,
+        "cardDataStoredByLoopora": False,
     }
 
 
@@ -206,7 +206,7 @@ def _payment_result(
             "providerHosted": provider_hosted,
             "tokenizationManagedByProvider": bool(tokenized),
             "tokenized": bool(tokenized),
-            "cardDataStoredByAisle": False,
+            "cardDataStoredByLoopora": False,
             "moneyMoved": money_moved,
             "demo": payment_status == "simulated",
         },
@@ -427,8 +427,8 @@ async def create_payment_intent(
         "amount": amount,
         "currency": currency,
         "merchantName": merchant.name,
-        "description": "Aisle one-time secure checkout",
-        "cardDataStoredByAisle": False,
+        "description": "Loopora one-time secure checkout",
+        "cardDataStoredByLoopora": False,
     }
 
 

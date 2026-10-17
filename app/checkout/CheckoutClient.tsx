@@ -203,7 +203,7 @@ export default function CheckoutClient() {
               </p>
               {order.paymentStatus === 'simulated' && (
                 <div className="alert alert-info py-2">
-                  Demo token authorized. No money moved and Aisle received no card number.
+                  Demo token authorized. No money moved and Loopora received no card number.
                 </div>
               )}
               {order.moneyMoved && <p className="text-success small">Provider-confirmed payment captured.</p>}

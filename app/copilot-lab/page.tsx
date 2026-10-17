@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import CopilotLabClient from './CopilotLabClient';
 
 export const metadata: Metadata = {
-  title: 'Live Retail Copilot Lab | Aisle AI',
+  title: 'Live Retail Copilot Lab | Loopora',
   description: 'Run a governed Gemini multimodal retail journey with grounded products, visible controls, stockout rescue, and human approval.',
 };
 
