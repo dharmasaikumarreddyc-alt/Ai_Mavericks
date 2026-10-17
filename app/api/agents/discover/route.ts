@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchMerchants, merchantsDB, type Merchant } from '../data';
-import { groceryMerchant, isRecipeShoppingIntent } from '../grocery-data';
+import { biryaniVariant, groceryMerchant, isRecipeShoppingIntent } from '../grocery-data';
 import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/discover
@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
         aiReason: 'Best bounded grocery match for a biryani ingredient basket.',
       } as Merchant & { aiReason: string };
       const configuredModel = llmDescriptor();
+      const variant = biryaniVariant(query);
       return NextResponse.json({
         success: true,
         agent: 'MerchantDiscoveryAgent',
@@ -116,6 +117,10 @@ export async function POST(request: NextRequest) {
           spoken: inRadius
             ? `${groceryMerchant.name} is the best match for the ingredient mission: ${groceryMerchant.rating} stars, ${groceryMerchant.distance} away, with a bounded biryani grocery catalog.`
             : undefined,
+          clarifyingQuestion:
+            inRadius && variant === 'unspecified'
+              ? 'Would you like ingredients for chicken biryani or vegetarian biryani?'
+              : undefined,
           provenance: {
             selectionMode: 'deterministic-fallback',
             provider: configuredModel?.provider ?? null,
