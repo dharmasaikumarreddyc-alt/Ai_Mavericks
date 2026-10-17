@@ -61,4 +61,7 @@ GROCERY_MERCHANTS = {
 }
 
 
-MERCHANTS = {**BASE_MERCHANTS, **GROCERY_MERCHANTS}
+# Mutate the original registry in place so legacy modules that still import
+# agents.base.MERCHANTS observe the same authoritative catalog object.
+BASE_MERCHANTS.update(GROCERY_MERCHANTS)
+MERCHANTS = BASE_MERCHANTS
