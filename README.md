@@ -13,6 +13,7 @@ Customer intent / optional image
 → Gemini interpretation and planning
 → application-owned commerce tools
 → deterministic price / stock / budget validation
+→ bounded repair when a plan becomes invalid
 → explicit customer confirmation
 → persistent order
 → merchant fulfillment
@@ -21,6 +22,18 @@ Customer intent / optional image
 ```
 
 The model helps interpret, plan, rank, explain, and repair proposals. Deterministic services remain authoritative for product IDs, prices, stock, budgets, authentication, payments, order state, and operational changes.
+
+## Judge it in 3 minutes
+
+Open `/copilot-lab` and follow one story instead of touring every dashboard:
+
+1. Run a constrained mission such as **“Build a vegan breakfast with coffee under $20. Prefer something healthy.”** Optionally add the synthetic sample image.
+2. Verify that the UI explicitly labels **live Gemini** versus **deterministic fallback**, then inspect bounded tool planning and the decision trace.
+3. Trigger **Stockout rescue** to show deterministic validation rejecting a stale plan, Gemini receiving bounded repair feedback, and the repaired basket being revalidated.
+4. Trigger **Attack test** to show prompt injection blocked before model/tool execution.
+5. Return to the valid basket and show deterministic budget compliance plus explicit human confirmation before checkout or merchant action.
+
+The full timed demo script and claims discipline are in [`docs/HACKATHON_DEMO.md`](docs/HACKATHON_DEMO.md).
 
 ## Core capabilities
 
@@ -36,6 +49,8 @@ The model helps interpret, plan, rank, explain, and repair proposals. Determinis
 - Merchant dashboard with order processing, directional demand evidence, grounded review intelligence, and human acceptance/rejection of recommendations.
 - Prompt-injection blocking, PII redaction, bounded model inputs, transparent fallback behavior, and public trust/evidence surfaces.
 - Simulated one-time payment token or COD in prototype mode; no PAN/CVV collection and no money movement in the default demo path.
+- Smart-cart merchant caps and optimization objectives are deterministic, normalized, and exposed in response metadata.
+- Budget shopping has a hard total-budget guard and uses the same USD convention as the synthetic catalog.
 
 Catalog, stock, merchant history, ratings, offers, and forecast data used in the prototype are synthetic or directional and are labelled accordingly.
 
@@ -89,6 +104,7 @@ npm run lint
 npm run build
 python -m unittest discover -s backend/tests -v
 npm run test:e2e-smoke
+npm run eval:commerce-guards
 ```
 
 Live Gemini evaluation:
@@ -97,7 +113,7 @@ Live Gemini evaluation:
 npm run eval:gemini
 ```
 
-The live evaluation requires a valid Gemini key and does not count deterministic fallback as successful live-model quality.
+`eval:commerce-guards` verifies deterministic commerce invariants such as merchant-cap enforcement, optimization propagation, USD consistency, hard total-budget enforcement, and fail-closed invalid constraints. `eval:gemini` separately requires a valid Gemini key and refuses to count deterministic fallback as successful live-model quality.
 
 ## Judge demo path
 
@@ -113,10 +129,12 @@ The live evaluation requires a valid Gemini key and does not count deterministic
 
 ## Evidence and governance
 
+- `docs/HACKATHON_DEMO.md` — timed 3-minute judge script, scoring focus, and claims discipline.
 - `docs/GENAI_ARCHITECTURE.md` — Gemini/tool/validator/human control architecture.
 - `docs/EVALUATION.md` — evaluation methodology and known evidence boundaries.
 - `docs/GOVERNANCE.md` — data, model, payment, and human-oversight controls.
 - `evidence/gemini_cases.json` — adversarial and representative Gemini evaluation cases.
+- `scripts/evaluate_commerce_guards.mjs` — reproducible deterministic commerce-invariant checks.
 - `backend/evidence/` — reproducible deterministic impact and forecasting benchmarks.
 
 No competition result is guaranteed. The repository is designed to make its claims inspectable and to separate measured evidence from synthetic/demo behavior.
