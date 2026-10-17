@@ -4,6 +4,7 @@ import StyleLoader from "./components/StyleLoader";
 import ScriptInitializer from "./components/ScriptInitializer";
 import ThemeProvider from "./components/ThemeProvider";
 import "./globals.css";
+import "./ui-polish.css";
 
 export const metadata: Metadata = {
   title: { default: "Loopora — Closed-Loop Commerce Copilot", template: "%s | Loopora" },
@@ -68,8 +69,6 @@ export default function RootLayout({
         <Script src="/vendor/group-slide/group-loop.js" strategy="lazyOnload" />
         <Script src="/vendor/lightgallery/dist/plugins/thumbnail/lg-thumbnail.min.js" strategy="lazyOnload" />
         <Script src="/vendor/lightgallery/dist/plugins/zoom/lg-zoom.min.js" strategy="lazyOnload" />
-        <Script src="/js/dz.ajax.js" strategy="lazyOnload" />
-        <Script src="/js/custom.min.js" strategy="lazyOnload" />
       </body>
     </html>
   );
