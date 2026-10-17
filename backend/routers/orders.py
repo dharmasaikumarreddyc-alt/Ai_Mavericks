@@ -6,7 +6,6 @@ from typing import List
 
 from database import get_db
 from services.order_service import OrderService
-from models.order import OrderResponse
 from routers.auth import get_current_user
 
 router = APIRouter(prefix="/orders", tags=["Orders"])

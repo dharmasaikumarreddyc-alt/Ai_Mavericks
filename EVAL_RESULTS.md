@@ -21,8 +21,8 @@ These are in-process checks over a fixed synthetic catalog and deterministic hel
 
 ## Local Function Timing
 
-- Median local operation time (p50): 0.28 ms
-- 95th percentile local operation time (p95): 0.43 ms
+- Median local operation time (p50): 0.30 ms
+- 95th percentile local operation time (p95): 0.34 ms
 - Scope: in-process catalog search and sanitation only; not browser, network, Gemini, database, or Cloud Run latency.
 
 ## Interpretation Boundary

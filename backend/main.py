@@ -3,13 +3,16 @@
 from collections import defaultdict, deque
 from time import monotonic
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from config import settings
 from database import init_db
+from database import get_db
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 from routers import (
     auth_router,
     orders_router,
@@ -102,8 +105,27 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Process liveness check; does not claim dependency readiness."""
     return {"status": "healthy"}
+
+
+@app.get("/ready")
+async def readiness_check(db: AsyncSession = Depends(get_db)):
+    """Confirm that the API can reach its operational database."""
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database is not ready.",
+        ) from exc
+    return {
+        "status": "ready",
+        "database": "reachable",
+        "aiConfigured": settings.has_ai_provider,
+        "geminiModel": settings.GOOGLE_MODEL if settings.GOOGLE_API_KEY else None,
+        "paymentMode": settings.PAYMENT_MODE,
+    }
 
 
 if __name__ == "__main__":

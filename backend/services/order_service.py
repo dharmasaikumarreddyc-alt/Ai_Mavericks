@@ -1,4 +1,4 @@
-"""Order service for managing orders and transactions."""
+"""Order service for customer-visible order history."""
 
 from typing import Dict, List, Any, Optional
 from datetime import datetime
@@ -10,13 +10,11 @@ from database.models import (
     MerchantOrderDB,
     MerchantReviewDB,
     OrderDB,
-    TransactionDB,
-    VirtualCardDB,
 )
 
 
 class OrderService:
-    """Service for order and transaction management."""
+    """Service for order history and summary data."""
 
     @staticmethod
     async def _serialize_order(db: AsyncSession, order: OrderDB) -> Dict[str, Any]:

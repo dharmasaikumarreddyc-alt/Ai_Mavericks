@@ -45,7 +45,9 @@ before deployment. Never commit environment files or paste credentials into docs
 - `GET /merchant/dashboard`
 - `PATCH /merchant/orders/{order_id}/status`
 - `POST /merchant/reviews/insights`, `POST /merchant/forecast/today`
+- `GET|POST /merchant/actions` for the authenticated recommendation acceptance log
 - `GET /governance`
+- `GET /health` for liveness and `GET /ready` for database readiness
 
 Legacy autonomous checkout, virtual-card, wallet, approval, and unauthenticated marketplace
 routes were removed because they were not part of the working product and expanded the attack

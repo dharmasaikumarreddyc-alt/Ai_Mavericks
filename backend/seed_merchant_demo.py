@@ -16,7 +16,6 @@ from database.models import (
     MerchantOrderDB,
     MerchantReviewDB,
     UserDB,
-    SpendingRulesDB,
 )
 from services.auth_service import AuthService
 
@@ -181,7 +180,6 @@ async def seed(data_only: bool = False) -> None:
             db.add(user)
             await db.flush()
             db.add(MerchantAccountDB(user_id=user.id, merchant_id=MERCHANT_ID))
-            db.add(SpendingRulesDB(user_id=user.id))
 
         if demo_orders == ORDER_COUNT and demo_reviews == REVIEW_COUNT:
             await db.commit()

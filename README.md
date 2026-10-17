@@ -99,7 +99,15 @@ Create these Secret Manager secrets first: `aisle-database-url`, `aisle-jwt-secr
 .\deploy-gcp.ps1 -ProjectId YOUR_GCP_PROJECT_ID
 ```
 
-The script enables required APIs, deploys the backend and frontend from source, injects secrets at runtime, configures the generated frontend as the only CORS origin, and prints both URLs. Migrations should be run as a controlled Cloud Run Job before production traffic; development-only auto-initialization is intentionally disabled in production.
+The script validates that the required secrets exist, deploys the backend with production checks from its first revision, runs `alembic upgrade head` as a one-off Cloud Run Job, deploys the frontend, sets its generated HTTPS URL as the only CORS origin, and prints the readiness URL.
+
+To seed the synthetic merchant dashboard, also create `aisle-demo-merchant-email` and `aisle-demo-merchant-password` with new dedicated demo credentials, then run:
+
+```powershell
+.\deploy-gcp.ps1 -ProjectId YOUR_GCP_PROJECT_ID -SeedDemo
+```
+
+Never place those credential values in the script, repository, deck, screenshots, or demo video. The seeding job is idempotent and the generated records are explicitly marked as demo data.
 
 ## Submission checklist
 
