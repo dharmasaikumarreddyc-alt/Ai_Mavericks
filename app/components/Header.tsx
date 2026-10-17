@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { optionalBackendUrl } from '../lib/backend';
 import { clearAuthenticatedToken, getAuthenticatedSession } from '../lib/auth';
-import styles from './Header.module.css';
 
 export default function Header() {
   const router = useRouter();
-  const [search, setSearch] = useState('');
   const [cartCount, setCartCount] = useState(0);
   const [userName, setUserName] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLLIElement>(null);
 
   const refreshSession = async () => {
     const session = await getAuthenticatedSession('customer');
@@ -59,12 +57,6 @@ export default function Header() {
     };
   }, []);
 
-  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const value = search.trim();
-    router.push(value ? `/shop?search=${encodeURIComponent(value)}` : '/shop');
-  };
-
   const logout = () => {
     clearAuthenticatedToken('customer');
     setUserName('');
@@ -75,69 +67,80 @@ export default function Header() {
   };
 
   return (
-    <header className={styles.header}>
-      <div className={styles.inner}>
-        <Link href="/" className={styles.logo} aria-label="Loopora home">
-          <img src="/images/logo.svg" alt="Loopora" />
-        </Link>
-
-        <div className={styles.actions}>
-          <form className={styles.searchForm} role="search" onSubmit={submitSearch}>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              type="search"
-              className={styles.searchInput}
-              aria-label="Search products"
-              placeholder="Search products"
-            />
-            <button className={styles.searchButton} type="submit" aria-label="Search">
-              <i className="fas fa-search" aria-hidden="true" />
-            </button>
-          </form>
-
-          <Link
-            href="/cart-pilot"
-            className={`${styles.iconButton} ${styles.desktopMic}`}
-            aria-label="Open CartPilot"
-            title="CartPilot"
-          >
-            <i className="fas fa-microphone" aria-hidden="true" />
-          </Link>
-
-          <Link href="/cart" className={styles.iconButton} aria-label={`Cart with ${cartCount} items`} title="Cart">
-            <i className="fas fa-shopping-basket" aria-hidden="true" />
-            {cartCount > 0 && <span className={styles.cartBadge}>{cartCount > 99 ? '99+' : cartCount}</span>}
-          </Link>
-
-          {userName ? (
-            <div className={styles.profileWrap} ref={profileRef}>
-              <button
-                type="button"
-                className={styles.profileButton}
-                onClick={() => setProfileOpen((current) => !current)}
-                aria-expanded={profileOpen}
-                aria-haspopup="menu"
-                aria-label="Account menu"
-                title="Account"
-              >
-                <i className="far fa-user" aria-hidden="true" />
-              </button>
-              {profileOpen && (
-                <div className={styles.profileMenu} role="menu">
-                  <strong className={styles.profileName}>{userName}</strong>
-                  <Link href="/account/dashboard" role="menuitem">My account</Link>
-                  <Link href="/account/orders" role="menuitem">Orders</Link>
-                  <Link href="/merchant/login" role="menuitem">Merchant portal</Link>
-                  <button type="button" onClick={logout} role="menuitem">Sign out</button>
-                </div>
-              )}
+    <header className="site-header mo-left header style-2" style={{ marginBottom: 0, paddingBottom: 0 }}>
+      <div className="sticky-header main-bar-wraper navbar-expand-lg">
+        <div className="main-bar clearfix">
+          <div className="container clearfix d-flex align-items-center justify-content-between">
+            <div className="logo-header logo-dark mb-0">
+              <Link href="/" aria-label="Loopora home">
+                <img src="/images/logo.svg" alt="Loopora" />
+              </Link>
             </div>
-          ) : (
-            <Link href="/login" className={styles.iconButton} aria-label="Sign in" title="Sign in">
-              <i className="far fa-user" aria-hidden="true" />
-            </Link>
-          )}
+
+            <div className="extra-nav d-flex ms-auto">
+              <div className="extra-cell">
+                <ul className="navbar-nav header-right m-0 flex-row align-items-center">
+                  <li className="nav-item">
+                    <Link className="nav-link" href="/shop" aria-label="Search products" title="Search products">
+                      <i className="iconly-Light-Search" aria-hidden="true" />
+                    </Link>
+                  </li>
+
+                  <li className="nav-item">
+                    <Link className="nav-link" href="/cart-pilot" aria-label="Open CartPilot" title="CartPilot">
+                      <i className="fas fa-microphone" aria-hidden="true" />
+                    </Link>
+                  </li>
+
+                  <li className="nav-item position-relative">
+                    <Link className="nav-link" href="/cart" aria-label={`Cart with ${cartCount} items`} title="Cart">
+                      <i className="flaticon flaticon-shopping-cart" aria-hidden="true" />
+                      {cartCount > 0 && (
+                        <span
+                          className="badge rounded-pill bg-primary"
+                          style={{ position: 'absolute', top: 0, right: 0, fontSize: '10px' }}
+                        >
+                          {cartCount > 99 ? '99+' : cartCount}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+
+                  {userName ? (
+                    <li className="nav-item position-relative" ref={profileRef}>
+                      <button
+                        type="button"
+                        className="nav-link border-0 bg-transparent"
+                        onClick={() => setProfileOpen((current) => !current)}
+                        aria-label="Customer account"
+                        aria-expanded={profileOpen}
+                        title="Customer account"
+                      >
+                        <i className="far fa-user" aria-hidden="true" />
+                      </button>
+                      {profileOpen && (
+                        <div
+                          className="dropdown-menu show"
+                          style={{ right: 0, left: 'auto', minWidth: '210px', marginTop: '8px' }}
+                        >
+                          <span className="dropdown-item-text fw-semibold text-truncate">{userName}</span>
+                          <Link className="dropdown-item" href="/account/dashboard" onClick={() => setProfileOpen(false)}>My account</Link>
+                          <Link className="dropdown-item" href="/account/orders" onClick={() => setProfileOpen(false)}>Orders</Link>
+                          <button className="dropdown-item" type="button" onClick={logout}>Sign out</button>
+                        </div>
+                      )}
+                    </li>
+                  ) : (
+                    <li className="nav-item">
+                      <Link className="nav-link" href="/login" aria-label="Customer login" title="Customer login">
+                        <i className="far fa-user" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </header>
