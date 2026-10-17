@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "prepare:brand-assets": "node scripts/prepare_brand_assets.mjs",
+    "check:branding": "npm run prepare:brand-assets && node scripts/check_public_branding.mjs",
     "predev": "npm run prepare:brand-assets",
     "dev": "next dev",
     "prebuild": "npm run prepare:brand-assets",
