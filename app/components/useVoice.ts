@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // Browser-native voice using the Web Speech API:
 //   - SpeechRecognition  -> speech-to-text (listen)
 //   - speechSynthesis    -> text-to-speech (speak)
-// No external service, no API key. Works in Chrome / Edge; degrades gracefully elsewhere.
+// No external service, no API key. Works in supported Chromium/Safari builds and
+// degrades gracefully to typed input elsewhere.
 
 type SpeechRecognitionLike = {
   lang: string;
@@ -33,8 +34,9 @@ export function useVoice(lang = 'en-IN') {
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [micError, setMicError] = useState<string>('');
-  const [interim, setInterim] = useState<string>(''); // live partial transcript
+  const [interim, setInterim] = useState<string>('');
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const cancelListeningRef = useRef<(() => void) | null>(null);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
   useEffect(() => {
@@ -44,12 +46,13 @@ export function useVoice(lang = 'en-IN') {
     setTtsSupported(hasTTS);
     setSttSupported(hasSTT);
 
+    let pickVoice: (() => void) | null = null;
     if (hasTTS) {
-      const pickVoice = () => {
+      pickVoice = () => {
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) return;
         voiceRef.current =
-          voices.find((v) => /en[-_]IN/i.test(v.lang)) || // Indian English first
+          voices.find((v) => /en[-_]IN/i.test(v.lang)) ||
           voices.find((v) => /en[-_]US/i.test(v.lang) && /female|samantha|zira|aria|jenny|google/i.test(v.name)) ||
           voices.find((v) => /en[-_]US/i.test(v.lang)) ||
           voices.find((v) => /^en/i.test(v.lang)) ||
@@ -61,25 +64,24 @@ export function useVoice(lang = 'en-IN') {
 
     return () => {
       try {
+        cancelListeningRef.current?.();
         recognitionRef.current?.abort();
-        if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
+        if (typeof window !== 'undefined') {
+          window.speechSynthesis?.cancel();
+          if (pickVoice && window.speechSynthesis.onvoiceschanged === pickVoice) {
+            window.speechSynthesis.onvoiceschanged = null;
+          }
+        }
       } catch {
         /* ignore */
       }
     };
   }, []);
 
-  /**
-   * Unlock the speech engine. MUST be called synchronously from a user gesture
-   * (e.g. a click handler) before any awaited speak()/listen() calls. Plays a
-   * silent utterance so the browser permits subsequent programmatic speech.
-   */
+  /** Unlock speech from a direct user gesture before async voice work begins. */
   const unlockAudio = useCallback(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
-      // Just resume — the first real speak() happens within the same gesture,
-      // which is enough to satisfy autoplay rules. A silent utterance here can
-      // race with that first speak and cancel it, so we deliberately avoid it.
       window.speechSynthesis.resume();
     } catch {
       /* ignore */
@@ -113,16 +115,14 @@ export function useVoice(lang = 'en-IN') {
 
         const speakNow = () => {
           try {
-            synth.resume(); // works around Chrome/Edge auto-pause
+            synth.resume();
           } catch {
             /* ignore */
           }
           synth.speak(utterance);
         };
 
-        // IMPORTANT: only cancel when something is actually queued. Calling
-        // cancel() right before speak() on an idle engine eats the utterance
-        // (a well-known Chrome/Edge bug => "nothing is spoken").
+        // Avoid Chromium's cancel-on-idle bug, but clear a genuinely active queue.
         if (synth.speaking || synth.pending) {
           synth.cancel();
           setTimeout(speakNow, 180);
@@ -130,7 +130,7 @@ export function useVoice(lang = 'en-IN') {
           speakNow();
         }
 
-        // Safety net: some browsers never fire onend for short clips.
+        // Some engines do not reliably emit onend for very short clips.
         setTimeout(done, Math.min(15000, 1800 + text.length * 90));
       }),
     [lang]
@@ -143,10 +143,8 @@ export function useVoice(lang = 'en-IN') {
 
   /**
    * Listen continuously and resolve with the recognized transcript.
-   * - continuous + interimResults: captures through brief pauses, shows a live
-   *   partial transcript, and accumulates the full final phrase.
-   * - resolves ~800ms after you stop talking (end-of-speech), or at the timeout.
-   * - re-arms only if a session ends having heard nothing, so the mic stays open.
+   * The active listen session exposes a cancellation closure so Stop really
+   * settles the promise instead of triggering onend and silently re-arming.
    */
   const listen = useCallback(
     (timeoutMs = 15000): Promise<string> =>
@@ -157,6 +155,9 @@ export function useVoice(lang = 'en-IN') {
           resolve('');
           return;
         }
+
+        // Settle any older session before starting a new one.
+        cancelListeningRef.current?.();
         if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
         try {
           recognitionRef.current?.abort();
@@ -176,12 +177,15 @@ export function useVoice(lang = 'en-IN') {
           settled = true;
           if (killTimer) clearTimeout(killTimer);
           if (silenceTimer) clearTimeout(silenceTimer);
+          cancelListeningRef.current = null;
           try { current?.stop(); } catch { /* ignore */ }
           setListening(false);
           setInterim('');
           recognitionRef.current = null;
           resolve(value.trim());
         };
+
+        cancelListeningRef.current = () => done(finalText);
 
         const arm = () => {
           if (settled) return;
@@ -203,10 +207,10 @@ export function useVoice(lang = 'en-IN') {
             }
             setMicError('');
             setInterim(interimStr || finalText);
-            // Resolve a beat after the user stops (so multi-part finals join).
             if (silenceTimer) clearTimeout(silenceTimer);
             if (finalText) silenceTimer = setTimeout(() => done(finalText), 800);
           };
+
           rec.onerror = (event: any) => {
             const err = event?.error;
             if (err && err !== 'no-speech' && err !== 'aborted') {
@@ -214,10 +218,11 @@ export function useVoice(lang = 'en-IN') {
               done(finalText);
             }
           };
+
           rec.onend = () => {
             if (settled) return;
             if (finalText) done(finalText);
-            else if (Date.now() < deadline) setTimeout(arm, 120); // keep the mic open
+            else if (Date.now() < deadline) setTimeout(arm, 120);
             else done('');
           };
 
@@ -239,23 +244,24 @@ export function useVoice(lang = 'en-IN') {
   );
 
   const stopListening = useCallback(() => {
+    if (cancelListeningRef.current) {
+      cancelListeningRef.current();
+      return;
+    }
     try {
-      recognitionRef.current?.stop();
+      recognitionRef.current?.abort();
     } catch {
       /* ignore */
     }
+    setListening(false);
+    setInterim('');
   }, []);
 
-  /**
-   * Speak a prompt, wait for it to finish, THEN listen. Sequential = the mic
-   * never hears the assistant's own voice, so recognition stays accurate.
-   * (Tapping "Answer now" cancels the speech early, which makes this resolve and
-   * jump straight to listening — that's the interrupt path.)
-   */
+  /** Speak a prompt, then listen so the microphone does not hear the assistant. */
   const askAndListen = useCallback(
     async (prompt: string, timeoutMs = 14000): Promise<string> => {
       await speak(prompt);
-      await new Promise((r) => setTimeout(r, 250)); // small gap after speech
+      await new Promise((r) => setTimeout(r, 250));
       return listen(timeoutMs);
     },
     [speak, listen]
