@@ -22,6 +22,18 @@ interface ChatRequest {
   provider: string;
 }
 
+export interface GeminiToolDefinition {
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
+}
+
+export interface GeminiToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
 export function llmEnabled(): boolean {
   return Boolean(GOOGLE_API_KEY) || USE_AZURE || Boolean(GH_TOKEN);
 }
@@ -102,6 +114,92 @@ export async function llmJSON<T = Record<string, unknown>>(
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) try { return JSON.parse(match[0]) as T; } catch { /* deterministic fallback */ }
     return null;
+  }
+}
+
+/**
+ * Ask Gemini to choose custom application tools using the OpenAI-compatible
+ * function-calling surface. The application still executes every tool and
+ * remains authoritative for catalog, stock, price, policy and order state.
+ *
+ * We intentionally return only the requested tool name + parsed arguments.
+ * Hidden reasoning / chain-of-thought is never exposed or persisted.
+ */
+export async function geminiToolCalls(
+  system: string,
+  user: string,
+  tools: GeminiToolDefinition[],
+  opts: { reasoningEffort?: 'low' | 'medium' | 'high'; timeoutMs?: number } = {},
+): Promise<GeminiToolCall[] | null> {
+  if (!GOOGLE_API_KEY || tools.length === 0) return null;
+
+  const allowed = new Set(tools.map((tool) => tool.name));
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? 12_000);
+  try {
+    const response = await fetch(`${GOOGLE_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GOOGLE_API_KEY}` },
+      body: JSON.stringify({
+        model: GOOGLE_MODEL,
+        messages: protectMessages([
+          { role: 'system', content: `${AI_SAFETY_POLICY}\n\n${system}` },
+          { role: 'user', content: user },
+        ]),
+        tools: tools.map((tool) => ({
+          type: 'function',
+          function: {
+            name: tool.name,
+            description: tool.description,
+            parameters: tool.parameters,
+          },
+        })),
+        tool_choice: 'auto',
+        reasoning_effort: opts.reasoningEffort ?? 'medium',
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      console.error('[llm:google-gemini-tools] request failed', response.status);
+      return null;
+    }
+
+    const payload = await response.json();
+    const rawCalls = payload?.choices?.[0]?.message?.tool_calls;
+    if (!Array.isArray(rawCalls)) return [];
+
+    const calls: GeminiToolCall[] = [];
+    for (const raw of rawCalls.slice(0, 8)) {
+      const name = raw?.function?.name;
+      if (typeof name !== 'string' || !allowed.has(name)) continue;
+      let args: Record<string, unknown> = {};
+      const rawArgs = raw?.function?.arguments;
+      if (typeof rawArgs === 'string') {
+        try {
+          const parsed = JSON.parse(rawArgs);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            args = parsed as Record<string, unknown>;
+          }
+        } catch {
+          // Invalid model arguments never reach an application tool.
+          continue;
+        }
+      } else if (rawArgs && typeof rawArgs === 'object' && !Array.isArray(rawArgs)) {
+        args = rawArgs as Record<string, unknown>;
+      }
+      calls.push({
+        id: typeof raw?.id === 'string' ? raw.id.slice(0, 120) : `tool-${calls.length + 1}`,
+        name,
+        arguments: args,
+      });
+    }
+    return calls;
+  } catch (error) {
+    console.error('[llm:google-gemini-tools] request error', error instanceof Error ? error.name : 'unknown');
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
