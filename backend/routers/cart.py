@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from agents.base import MERCHANTS
+from services.catalog_registry import MERCHANTS
 from database import get_db
 from database.models import CartItemDB
 from routers.auth import get_current_user
