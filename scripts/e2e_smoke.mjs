@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 
 const port = process.env.E2E_PORT || '3100';
 const baseUrl = `http://localhost:${port}`;
-const child = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['start', '--', '-p', port], {
+const child = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '-p', port], {
   stdio: ['ignore', 'pipe', 'pipe'],
   env: { ...process.env, PORT: port },
 });
@@ -28,6 +29,16 @@ async function post(payload) {
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
     body: JSON.stringify(payload),
   });
+}
+
+async function stopServer() {
+  if (child.exitCode !== null) return;
+  child.kill('SIGTERM');
+  await Promise.race([
+    once(child, 'exit'),
+    new Promise((resolve) => setTimeout(resolve, 2_000)),
+  ]);
+  if (child.exitCode === null) child.kill('SIGKILL');
 }
 
 try {
@@ -62,5 +73,5 @@ try {
 
   console.log('E2E smoke passed: page render, deterministic outage recovery, budget control, human confirmation boundary, and injection block.');
 } finally {
-  child.kill('SIGTERM');
+  await stopServer();
 }
