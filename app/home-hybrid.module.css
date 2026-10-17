@@ -1,0 +1,604 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 74px 0 54px;
+  background:
+    radial-gradient(circle at 78% 15%, rgba(255, 198, 92, 0.34), transparent 29%),
+    radial-gradient(circle at 10% 15%, rgba(65, 154, 118, 0.16), transparent 31%),
+    linear-gradient(135deg, #fffaf2 0%, #ffffff 48%, #f3f7f1 100%);
+}
+
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.hero::before {
+  width: 420px;
+  height: 420px;
+  right: -170px;
+  top: -190px;
+  border: 1px solid rgba(31, 64, 45, 0.12);
+  box-shadow: 0 0 0 42px rgba(255, 255, 255, 0.26), 0 0 0 84px rgba(31, 64, 45, 0.035);
+}
+
+.hero::after {
+  width: 130px;
+  height: 130px;
+  left: -55px;
+  bottom: 50px;
+  background: rgba(255, 197, 82, 0.24);
+  filter: blur(2px);
+}
+
+.heroGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.03fr) minmax(430px, 0.97fr);
+  align-items: center;
+  gap: 60px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 18px;
+  color: #3c6a50;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.kickerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e8a62a;
+  box-shadow: 0 0 0 6px rgba(232, 166, 42, 0.13);
+}
+
+.heroTitle {
+  max-width: 760px;
+  margin: 0;
+  color: #17241b;
+  font-size: clamp(48px, 6vw, 78px);
+  line-height: 0.98;
+  letter-spacing: -0.052em;
+  font-weight: 800;
+}
+
+.heroAccent {
+  display: block;
+  margin-top: 7px;
+  color: #2f704c;
+}
+
+.heroLede {
+  max-width: 650px;
+  margin: 26px 0 0;
+  color: #56635a;
+  font-size: 18px;
+  line-height: 1.72;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.heroActions :global(.btn) {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.trustRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 27px;
+}
+
+.trustPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(35, 76, 53, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #405047;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(12px);
+}
+
+.visualStage {
+  position: relative;
+  min-height: 560px;
+}
+
+.visualHalo {
+  position: absolute;
+  inset: 8% 4% 8% 12%;
+  border-radius: 44% 56% 58% 42% / 48% 43% 57% 52%;
+  background: linear-gradient(145deg, #f0aa2a 0%, #ffd87f 54%, #f7e7bd 100%);
+  transform: rotate(-5deg);
+  box-shadow: 0 38px 90px rgba(86, 67, 31, 0.16);
+}
+
+.heroPhoto {
+  position: absolute;
+  width: 73%;
+  height: 76%;
+  right: 5%;
+  top: 8%;
+  overflow: hidden;
+  border-radius: 42px 86px 46px 86px;
+  border: 8px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 28px 70px rgba(29, 47, 35, 0.24);
+  transform: rotate(2deg);
+}
+
+.heroImage {
+  object-fit: cover;
+}
+
+.floatingCard {
+  position: absolute;
+  display: grid;
+  grid-template-columns: 66px 1fr;
+  gap: 12px;
+  align-items: center;
+  min-width: 232px;
+  padding: 12px;
+  border: 1px solid rgba(30, 64, 43, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 20px 55px rgba(33, 57, 42, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.floatingCardTop {
+  top: 5%;
+  left: 0;
+}
+
+.floatingCardBottom {
+  right: -1%;
+  bottom: 12%;
+}
+
+.floatingThumb {
+  width: 66px;
+  height: 66px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.floatingCard strong {
+  display: block;
+  color: #19251d;
+  font-size: 14px;
+}
+
+.floatingCard small {
+  display: block;
+  margin-top: 4px;
+  color: #748078;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.traceCard {
+  position: absolute;
+  left: 6%;
+  bottom: 1%;
+  width: 70%;
+  padding: 18px;
+  border-radius: 20px;
+  color: #eef7f0;
+  background: rgba(24, 41, 30, 0.95);
+  box-shadow: 0 22px 55px rgba(19, 35, 24, 0.22);
+}
+
+.traceHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.liveBadge {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #1b2e20;
+  background: #b8efc8;
+}
+
+.traceSteps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.traceStep {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.traceStep span {
+  display: block;
+  margin-bottom: 4px;
+  color: #b8efc8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.traceStep strong {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.categorySection {
+  padding: 72px 0 86px;
+  background: #fff;
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 28px;
+  margin-bottom: 28px;
+}
+
+.sectionEyebrow {
+  margin: 0 0 7px;
+  color: #4a775b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.sectionHead h2 {
+  max-width: 760px;
+  margin: 0;
+  color: #17231b;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.sectionHead > a {
+  flex: 0 0 auto;
+  color: #2e6c49;
+  font-weight: 800;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr 1fr;
+  grid-auto-rows: 220px;
+  gap: 18px;
+}
+
+.categoryCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #e9eee9;
+  box-shadow: 0 18px 42px rgba(28, 47, 34, 0.08);
+  isolation: isolate;
+}
+
+.categoryCard:nth-child(1),
+.categoryCard:nth-child(5) {
+  grid-row: span 2;
+}
+
+.categoryImage {
+  object-fit: cover;
+  transition: transform 420ms ease;
+}
+
+.categoryCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(17, 28, 20, 0.74), rgba(17, 28, 20, 0.03) 62%);
+}
+
+.categoryCard:hover .categoryImage {
+  transform: scale(1.055);
+}
+
+.categoryLabel {
+  position: absolute;
+  z-index: 2;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  color: #fff;
+}
+
+.categoryLabel strong {
+  display: block;
+  font-size: 19px;
+}
+
+.categoryLabel span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+}
+
+.categoryArrow {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  color: #18261c;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.loopSection {
+  padding: 88px 0;
+  background: #f3f5f1;
+}
+
+.loopGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.loopCard {
+  min-height: 230px;
+  padding: 24px 20px;
+  border: 1px solid rgba(36, 71, 49, 0.09);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(29, 49, 35, 0.045);
+}
+
+.loopNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #2e6848;
+  background: #e8f1e9;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.loopCard h3 {
+  margin: 26px 0 10px;
+  color: #1a281f;
+  font-size: 20px;
+}
+
+.loopCard p {
+  margin: 0;
+  color: #69766d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.productsSection {
+  padding: 88px 0;
+  background: #fff;
+}
+
+.merchantSection {
+  padding: 84px 0;
+  color: #f4f7f4;
+  background:
+    radial-gradient(circle at 84% 25%, rgba(183, 239, 200, 0.15), transparent 28%),
+    linear-gradient(135deg, #173121, #244a33);
+}
+
+.merchantGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 42px;
+}
+
+.merchantGrid p {
+  margin: 0 0 9px;
+  color: #b8efc8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.merchantGrid h2 {
+  max-width: 760px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(32px, 4vw, 50px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.merchantGrid span {
+  display: block;
+  max-width: 800px;
+  margin-top: 18px;
+  color: rgba(244, 247, 244, 0.74);
+  line-height: 1.72;
+}
+
+@media (max-width: 1100px) {
+  .heroGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .visualStage {
+    min-height: 500px;
+  }
+
+  .categoryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .categoryCard:nth-child(1),
+  .categoryCard:nth-child(5) {
+    grid-row: span 1;
+  }
+
+  .loopGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .hero {
+    padding-top: 48px;
+  }
+
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitle {
+    font-size: clamp(45px, 11vw, 66px);
+  }
+
+  .visualStage {
+    min-height: 520px;
+    margin-top: 4px;
+  }
+
+  .sectionHead,
+  .merchantGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHead {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .loopGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .merchantGrid {
+    display: grid;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 38px 0 34px;
+  }
+
+  .heroLede {
+    font-size: 16px;
+  }
+
+  .heroActions {
+    display: grid;
+  }
+
+  .heroActions :global(.btn) {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .visualStage {
+    min-height: 440px;
+  }
+
+  .heroPhoto {
+    width: 82%;
+    height: 70%;
+    right: 1%;
+    border-radius: 32px 54px 32px 54px;
+  }
+
+  .floatingCard {
+    min-width: 185px;
+    grid-template-columns: 52px 1fr;
+  }
+
+  .floatingThumb {
+    width: 52px;
+    height: 52px;
+  }
+
+  .floatingCardTop {
+    top: 1%;
+  }
+
+  .floatingCardBottom {
+    right: 0;
+    bottom: 17%;
+  }
+
+  .traceCard {
+    left: 1%;
+    bottom: 0;
+    width: 94%;
+  }
+
+  .traceSteps {
+    gap: 5px;
+  }
+
+  .traceStep {
+    padding: 8px 6px;
+  }
+
+  .traceStep strong {
+    font-size: 9px;
+  }
+
+  .categorySection,
+  .loopSection,
+  .productsSection,
+  .merchantSection {
+    padding: 60px 0;
+  }
+
+  .categoryGrid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 210px;
+  }
+
+  .loopGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .loopCard {
+    min-height: 0;
+  }
+}
