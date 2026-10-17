@@ -5,7 +5,19 @@ import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/discover
 // Merchant Discovery Agent - Finds & ranks relevant merchants for a natural-language request.
-// Uses the LLM to reason over the registered merchant list; falls back to keyword search.
+// Uses the LLM to reason over the registered merchant list; falls back to grounded scoring.
+
+const SYNTHETIC_REVIEW_COUNTS: Record<string, number> = {
+  'cafe-verde': 234,
+  'green-leaf-bistro': 189,
+  'bean-scene-coffee': 456,
+  'tech-hub-electronics': 567,
+  'daily-fresh-mart': 892,
+  'spice-kitchen': 723,
+  'south-delight': 567,
+  'sweet-treats-bakery': 412,
+  'loopora-fresh-market': 318,
+};
 
 const SYSTEM_PROMPT = `You are the Merchant Discovery Agent for an agentic commerce marketplace.
 The customer speaks in natural language (e.g. "find me a local coffee shop with vegan breakfast and order ahead").
@@ -13,7 +25,9 @@ You are given a list of registered local merchants. Pick the ones that genuinely
 
 Rules:
 - Only choose from the provided merchant ids. Never invent merchants.
-- Prefer merchants whose type/categories/offers match the intent AND that are closer / higher rated.
+- Product/category/constraint fit is the most important signal.
+- For otherwise relevant merchants, consider rating, synthetic demo review count, distance, preparation time and offers together. Do not choose a poorly matching merchant just because it has more reviews.
+- The rating/review figures are synthetic prototype evidence, not live public reviews.
 - Respect dietary or other constraints (vegan, healthy, etc.) when stated.
 - If the request is too vague to choose well, set a short "clarifyingQuestion".
 
@@ -36,11 +50,24 @@ function distanceOf(m: Merchant): number {
   return Number.isFinite(n) ? n : 99;
 }
 
+function reviewCountOf(m: Merchant): number {
+  return SYNTHETIC_REVIEW_COUNTS[m.id] ?? 0;
+}
+
+function fallbackScore(m: Merchant): number {
+  // Relevance has already been established by searchMerchants. This score only
+  // orders those eligible candidates using bounded quality/convenience signals.
+  const ratingScore = Math.max(0, Math.min(1, m.rating / 5));
+  const reviewConfidence = Math.max(0, Math.min(1, Math.log10(reviewCountOf(m) + 1) / 3));
+  const distanceScore = 1 / (1 + distanceOf(m));
+  return ratingScore * 0.55 + reviewConfidence * 0.25 + distanceScore * 0.20;
+}
+
 function buildMerchantContext(list: Merchant[]): string {
   return list
     .map(
       (m) =>
-        `- id: ${m.id} | ${m.name} (${m.type}) | categories: ${m.category.join(', ')} | rating: ${m.rating} | distance: ${m.distance} | offers: ${m.offers.join('; ')}`
+        `- id: ${m.id} | ${m.name} (${m.type}) | categories: ${m.category.join(', ')} | rating: ${m.rating} | synthetic reviews: ${reviewCountOf(m)} | distance: ${m.distance} | prep: ${m.prepTime} | offers: ${m.offers.join('; ')}`
     )
     .join('\n');
 }
@@ -115,7 +142,7 @@ export async function POST(request: NextRequest) {
             ? 'Found a grocery merchant with a bounded biryani ingredient catalog.'
             : 'No supported grocery merchant is within the selected radius.',
           spoken: inRadius
-            ? `${groceryMerchant.name} is the best match for the ingredient mission: ${groceryMerchant.rating} stars, ${groceryMerchant.distance} away, with a bounded biryani grocery catalog.`
+            ? `${groceryMerchant.name} is the best match for the ingredient mission: ${groceryMerchant.rating} stars, ${SYNTHETIC_REVIEW_COUNTS[groceryMerchant.id]} synthetic demo reviews, ${groceryMerchant.distance} away, with a bounded biryani grocery catalog.`
             : undefined,
           clarifyingQuestion:
             inRadius && variant === 'unspecified'
@@ -125,7 +152,7 @@ export async function POST(request: NextRequest) {
             selectionMode: 'deterministic-fallback',
             provider: configuredModel?.provider ?? null,
             model: configuredModel?.model ?? null,
-            evidenceSource: 'bounded synthetic grocery merchant catalog',
+            evidenceSource: 'bounded synthetic grocery merchant catalog and synthetic rating/review signals',
           },
         },
       });
@@ -133,18 +160,20 @@ export async function POST(request: NextRequest) {
 
     const withinRadius = merchantsDB.filter((m) => m.isOpen && distanceOf(m) <= radius);
 
-    // Try the real AI agent first; fall back to keyword matching if it's unavailable.
+    // Try the real AI agent first; fall back to catalog matching plus a transparent
+    // rating/review-confidence/distance score if the model is unavailable.
     const ai = await aiDiscover(query, withinRadius);
-    const fallbackMerchants = await searchMerchants(query);
-    const merchants =
-      ai?.merchants ?? fallbackMerchants.filter((m) => distanceOf(m) <= radius);
+    const fallbackMerchants = (await searchMerchants(query))
+      .filter((m) => distanceOf(m) <= radius)
+      .sort((left, right) => fallbackScore(right) - fallbackScore(left));
+    const merchants = ai?.merchants ?? fallbackMerchants;
     const usedAI = Boolean(ai);
     const configuredModel = llmDescriptor();
 
     const response = {
       success: true,
       agent: 'MerchantDiscoveryAgent',
-      mode: usedAI ? 'llm' : llmEnabled() ? 'llm-fallback' : 'keyword',
+      mode: usedAI ? 'llm' : llmEnabled() ? 'llm-fallback' : 'grounded-ranking',
       query,
       timestamp: new Date().toISOString(),
       results: {
@@ -156,11 +185,17 @@ export async function POST(request: NextRequest) {
             : 'No merchants found for your query. Try broadening your search.',
         spoken: ai?.spoken,
         clarifyingQuestion: ai?.clarifyingQuestion,
+        rankingEvidence: merchants.map((merchant) => ({
+          merchantId: merchant.id,
+          rating: merchant.rating,
+          syntheticReviewCount: reviewCountOf(merchant),
+          distance: merchant.distance,
+        })),
         provenance: {
           selectionMode: usedAI ? 'model' : 'deterministic-fallback',
           provider: usedAI ? configuredModel?.provider ?? null : null,
           model: usedAI ? configuredModel?.model ?? null : null,
-          evidenceSource: 'bounded synthetic merchant catalog',
+          evidenceSource: 'bounded synthetic merchant catalog and synthetic rating/review signals',
         },
       },
     };
