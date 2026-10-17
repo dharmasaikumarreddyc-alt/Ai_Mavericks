@@ -1,0 +1,61 @@
+name: Rebrand Loopora once
+
+on:
+  push:
+    branches: [chatgpt/rebrand-loopora]
+
+permissions:
+  contents: write
+
+jobs:
+  rebrand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/rebrand-loopora
+          fetch-depth: 0
+
+      - name: Replace visible product branding
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+
+          allowed = {'.md', '.tsx', '.ts', '.py', '.json', '.yml', '.yaml', '.toml', '.txt', '.svg', '.ps1'}
+          changed = []
+          raw = subprocess.check_output(['git', 'ls-files', '-z'])
+          for item in raw.split(b'\0'):
+              if not item:
+                  continue
+              path = Path(item.decode())
+              if path.as_posix() == '.github/workflows/rebrand-loopora-once.yml':
+                  continue
+              if path.suffix.lower() not in allowed:
+                  continue
+              if path.as_posix().startswith(('public/vendor/', 'public/js/')):
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              updated = text.replace('Aisle AI', 'Loopora').replace('Aisle', 'Loopora')
+              if path.as_posix() == 'public/images/logo.svg':
+                  updated = updated.replace('<!-- New AI Mavericks Text -->', '<!-- Loopora product wordmark -->')
+                  updated = updated.replace('>AI Mavericks</text>', '>Loopora</text>')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(path.as_posix())
+
+          print('Rebranded files:')
+          for name in changed:
+              print(name)
+
+      - name: Remove temporary workflow and push rebrand
+        run: |
+          git rm .github/workflows/rebrand-loopora-once.yml
+          git config user.name "dharmasaikumarreddyc-alt"
+          git config user.email "dharmasaikumarreddy.c@gmail.com"
+          git add -A
+          git commit -m "Rebrand Aisle AI to Loopora"
+          git push origin HEAD:chatgpt/rebrand-loopora
