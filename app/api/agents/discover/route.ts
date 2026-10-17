@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchMerchants, merchantsDB, type Merchant } from '../data';
+import { groceryMerchant, isRecipeShoppingIntent } from '../grocery-data';
 import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/discover
@@ -88,6 +89,43 @@ export async function POST(request: NextRequest) {
 
     // Radius filter — only consider open merchants within the requested distance.
     const radius = typeof maxDistance === 'number' && maxDistance > 0 ? maxDistance : 99;
+
+    // Recipe-shopping intent is deliberately separated from restaurant intent.
+    // "Order biryani" still searches restaurants; "ingredients to make biryani"
+    // routes to the bounded grocery catalog so the agent cannot confuse a cooked
+    // dish with a shopping list.
+    if (isRecipeShoppingIntent(query)) {
+      const inRadius = groceryMerchant.isOpen && distanceOf(groceryMerchant) <= radius;
+      const merchant = {
+        ...groceryMerchant,
+        aiReason: 'Best bounded grocery match for a biryani ingredient basket.',
+      } as Merchant & { aiReason: string };
+      const configuredModel = llmDescriptor();
+      return NextResponse.json({
+        success: true,
+        agent: 'MerchantDiscoveryAgent',
+        mode: 'recipe-intent',
+        query,
+        timestamp: new Date().toISOString(),
+        results: {
+          merchants: inRadius ? [merchant] : [],
+          count: inRadius ? 1 : 0,
+          message: inRadius
+            ? 'Found a grocery merchant with a bounded biryani ingredient catalog.'
+            : 'No supported grocery merchant is within the selected radius.',
+          spoken: inRadius
+            ? `${groceryMerchant.name} is the best match for the ingredient mission: ${groceryMerchant.rating} stars, ${groceryMerchant.distance} away, with a bounded biryani grocery catalog.`
+            : undefined,
+          provenance: {
+            selectionMode: 'deterministic-fallback',
+            provider: configuredModel?.provider ?? null,
+            model: configuredModel?.model ?? null,
+            evidenceSource: 'bounded synthetic grocery merchant catalog',
+          },
+        },
+      });
+    }
+
     const withinRadius = merchantsDB.filter((m) => m.isOpen && distanceOf(m) <= radius);
 
     // Try the real AI agent first; fall back to keyword matching if it's unavailable.
