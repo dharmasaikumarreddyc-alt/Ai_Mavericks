@@ -18,6 +18,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    already_exists = bind.execute(
+        sa.text("SELECT 1 FROM merchant_profiles WHERE id = :merchant_id"),
+        {"merchant_id": "loopora-fresh-market"},
+    ).scalar()
+    if already_exists:
+        return
+
     merchant_profiles = sa.table(
         "merchant_profiles",
         sa.column("id", sa.String()),
