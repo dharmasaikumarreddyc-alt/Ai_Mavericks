@@ -875,7 +875,7 @@ async def list_merchant_actions(
             "id": action.id,
             "recommendationId": action.recommendation_id,
             "status": action.status,
-            "acceptedAt": action.accepted_at.isoformat(),
+            "acceptedAt": action.accepted_at.replace(tzinfo=timezone.utc).isoformat(),
         }
         for action in result.scalars().all()
     ]
@@ -905,6 +905,6 @@ async def accept_merchant_action(
         "id": action.id,
         "recommendationId": action.recommendation_id,
         "status": action.status,
-        "acceptedAt": action.accepted_at.isoformat(),
+        "acceptedAt": action.accepted_at.replace(tzinfo=timezone.utc).isoformat(),
         "message": "Recommendation saved to the merchant action log for staff review.",
     }

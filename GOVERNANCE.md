@@ -25,6 +25,8 @@ Aisle AI supports product discovery, cart preparation, and merchant decision sup
 - The disabled-by-default Razorpay adapter creates the provider order server-side and verifies signature, captured state, order ID, amount, and currency before order creation.
 - AI failures fall back to transparent evidence-based behavior instead of blocking checkout or fabricating an answer.
 - Customer and merchant tokens are kept separate, records are ownership-scoped, and sensitive endpoints return `no-store`.
+- Browser-facing AI routes reject cross-site requests and oversized payloads and apply a best-effort per-instance burst limit.
+- The in-process limit is not a distributed quota. Production must also enforce managed API/edge quotas and billing alerts.
 
 ## Model risk and evaluation
 

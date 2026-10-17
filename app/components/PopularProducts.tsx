@@ -67,35 +67,13 @@ export default function PopularProducts() {
     );
   }
 
-  // Map category names to filter classes for the masonry filter
-  const getCategoryClass = (categories: string[]) => {
-    const classMap: { [key: string]: string } = {
-      'Coffee': 'Dresses',
-      'Beverages': 'Dresses',
-      'Breakfast': 'Dresses Jacket',
-      'Bakery': 'Tops',
-      'Groceries': 'Outerwear',
-      'Fresh Produce': 'Tops Jacket',
-      'Dairy': 'Dresses',
-      'Pantry': 'Outerwear',
-    };
-
-    for (const cat of categories) {
-      if (classMap[cat]) {
-        return classMap[cat];
-      }
-    }
-    return 'Dresses';
-  };
-
   return (
     <div className="clearfix">
-      <ul id="masonry" className="row g-xl-4 g-3">
-        {products.map((product, idx) => (
+      <ul className="row g-xl-4 g-3">
+        {products.map((product) => (
           <li
             key={product.id}
-            className={`card-container col-6 col-xl-3 col-lg-3 col-md-4 col-sm-6 ${getCategoryClass(product.category)} wow fadeInUp`}
-            data-wow-delay={`${(idx % 4) * 0.2 + 0.2}s`}
+            className="card-container col-6 col-xl-3 col-lg-3 col-md-4 col-sm-6"
           >
             <div className="shop-card">
               <div className="dz-media">
