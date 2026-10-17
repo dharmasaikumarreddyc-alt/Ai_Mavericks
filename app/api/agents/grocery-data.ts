@@ -28,6 +28,18 @@ export const groceryProducts: Product[] = [
     quantity: 20,
   },
   {
+    id: 'fm-biryani-fresh-base',
+    merchantId: groceryMerchant.id,
+    name: 'Biryani Fresh Base Pack',
+    price: 6.99,
+    description: 'Onions, tomatoes, yogurt, mint and coriander. Add your preferred protein or vegetables.',
+    image: '/images/products/mediterranean-salad.jpg',
+    category: 'Recipe Kits',
+    tags: ['biryani', 'ingredients', 'onion', 'tomato', 'yogurt', 'mint', 'coriander', 'fresh'],
+    inStock: true,
+    quantity: 20,
+  },
+  {
     id: 'fm-biryani-chicken',
     merchantId: groceryMerchant.id,
     name: 'Chicken Biryani Fresh Ingredients Pack',
@@ -60,13 +72,18 @@ export function isRecipeShoppingIntent(query: string): boolean {
   return recipeCue && supportedDish;
 }
 
-export function prefersVegetarianBiryani(query: string): boolean {
-  return /\b(veg|vegetarian|veggie|meatless)\b/i.test(query);
+export type BiryaniVariant = 'chicken' | 'vegetarian' | 'unspecified';
+
+export function biryaniVariant(query: string): BiryaniVariant {
+  if (/\b(veg|vegetarian|veggie|meatless)\b/i.test(query)) return 'vegetarian';
+  if (/\b(chicken|meat|non[- ]?veg)\b/i.test(query)) return 'chicken';
+  return 'unspecified';
 }
 
 export function deterministicBiryaniIngredients(query: string): string[] {
   const common = ['basmati rice', 'biryani masala', 'whole spices', 'ghee', 'onions', 'tomatoes', 'yogurt', 'mint', 'coriander'];
-  return prefersVegetarianBiryani(query)
-    ? [...common, 'mixed vegetables']
-    : [...common, 'chicken'];
+  const variant = biryaniVariant(query);
+  if (variant === 'vegetarian') return [...common, 'mixed vegetables'];
+  if (variant === 'chicken') return [...common, 'chicken'];
+  return common;
 }
