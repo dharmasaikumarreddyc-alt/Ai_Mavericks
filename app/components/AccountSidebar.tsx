@@ -72,7 +72,7 @@ export default function AccountSidebar({ userName, userEmail }: AccountSidebarPr
               </li>
               <li>
                 <Link href="/cart-pilot">
-                  Cart Pilot
+                  AI Concierge
                 </Link>
               </li>
             </ul>

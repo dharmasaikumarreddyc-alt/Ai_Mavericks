@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from autogen_core.models import UserMessage
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
 from openai import APIConnectionError, APIStatusError
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,18 +17,47 @@ from config import get_google_model_client
 from database import get_db
 from database.models import (
     MerchantAccountDB,
+    MerchantActionDB,
     MerchantDB,
     MerchantOrderDB,
     MerchantReviewDB,
+    OrderDB,
     UserDB,
 )
 from routers.auth import oauth2_scheme
 from services.auth_service import AuthService
+from services.ai_governance import (
+    GOVERNANCE_SYSTEM_POLICY,
+    log_ai_event,
+    sanitize_untrusted_text,
+    validate_model_output,
+)
+from services.order_workflow import ALLOWED_TRANSITIONS, can_transition
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/merchant", tags=["Merchant Dashboard"])
 ACTIVE_STATUSES = {"pending", "confirmed", "preparing", "ready"}
 RETRYABLE_GEMINI_STATUSES = {500, 502, 503, 504}
+
+
+class OrderStatusUpdate(BaseModel):
+    status: str = Field(min_length=3, max_length=20)
+    cancellation_reason: str | None = Field(default=None, max_length=300)
+
+
+class MerchantActionEvidence(BaseModel):
+    analysisSource: str = Field(default="unknown", max_length=40)
+    sampleOrderCount: int = Field(default=0, ge=0, le=1_000_000)
+    historyWeeksWithOrders: int = Field(default=0, ge=0, le=10_000)
+    forecastWindow: str = Field(default="", max_length=120)
+
+
+class MerchantActionAccept(BaseModel):
+    recommendation_id: str = Field(pattern=r"^act_(prep|stage)_[A-Za-z0-9_-]+$", max_length=120)
+    category: str = Field(min_length=2, max_length=80)
+    title: str = Field(min_length=2, max_length=160)
+    instruction: str = Field(min_length=2, max_length=500)
+    evidence: MerchantActionEvidence = Field(default_factory=MerchantActionEvidence)
 
 
 async def get_current_merchant(
@@ -82,11 +112,16 @@ async def _generate_gemini_text(prompt: str) -> str:
         for attempt in range(3):
             try:
                 response = await client.create(
-                    messages=[UserMessage(content=prompt, source="merchant_dashboard")]
+                    messages=[UserMessage(
+                        content=f"{GOVERNANCE_SYSTEM_POLICY}\n\n{prompt}",
+                        source="merchant_dashboard",
+                    )]
                 )
                 content = response.content
                 if isinstance(content, str) and content.strip():
-                    return content.strip()
+                    result = validate_model_output(content)
+                    log_ai_event("merchant_insight", "success", len(prompt), len(result))
+                    return result
                 raise RuntimeError("Gemini returned an empty response.")
             except APIStatusError as exc:
                 if exc.status_code not in RETRYABLE_GEMINI_STATUSES or attempt == 2:
@@ -439,6 +474,60 @@ async def get_merchant_dashboard(
     }
 
 
+@router.patch("/orders/{order_id}/status")
+async def update_order_status(
+    order_id: str,
+    request: OrderStatusUpdate,
+    merchant: MerchantDB = Depends(get_current_merchant),
+    db: AsyncSession = Depends(get_db),
+):
+    """Advance a real order through the merchant-controlled fulfillment workflow."""
+    new_status = request.status.lower().strip()
+    if new_status not in ALLOWED_TRANSITIONS:
+        raise HTTPException(status_code=400, detail="Unknown order status.")
+
+    result = await db.execute(
+        select(MerchantOrderDB).where(
+            MerchantOrderDB.id == order_id,
+            MerchantOrderDB.merchant_id == merchant.id,
+        )
+    )
+    order = result.scalar_one_or_none()
+    if order is None:
+        raise HTTPException(status_code=404, detail="Order not found for this merchant.")
+    if order.is_demo:
+        raise HTTPException(status_code=409, detail="Demo history is read-only. Place a live test order to process it.")
+    if not can_transition(order.status, new_status):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot move an order from {order.status} to {new_status}.",
+        )
+    if new_status == "cancelled" and not (request.cancellation_reason or "").strip():
+        raise HTTPException(status_code=422, detail="A cancellation reason is required.")
+
+    now = datetime.utcnow()
+    order.status = new_status
+    if new_status == "dispatched":
+        order.dispatched_at = now
+    if new_status == "cancelled":
+        order.cancelled_at = now
+        order.cancellation_reason = sanitize_untrusted_text(request.cancellation_reason or "", 300)
+
+    customer_order = await db.get(OrderDB, order.id)
+    if customer_order is not None:
+        customer_order.status = new_status
+        customer_order.steps = [
+            *(customer_order.steps or []),
+            {
+                "time": now.isoformat(),
+                "label": new_status.replace("_", " ").title(),
+                "detail": "Order status updated by the merchant.",
+            },
+        ]
+    await db.commit()
+    return {"success": True, "orderId": order.id, "status": order.status, "updatedAt": now.isoformat()}
+
+
 @router.post("/reviews/insights")
 async def get_review_insights(
     merchant: MerchantDB = Depends(get_current_merchant),
@@ -516,7 +605,7 @@ async def get_review_insights(
     )
 
     review_text = "\n".join(
-        f"- {review.rating}/5: {review.review[:500]}"
+        f"- {review.rating}/5: {sanitize_untrusted_text(review.review)}"
         for review in reviews
     )
     prompt = (
@@ -732,6 +821,28 @@ async def get_today_sales_forecast(
         )
         analysis_source = "evidence_fallback"
 
+    suggested_actions = []
+    if expected_items:
+        top_item = expected_items[0]
+        suggested_actions.append({
+            "id": f"act_prep_{top_item['id'] or 'top'}",
+            "category": "Batch Preparation",
+            "title": f"Prep {top_item['name']}",
+            "instruction": f"Batch-prep ~{top_item['estimatedUnitsPerComparableDay']} units ahead of peak demand at {top_item['typicalPeakTime']}.",
+            "priority": "High",
+            "impact": "Goal: shorten preparation time; compare actual ready-time data after the shift",
+        })
+        if len(expected_items) > 1:
+            second_item = expected_items[1]
+            suggested_actions.append({
+                "id": f"act_stage_{second_item['id'] or 'second'}",
+                "category": "Inventory Staging",
+                "title": f"Stage Supplies for {second_item['name']}",
+                "instruction": f"Ensure cups and ingredients for ~{second_item['estimatedUnitsPerComparableDay']} units are accessible before peak at {second_item['typicalPeakTime']}.",
+                "priority": "Medium",
+                "impact": "Goal: reduce peak-time station bottlenecks; validate against actual orders",
+            })
+
     return {
         "success": True,
         "timezone": timezone_name,
@@ -743,4 +854,57 @@ async def get_today_sales_forecast(
         "items": expected_items,
         "analysis": analysis,
         "analysisSource": analysis_source,
+        "actions": suggested_actions,
+    }
+
+
+@router.get("/actions")
+async def list_merchant_actions(
+    limit: int = Query(default=20, ge=1, le=100),
+    merchant: MerchantDB = Depends(get_current_merchant),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(MerchantActionDB)
+        .where(MerchantActionDB.merchant_id == merchant.id)
+        .order_by(MerchantActionDB.accepted_at.desc())
+        .limit(limit)
+    )
+    return [
+        {
+            "id": action.id,
+            "recommendationId": action.recommendation_id,
+            "status": action.status,
+            "acceptedAt": action.accepted_at.isoformat(),
+        }
+        for action in result.scalars().all()
+    ]
+
+
+@router.post("/actions", status_code=status.HTTP_201_CREATED)
+async def accept_merchant_action(
+    request: MerchantActionAccept,
+    merchant: MerchantDB = Depends(get_current_merchant),
+    db: AsyncSession = Depends(get_db),
+):
+    """Persist human acceptance of advisory guidance without claiming execution."""
+    evidence = request.evidence.model_dump()
+    action = MerchantActionDB(
+        merchant_id=merchant.id,
+        recommendation_id=request.recommendation_id,
+        category=request.category,
+        title=request.title,
+        instruction=request.instruction,
+        evidence=evidence,
+        status="accepted_for_review",
+    )
+    db.add(action)
+    await db.commit()
+    await db.refresh(action)
+    return {
+        "id": action.id,
+        "recommendationId": action.recommendation_id,
+        "status": action.status,
+        "acceptedAt": action.accepted_at.isoformat(),
+        "message": "Recommendation saved to the merchant action log for staff review.",
     }

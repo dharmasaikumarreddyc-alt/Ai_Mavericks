@@ -9,11 +9,26 @@ from datetime import timedelta
 from database import get_db
 from services.auth_service import AuthService
 from database.models import MerchantAccountDB
-from models.user import UserCreate, UserLogin, UserResponse, Token
+from models.user import ProfileUpdate, UserCreate, UserLogin, UserResponse, Token
 from config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+
+async def build_login_response(user, access_token: str, db: AsyncSession) -> Token:
+    account_result = await db.execute(
+        select(MerchantAccountDB).where(MerchantAccountDB.user_id == user.id)
+    )
+    merchant_account = account_result.scalar_one_or_none()
+    return Token(
+        access_token=access_token,
+        id=user.id,
+        email=user.email,
+        name=user.name,
+        role="merchant" if merchant_account else "customer",
+        merchant_id=merchant_account.merchant_id if merchant_account else None,
+    )
 
 
 async def get_current_user(
@@ -53,7 +68,7 @@ async def signup(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
-    return Token(access_token=access_token)
+    return await build_login_response(user, access_token, db)
 
 
 @router.post("/login", response_model=Token)
@@ -80,7 +95,7 @@ async def login(
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
-    return Token(access_token=access_token)
+    return await build_login_response(user, access_token, db)
 
 
 @router.post("/login/json", response_model=Token)
@@ -103,7 +118,7 @@ async def login_json(credentials: UserLogin, db: AsyncSession = Depends(get_db))
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
-    return Token(access_token=access_token)
+    return await build_login_response(user, access_token, db)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -128,23 +143,12 @@ async def get_me(
 
 @router.put("/me")
 async def update_me(
-    updates: dict,
+    updates: ProfileUpdate,
     current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Update current user profile."""
-    if "name" in updates:
-        current_user.name = updates["name"]
-    if "email" in updates:
-        current_user.email = updates["email"]
-    if "agent_paused" in updates:
-        current_user.agent_paused = updates["agent_paused"]
-    if "notification_email" in updates:
-        current_user.notification_email = updates["notification_email"]
-    if "notification_push" in updates:
-        current_user.notification_push = updates["notification_push"]
-    if "notification_sms" in updates:
-        current_user.notification_sms = updates["notification_sms"]
+    current_user.name = updates.name.strip()
 
     await db.commit()
     await db.refresh(current_user)

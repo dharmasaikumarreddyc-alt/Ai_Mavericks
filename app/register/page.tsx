@@ -6,8 +6,8 @@ import Link from 'next/link';
 import RegisterClient from './RegisterClient';
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Checkout | Create Account',
-  description: 'Create an Agentic AI Checkout account',
+  title: 'Create Account',
+  description: 'Create an Aisle AI customer account.',
 };
 
 export default function RegisterPage() {

@@ -1,17 +1,36 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, Literal
 from datetime import datetime
 
 class UserBase(BaseModel):
     email: EmailStr
-    name: str
+    name: str = Field(min_length=1, max_length=120)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Name cannot be blank.")
+        return value
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=8, max_length=72)
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=1, max_length=72)
+
+class ProfileUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Name cannot be blank.")
+        return value
 
 class User(UserBase):
     id: str
@@ -35,6 +54,11 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    id: Optional[str] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    role: Literal["customer", "merchant"] = "customer"
+    merchant_id: Optional[str] = None
 
 class TokenData(BaseModel):
     user_id: Optional[str] = None

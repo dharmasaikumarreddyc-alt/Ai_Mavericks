@@ -39,7 +39,7 @@ interface Order {
     total: number;
   };
   payment: {
-    token: string;
+    token?: string;
     method: string;
     status: string;
   };
@@ -115,10 +115,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           timeline: (data.steps || []).map((step: { label: string; time: string; detail?: string }) => ({
             status: step.label,
             time: step.time,
-            description:
-              step.label === 'Order placed' && step.detail?.toLowerCase().includes('payment not collected')
-                ? 'Order placed successfully.'
-                : step.detail || '',
+            description: step.detail || '',
           })),
           review: data.review || null,
         };
@@ -354,25 +351,31 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       </div>
                     )}
                     <div className="d-flex justify-content-between align-items-center mt-2">
-                      <strong style={{ fontSize: '1.15rem' }}>Total Paid</strong>
+                      <strong style={{ fontSize: '1.15rem' }}>Order total</strong>
                       <strong className="text-primary" style={{ fontSize: '1.5rem' }}>
                         ${order.pricing.total.toFixed(2)}
                       </strong>
                     </div>
                     <div className="d-flex align-items-center mt-3">
                       <span className="badge bg-light text-dark border me-2" style={{ fontSize: '0.85rem', padding: '6px 10px' }}>
-                        {order.payment.method === 'upi' ? (
-                          <><i className="fas fa-mobile-alt me-1"></i>UPI Payment</>
-                        ) : order.payment.method === 'wallet' ? (
-                          <><i className="fas fa-wallet me-1"></i>Wallet</>
-                        ) : order.payment.method === 'cod' ? (
+                        {order.payment.method === 'cod' ? (
                           <><i className="fas fa-money-bill-wave me-1"></i>Cash on Delivery</>
+                        ) : order.payment.status === 'simulated' ? (
+                          <><i className="fas fa-shield-alt me-1"></i>Demo token</>
+                        ) : order.payment.status === 'captured' ? (
+                          <><i className="fas fa-credit-card me-1"></i>Provider-confirmed card</>
                         ) : (
-                          <><i className="fas fa-credit-card me-1"></i>Card •••• 4242</>
+                          <><i className="fas fa-credit-card me-1"></i>{order.payment.method.toUpperCase()}</>
                         )}
                       </span>
                       <small className="text-muted">
-                        {order.payment.method === 'cod' ? 'Pay on arrival' : 'Tokenized payment'}
+                        {order.payment.method === 'cod'
+                          ? 'Not collected · pay on arrival'
+                          : order.payment.status === 'simulated'
+                            ? 'Simulated token · no money moved'
+                            : order.payment.status === 'captured'
+                              ? 'Captured by payment provider'
+                              : `Payment status: ${order.payment.status}`}
                       </small>
                     </div>
                   </div>

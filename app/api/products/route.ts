@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         }
       }
     } catch {
-      // Backend not available, fall through to local/DummyJSON
+      // Backend not available; use the bundled synthetic catalog.
     }
   }
 

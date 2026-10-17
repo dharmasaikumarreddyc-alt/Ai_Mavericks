@@ -12,7 +12,7 @@ export interface CustomerAddress {
 }
 
 export function readCustomerAddresses(): CustomerAddress[] {
-  const saved = localStorage.getItem('userAddresses');
+  const saved = sessionStorage.getItem('userAddresses');
   if (!saved) return [];
 
   const parsed: unknown = JSON.parse(saved);

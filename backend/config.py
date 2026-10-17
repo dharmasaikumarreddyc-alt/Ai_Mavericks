@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
-    # Azure OpenAI (primary LLM backend)
+    # Optional Azure OpenAI fallback
     AZURE_OPENAI_ENDPOINT: Optional[str] = None
     AZURE_OPENAI_API_KEY: Optional[str] = None
     AZURE_OPENAI_DEPLOYMENT: Optional[str] = None
@@ -40,6 +40,13 @@ class Settings(BaseSettings):
     GROQ_API_KEY: Optional[str] = None
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
+    # Payment boundary. Demo mode never moves money or accepts raw card data.
+    PAYMENT_MODE: Literal["demo", "razorpay"] = "demo"
+    # Razorpay Standard Checkout. Key ID is publishable; secret stays server-side.
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
+    PAYMENT_CURRENCY: str = "USD"
 
     # Explicitly opt-in credentials used only by the one-time demo merchant seed.
     DEMO_MERCHANT_EMAIL: Optional[str] = None
@@ -70,6 +77,14 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_settings(self):
+        if bool(self.RAZORPAY_KEY_ID) != bool(self.RAZORPAY_KEY_SECRET):
+            raise ValueError("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be configured together.")
+        if self.PAYMENT_MODE == "razorpay" and not (
+            self.RAZORPAY_KEY_ID and self.RAZORPAY_KEY_SECRET
+        ):
+            raise ValueError("PAYMENT_MODE=razorpay requires both Razorpay credentials.")
+        if len(self.PAYMENT_CURRENCY) != 3 or not self.PAYMENT_CURRENCY.isalpha():
+            raise ValueError("PAYMENT_CURRENCY must be a three-letter ISO currency code.")
         if self.ENVIRONMENT.lower() == "production":
             if (
                 len(self.SECRET_KEY) < 32
@@ -97,9 +112,24 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Create model client for AutoGen 0.4+.
-# Prefers Azure OpenAI, then Groq, then Google AI Studio.
+# Gemini is primary for the Google AI Builder Cup; other providers are fallbacks.
 def get_model_client():
     from autogen_core.models import ModelFamily
+
+    if settings.GOOGLE_API_KEY and settings.GOOGLE_API_KEY.strip():
+        from autogen_ext.models.openai import OpenAIChatCompletionClient
+        return OpenAIChatCompletionClient(
+            model=settings.GOOGLE_MODEL,
+            api_key=settings.GOOGLE_API_KEY,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            model_info={
+                "vision": False,
+                "function_calling": True,
+                "json_output": True,
+                "structured_output": True,
+                "family": ModelFamily.UNKNOWN,
+            },
+        )
 
     if all(
         value and value.strip()
@@ -131,21 +161,6 @@ def get_model_client():
             model=settings.GROQ_MODEL,
             api_key=settings.GROQ_API_KEY,
             base_url=settings.GROQ_BASE_URL,
-            model_info={
-                "vision": False,
-                "function_calling": True,
-                "json_output": True,
-                "structured_output": True,
-                "family": ModelFamily.UNKNOWN,
-            },
-        )
-
-    if settings.GOOGLE_API_KEY and settings.GOOGLE_API_KEY.strip():
-        from autogen_ext.models.openai import OpenAIChatCompletionClient
-        return OpenAIChatCompletionClient(
-            model=settings.GOOGLE_MODEL,
-            api_key=settings.GOOGLE_API_KEY,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
             model_info={
                 "vision": False,
                 "function_calling": True,

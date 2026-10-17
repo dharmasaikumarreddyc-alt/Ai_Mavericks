@@ -6,8 +6,8 @@ import Preloader from '../components/Preloader';
 import CartClient from './CartClient';
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Checkout | Cart',
-  description: 'Shopping cart for Agentic AI Checkout',
+  title: 'Cart',
+  description: 'Review your Aisle AI cart before checkout.',
 };
 
 export default function CartPage() {

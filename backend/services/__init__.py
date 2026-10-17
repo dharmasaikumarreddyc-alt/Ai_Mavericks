@@ -1,5 +1,5 @@
-from .auth_service import AuthService
-from .agent_service import AgentService
-from .order_service import OrderService
+"""Service modules.
 
-__all__ = ["AuthService", "AgentService", "OrderService"]
+Keep package import side-effect free so pure governance/workflow rules can be
+tested without loading optional database, JWT, or AI dependencies.
+"""

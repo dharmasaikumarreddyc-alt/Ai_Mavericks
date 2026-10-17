@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { backendUrl } from '../../lib/backend';
-import { saveAuthenticatedToken } from '../../lib/auth';
+import { saveAuthenticatedToken, type AuthProfile } from '../../lib/auth';
 
 export default function MerchantLoginClient() {
   const [email, setEmail] = useState('');
@@ -30,19 +30,27 @@ export default function MerchantLoginClient() {
         throw new Error(login.detail || 'Email or password is incorrect.');
       }
 
-      const profileResponse = await fetch(`${backendUrl}/auth/me`, {
-        cache: 'no-store',
-        headers: { Authorization: `Bearer ${login.access_token}` },
-      });
-      const profile = await profileResponse.json();
-      if (!profileResponse.ok) {
-        throw new Error(profile.detail || 'Could not verify this account.');
+      const profile: AuthProfile = {
+        id: login.id,
+        email: login.email,
+        name: login.name,
+        role: login.role,
+        merchant_id: login.merchant_id,
+      };
+      if (!profile.id || !profile.email || !['customer', 'merchant'].includes(profile.role)) {
+        throw new Error('Could not verify this account.');
+      }
+      if (profile.role === 'customer') {
+        saveAuthenticatedToken('customer', login.access_token, profile);
+        window.dispatchEvent(new Event('authChanged'));
+        router.replace('/shop');
+        return;
       }
       if (profile.role !== 'merchant' || !profile.merchant_id) {
-        throw new Error('That is a customer account. Use the customer sign-in instead.');
+        throw new Error('This account is not linked to a merchant workspace.');
       }
 
-      saveAuthenticatedToken('merchant', login.access_token);
+      saveAuthenticatedToken('merchant', login.access_token, profile);
       window.dispatchEvent(new Event('authChanged'));
       router.replace(`/merchant/dashboard/${encodeURIComponent(profile.merchant_id)}`);
     } catch (reason) {

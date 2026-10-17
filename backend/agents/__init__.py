@@ -1,13 +1,5 @@
-from .orchestrator import AgentOrchestrator
-from .shopping_agent import ShoppingAgent
-from .comparison_agent import ComparisonAgent
-from .checkout_agent import CheckoutAgent
-from .rules_agent import RulesAgent
+"""Synthetic catalog package used by deterministic commerce APIs.
 
-__all__ = [
-    "AgentOrchestrator",
-    "ShoppingAgent",
-    "ComparisonAgent",
-    "CheckoutAgent",
-    "RulesAgent"
-]
+The retired autonomous-checkout prototype is intentionally not imported here;
+doing so added startup cost and implied unsupported payment authority.
+"""

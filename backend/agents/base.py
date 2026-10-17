@@ -1,25 +1,19 @@
 """Base utilities for Aisle Marketplace - Agentic AI Checkout."""
-
-from datetime import datetime
-import random
-import string
-from typing import Dict, List, Any
-
 # ============================================================
-# MOCK MERCHANT DATABASE - SMB Marketplace
-# In production: This would be a real database with merchant onboarding
+# SYNTHETIC DEMO CATALOG - no affiliation with real merchants.
+# In production: use verified merchant onboarding and live inventory feeds.
 # ============================================================
 
 MERCHANTS = {
     "cafe-verde": {
         "id": "cafe-verde",
-        "name": "Starbucks Coffee Company",
+        "name": "Aisle Coffee Lab",
         "type": "Coffee Shop",
         "category": "Food & Beverage",
         "rating": 4.7,
         "reviews": 234,
         "distance": 0.1,
-        "address": "3550 Lenox Rd NE, Atlanta, GA 30326",
+        "address": "100 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/cafe-verde.jpg",
         "tags": ["vegan", "organic", "breakfast", "coffee", "healthy"],
         "hours": "7:00 AM - 4:00 PM",
@@ -43,13 +37,13 @@ MERCHANTS = {
     },
     "green-leaf-bistro": {
         "id": "green-leaf-bistro",
-        "name": "Tower Cafe",
+        "name": "Green Leaf Bistro",
         "type": "Health Restaurant",
         "category": "Food & Beverage",
         "rating": 4.5,
         "reviews": 189,
         "distance": 0.3,
-        "address": "3530 Lenox Rd NE, Atlanta, GA 30326",
+        "address": "120 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/green-leaf-bistro.jpg",
         "tags": ["vegan", "salads", "healthy", "lunch", "organic"],
         "hours": "8:00 AM - 9:00 PM",
@@ -72,13 +66,13 @@ MERCHANTS = {
     },
     "bean-scene-coffee": {
         "id": "bean-scene-coffee",
-        "name": "Truffles Cafe",
+        "name": "Bean Scene Coffee",
         "type": "Coffee Shop",
         "category": "Food & Beverage",
         "rating": 4.8,
         "reviews": 456,
         "distance": 0.5,
-        "address": "3500 Lenox Rd NE, Atlanta, GA 30326",
+        "address": "110 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/bean-scene-coffee.jpg",
         "tags": ["coffee", "breakfast", "vegan-options", "workspace", "wifi"],
         "hours": "6:30 AM - 11:00 PM",
@@ -102,13 +96,13 @@ MERCHANTS = {
     },
     "tech-hub-electronics": {
         "id": "tech-hub-electronics",
-        "name": "Live Oak Cafe",
+        "name": "Morning Oak Cafe",
         "type": "Coffee & Snacks",
         "category": "Food & Beverage",
         "rating": 4.3,
         "reviews": 567,
         "distance": 0.4,
-        "address": "3535 Lenox Rd NE, Atlanta, GA 30326",
+        "address": "130 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/tech-hub.jpg",
         "tags": ["coffee", "pastries", "sandwiches", "breakfast", "snacks"],
         "hours": "6:00 AM - 7:00 PM",
@@ -125,13 +119,13 @@ MERCHANTS = {
     },
     "daily-fresh-mart": {
         "id": "daily-fresh-mart",
-        "name": "Peet's Coffee & Tea",
+        "name": "Daily Fresh Roasters",
         "type": "Coffee Shop",
         "category": "Food & Beverage",
         "rating": 4.6,
         "reviews": 892,
         "distance": 0.6,
-        "address": "3393 Peachtree Rd NE, Atlanta, GA 30326",
+        "address": "140 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/daily-fresh-mart.jpg",
         "tags": ["coffee", "tea", "espresso", "organic", "roasts"],
         "hours": "5:30 AM - 8:00 PM",
@@ -161,7 +155,7 @@ MERCHANTS = {
         "rating": 4.6,
         "reviews": 723,
         "distance": 0.8,
-        "address": "3580 Lenox Rd NE, Atlanta, GA 30326",
+        "address": "150 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/curry.jpg",
         "tags": ["indian", "biryani", "curry", "lunch", "dinner", "spicy"],
         "hours": "11:00 AM - 11:00 PM",
@@ -191,7 +185,7 @@ MERCHANTS = {
         "rating": 4.7,
         "reviews": 567,
         "distance": 0.7,
-        "address": "3424 Peachtree Rd NE, Atlanta, GA 30326",
+        "address": "160 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/dosa.jpg",
         "tags": ["south indian", "dosa", "idli", "breakfast", "vegetarian"],
         "hours": "6:00 AM - 10:00 PM",
@@ -217,7 +211,7 @@ MERCHANTS = {
         "rating": 4.8,
         "reviews": 412,
         "distance": 0.9,
-        "address": "3500 Peachtree Rd NE, Atlanta, GA 30326",
+        "address": "170 Demo Market St, Atlanta, GA 30326",
         "image": "/images/products/cake.jpg",
         "tags": ["bakery", "cakes", "pastries", "desserts", "birthday"],
         "hours": "8:00 AM - 9:00 PM",
@@ -237,289 +231,3 @@ MERCHANTS = {
         ]
     },
 }
-
-# Customer data (in production: database)
-CUSTOMER_DATA = {}
-
-
-def get_current_time_str() -> str:
-    """Get current time as formatted string."""
-    return datetime.now().strftime("%I:%M %p")
-
-
-def generate_id(prefix: str = "ORD") -> str:
-    """Generate a unique ID."""
-    suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    return f"{prefix}-{suffix}"
-
-
-def discover_merchants(
-    query: str,
-    max_distance: float = 10.0,
-    category: str = None,
-) -> List[Dict]:
-    """
-    AI-powered merchant discovery based on natural language query.
-
-    Example: "Find me a local coffee shop with vegan breakfast"
-    Returns: Matching merchants sorted by relevance
-    """
-    query_lower = query.lower()
-    results = []
-
-    # Extract keywords from query
-    keywords = query_lower.split()
-
-    for merchant_id, merchant in MERCHANTS.items():
-        if merchant["distance"] > max_distance:
-            continue
-
-        if category and merchant["category"].lower() != category.lower():
-            continue
-
-        score = 0
-        match_reasons = []
-
-        # Check merchant type
-        if any(word in merchant["type"].lower() for word in keywords):
-            score += 15
-            match_reasons.append(f"Type: {merchant['type']}")
-
-        # Check merchant name
-        if any(word in merchant["name"].lower() for word in keywords):
-            score += 10
-
-        # Check tags
-        merchant_tags = [t.lower() for t in merchant.get("tags", [])]
-        for word in keywords:
-            if word in merchant_tags:
-                score += 8
-                match_reasons.append(f"Has: {word}")
-
-        # Check catalog for specific items
-        for item in merchant.get("catalog", []):
-            item_text = f"{item['name']} {item.get('description', '')} {' '.join(item.get('tags', []))}".lower()
-            for word in keywords:
-                if word in item_text:
-                    score += 5
-                    if f"Menu: {word}" not in match_reasons:
-                        match_reasons.append(f"Menu: {word}")
-
-        # Specific query patterns
-        if "coffee" in query_lower and "coffee" in merchant["type"].lower():
-            score += 20
-        if "vegan" in query_lower and "vegan" in merchant_tags:
-            score += 15
-        if "breakfast" in query_lower:
-            if any("breakfast" in item.get("category", "").lower() for item in merchant.get("catalog", [])):
-                score += 12
-        if "order ahead" in query_lower or "pickup" in query_lower:
-            score += 5  # All merchants support this
-
-        if score > 0:
-            results.append({
-                **merchant,
-                "relevance_score": score,
-                "match_reasons": match_reasons[:3]
-            })
-
-    results.sort(key=lambda x: (-x["relevance_score"], x["distance"]))
-    return results
-
-
-def get_merchant_catalog(merchant_id: str, filter_tags: List[str] = None) -> Dict:
-    """Get merchant details with catalog, optionally filtered."""
-    merchant = MERCHANTS.get(merchant_id)
-    if not merchant:
-        return None
-
-    catalog = merchant.get("catalog", [])
-
-    if filter_tags:
-        tags_lower = [t.lower() for t in filter_tags]
-        catalog = [
-            item for item in catalog
-            if any(t in [x.lower() for x in item.get("tags", [])] for t in tags_lower)
-        ]
-
-    return {
-        **merchant,
-        "catalog": catalog
-    }
-
-
-def generate_payment_token(amount: float, merchant_id: str) -> Dict:
-    """Generate tokenized payment card for secure transaction."""
-    last4 = ''.join(random.choices(string.digits, k=4))
-
-    return {
-        "token_id": generate_id("TKN"),
-        "card_display": f"•••• {last4}",
-        "last4": last4,
-        "type": "tokenized",
-        "amount_locked": amount,
-        "merchant_locked": merchant_id,
-        "expires_in": "15 minutes",
-        "status": "ready"
-    }
-
-
-def process_payment(token: Dict, amount: float, merchant_id: str) -> Dict:
-    """Process tokenized payment."""
-    # Simulate payment processing (95% success rate)
-    success = random.random() > 0.05
-
-    if success:
-        return {
-            "success": True,
-            "transaction_id": generate_id("TXN"),
-            "amount_charged": amount,
-            "card_last4": token["last4"],
-            "merchant_id": merchant_id,
-            "timestamp": get_current_time_str(),
-            "status": "completed"
-        }
-    else:
-        return {
-            "success": False,
-            "error": "Payment declined - please try again",
-            "status": "failed"
-        }
-
-
-def create_order(
-    merchant_id: str,
-    items: List[Dict],
-    customer_id: str,
-    payment_result: Dict,
-    order_type: str = "pickup"  # pickup or delivery
-) -> Dict:
-    """
-    Create order and notify merchant.
-    Returns order confirmation for both customer and merchant.
-    """
-    merchant = MERCHANTS.get(merchant_id)
-    if not merchant:
-        return {"error": "Merchant not found"}
-
-    order_id = generate_id("ORD")
-    total = sum(item["price"] * item.get("qty", 1) for item in items)
-
-    # Calculate loyalty points
-    loyalty_config = merchant.get("loyalty", {})
-    points_earned = int(total * loyalty_config.get("points_per_dollar", 1))
-
-    # Update customer loyalty (in production: database)
-    if customer_id not in CUSTOMER_DATA:
-        CUSTOMER_DATA[customer_id] = {
-            "total_points": 0,
-            "orders": [],
-            "merchants": {}
-        }
-
-    CUSTOMER_DATA[customer_id]["total_points"] += points_earned
-    if merchant_id not in CUSTOMER_DATA[customer_id]["merchants"]:
-        CUSTOMER_DATA[customer_id]["merchants"][merchant_id] = {"points": 0, "orders": 0}
-    CUSTOMER_DATA[customer_id]["merchants"][merchant_id]["points"] += points_earned
-    CUSTOMER_DATA[customer_id]["merchants"][merchant_id]["orders"] += 1
-
-    order = {
-        "order_id": order_id,
-        "status": "confirmed",
-        "type": order_type,
-        "merchant": {
-            "id": merchant_id,
-            "name": merchant["name"],
-            "address": merchant["address"],
-            "type": merchant["type"],
-            "image": merchant.get("image")
-        },
-        "items": items,
-        "subtotal": total,
-        "total": total,
-        "payment": {
-            "status": "paid",
-            "transaction_id": payment_result.get("transaction_id"),
-            "card_display": f"•••• {payment_result.get('card_last4')}"
-        },
-        "loyalty": {
-            "points_earned": points_earned,
-            "total_points": CUSTOMER_DATA[customer_id]["merchants"][merchant_id]["points"],
-            "next_reward": loyalty_config.get("reward", ""),
-            "points_to_reward": max(0, 100 - CUSTOMER_DATA[customer_id]["merchants"][merchant_id]["points"])
-        },
-        "timing": {
-            "estimated_ready": "15-20 mins" if order_type == "pickup" else "30-45 mins",
-            "order_placed": get_current_time_str()
-        },
-        "created_at": datetime.now().isoformat()
-    }
-
-    # Add to customer order history
-    CUSTOMER_DATA[customer_id]["orders"].append(order)
-
-    return order
-
-
-def get_customer_data(customer_id: str) -> Dict:
-    """Get customer profile with loyalty and order history."""
-    return CUSTOMER_DATA.get(customer_id, {
-        "total_points": 0,
-        "orders": [],
-        "merchants": {}
-    })
-
-
-# Legacy functions for backward compatibility
-def search_products(query: str) -> List[Dict]:
-    """Legacy: Search products (now searches merchant catalogs)."""
-    merchants = discover_merchants(query)
-    products = []
-    for m in merchants[:3]:
-        for item in m.get("catalog", [])[:3]:
-            products.append({
-                **item,
-                "merchant": m["name"],
-                "merchant_id": m["id"]
-            })
-    return products
-
-
-def compare_prices(product_name: str, results: List[Dict]) -> Dict:
-    """Legacy: Compare prices."""
-    if not results:
-        return {"best_price": None, "comparison": [], "savings": 0, "stores_checked": 0}
-
-    sorted_results = sorted(results, key=lambda x: x.get("price", 0))
-    best = sorted_results[0] if sorted_results else None
-
-    return {
-        "best_price": best,
-        "comparison": [{"store": r.get("merchant", ""), "price": r.get("price", 0)} for r in sorted_results[:5]],
-        "savings": (sorted_results[-1]["price"] - sorted_results[0]["price"]) if len(sorted_results) > 1 else 0,
-        "stores_checked": len(set(r.get("merchant", "") for r in results))
-    }
-
-
-def check_spending_rules(amount: float, category: str, rules: Dict) -> Dict:
-    """Check spending rules."""
-    return {"compliant": True, "issues": [], "requires_approval": amount > 2000}
-
-
-def generate_virtual_card(card_type: str, limit: float, merchant: str = None) -> Dict:
-    """Generate virtual card."""
-    return generate_payment_token(limit, merchant or "general")
-
-
-def simulate_checkout(merchant: str, items: List[Dict], card: Dict, address: str) -> Dict:
-    """Simulate checkout."""
-    return {
-        "success": True,
-        "order_id": generate_id("ORD"),
-        "merchant": merchant,
-        "items": items,
-        "total": sum(i.get("price", 0) * i.get("qty", 1) for i in items),
-        "card_used": card.get("label", f"•••• {card.get('last4', '0000')}"),
-        "address": address,
-        "estimated_delivery": "2-3 business days"
-    }

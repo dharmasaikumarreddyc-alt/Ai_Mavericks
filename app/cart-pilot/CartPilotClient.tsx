@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useVoice, interpretYesNo } from '../components/useVoice';
 import { backendUrl } from '../lib/backend';
 import { getAuthenticatedSession } from '../lib/auth';
+import { completeCheckout, type CheckoutPaymentMethod } from '../lib/secure-checkout';
+import { readCustomerAddresses } from '../lib/customer-addresses';
 
 interface AgentStep {
   id: string;
@@ -71,6 +73,15 @@ interface AIProposal {
   reasoning: string;
   hasAlternatives?: boolean;
   alternativeMessage?: string;
+  provenance?: SelectionProvenance;
+}
+
+interface SelectionProvenance {
+  selectionMode: 'model' | 'deterministic-fallback';
+  provider: string | null;
+  model: string | null;
+  evidenceSource: string;
+  piiControls?: string[];
 }
 
 type FlowStep = 'input' | 'thinking' | 'choosing' | 'proposal' | 'processing' | 'confirmed' | 'smart-cart' | 'budget-shop' | 'predictions';
@@ -258,6 +269,7 @@ interface InventoryResult {
   hasAlternatives?: boolean;
   alternativeMessage?: string;
   alternatives?: { productId: string; originalRequest: string; reason: string }[];
+  provenance?: SelectionProvenance;
 }
 
 async function fetchInventory(
@@ -275,10 +287,11 @@ async function fetchInventory(
 }
 
 async function fetchAddresses(): Promise<Address[]> {
-  const response = await fetch('/api/addresses');
-  const data = await response.json();
-  if (!data.success) return [];
-  return data.addresses;
+  try {
+    return readCustomerAddresses();
+  } catch {
+    return [];
+  }
 }
 
 interface PaymentResult {
@@ -301,7 +314,7 @@ interface PaymentResult {
     estimatedReady: string;
   };
   payment: {
-    token: string;
+    token?: string;
     method: string;
     status: string;
     cardBrand?: string;
@@ -309,6 +322,9 @@ interface PaymentResult {
     upiApp?: string;
     walletType?: string;
     tokenized?: boolean;
+    moneyMoved?: boolean;
+    demo?: boolean;
+    cardDataStoredByAisle?: boolean;
   };
   loyalty: {
     pointsEarned: number;
@@ -319,26 +335,20 @@ interface PaymentResult {
 async function processPayment(
   merchantId: string,
   items: { productId: string; quantity: number; name?: string; price?: number }[],
-  paymentMethod: 'card' | 'upi' | 'wallet' | 'cod',
+  paymentMethod: CheckoutPaymentMethod,
   deliveryAddress: string,
   cookingInstructions = ''
 ): Promise<PaymentResult> {
   const session = await getAuthenticatedSession('customer');
   if (!session) throw new Error('Sign in with a customer account to place an order.');
 
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${session.token}`,
-  };
-  const response = await fetch(`${backendUrl}/payments/checkout`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ merchantId, items, paymentMethod, deliveryAddress, cookingInstructions }),
+  const data = await completeCheckout(session.token, {
+    merchantId,
+    items,
+    paymentMethod,
+    deliveryAddress,
+    cookingInstructions,
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.detail || data.error || 'Could not start checkout.');
-  }
   if (!data.order) throw new Error('The order service returned an invalid response.');
   return data as PaymentResult;
 }
@@ -378,6 +388,7 @@ export default function CartPilotClient() {
   const [userQuery, setUserQuery] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [proposal, setProposal] = useState<AIProposal | null>(null);
+  const [provenanceItem, setProvenanceItem] = useState<CartItem | null>(null);
   const [orderResult, setOrderResult] = useState<PaymentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -412,32 +423,6 @@ export default function CartPilotClient() {
   const [assistantActive, setAssistantActive] = useState(false); // continuous mode on/off
   const assistantActiveRef = useRef(false);
 
-  // Bland.ai demo call
-  const [callStatus, setCallStatus] = useState<'idle' | 'calling' | 'ok' | 'error'>('idle');
-  const [callMessage, setCallMessage] = useState<string>('');
-  async function triggerDemoCall() {
-    setCallStatus('calling');
-    setCallMessage('Placing a call to +91 84990 77262…');
-    try {
-      const res = await fetch('/api/agents/call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data?.ok) {
-        setCallStatus('ok');
-        setCallMessage('Call queued — your phone should ring in a few seconds.');
-      } else {
-        setCallStatus('error');
-        setCallMessage(data?.error || `Call failed (HTTP ${res.status})`);
-      }
-    } catch (err) {
-      setCallStatus('error');
-      setCallMessage((err as Error).message || 'Network error');
-    }
-  }
-
   // Geolocation / radius
   const [maxDistance, setMaxDistance] = useState(5);
   const [located, setLocated] = useState(false);
@@ -466,8 +451,8 @@ export default function CartPilotClient() {
   const [selectedAIMode, setSelectedAIMode] = useState<AIMode>('standard');
 
   // Payment method selection
-  type PaymentMethod = 'card' | 'upi' | 'wallet' | 'cod';
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('upi');
+  type PaymentMethod = CheckoutPaymentMethod;
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('card');
 
   // Live streamed agent narration (shown during the "thinking" phase)
   const [narration, setNarration] = useState('');
@@ -513,9 +498,15 @@ export default function CartPilotClient() {
   // Personalization: derive "your usual" from the most recent past order.
   const loadUsual = async () => {
     try {
-      const res = await fetch('/api/orders', { cache: 'no-store' });
+      const session = await getAuthenticatedSession('customer');
+      if (!session) return;
+      const res = await fetch(`${backendUrl}/orders?limit=20`, {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
+      if (!res.ok) return;
       const data = await res.json();
-      const orders = data?.orders || [];
+      const orders = Array.isArray(data) ? data : [];
       setOrderHistory(orders);
       const last = orders[0];
       if (last?.items?.length) {
@@ -811,7 +802,6 @@ export default function CartPilotClient() {
     try {
       // Step 1: Understanding Request
       updateStepStatus('1', 'active');
-      await new Promise(r => setTimeout(r, 600));
       updateStepStatus('1', 'completed', [`"${query}"`, 'Intent: Order Request']);
 
       // Step 2: Finding Best Merchant
@@ -877,8 +867,6 @@ export default function CartPilotClient() {
 
       // Step 4: Preparing Order
       updateStepStatus('4', 'active');
-      await new Promise(r => setTimeout(r, 400));
-
       // Get default address
       const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
       if (!defaultAddress) {
@@ -909,6 +897,7 @@ export default function CartPilotClient() {
           `Based on your request "${query}", I found ${bestMerchant.name} which has ${bestMerchant.offers[0]}. I've selected ${selectedProducts.length} item${selectedProducts.length > 1 ? 's' : ''} that match what you're looking for.`,
         hasAlternatives: isAlternative,
         alternativeMessage: inventoryResult.alternativeMessage,
+        provenance: inventoryResult.provenance,
       };
 
       setProposal(aiProposal);
@@ -970,6 +959,7 @@ export default function CartPilotClient() {
         `${merchant.name}: I've selected ${selectedProducts.length} item${selectedProducts.length > 1 ? 's' : ''} for you.`,
       hasAlternatives: inventoryResult.hasAlternatives && !inventoryResult.exactMatchFound,
       alternativeMessage: inventoryResult.alternativeMessage,
+      provenance: inventoryResult.provenance,
     };
     setHasAlternatives(proposal.hasAlternatives || false);
     setAlternativeMessage(proposal.alternativeMessage || '');
@@ -1181,11 +1171,11 @@ export default function CartPilotClient() {
 
     // Ask for payment method
     let paymentResponse = await ask(
-      'Choose UPI, Card, Wallet, or Cash on Delivery.'
+      'Choose the demo tokenized card or Cash on Delivery.'
     );
     if (!assistantActiveRef.current) return false;
 
-    let chosenPaymentMethod: PaymentMethod = 'upi';
+    let chosenPaymentMethod: PaymentMethod = 'card';
 
     if (paymentResponse) {
       const parsedMethod = parsePaymentMethod(paymentResponse);
@@ -1193,13 +1183,11 @@ export default function CartPilotClient() {
         chosenPaymentMethod = parsedMethod;
         setSelectedPaymentMethod(parsedMethod);
       } else {
-        await say('UPI is selected.');
+        await say('The demo tokenized card is selected. No money will move.');
       }
     }
 
-    const methodName = chosenPaymentMethod === 'upi' ? 'UPI' :
-                      chosenPaymentMethod === 'card' ? 'Card' :
-                      chosenPaymentMethod === 'wallet' ? 'Wallet' : 'Cash on Delivery';
+    const methodName = chosenPaymentMethod === 'card' ? 'Demo tokenized card' : 'Cash on Delivery';
 
     // Final confirmation
     await say(`${methodName} is selected as your mode of payment.`);
@@ -1348,7 +1336,10 @@ export default function CartPilotClient() {
 
       // Voice: speak a very concise confirmation (not the full receipt).
       if (voiceMode && voiceSupported) {
-        const concise = `Your order was placed successfully at ${p.merchant.name}. The total is ${paymentResult.order.pricing.total.toFixed(0)} dollars, ready in ${paymentResult.order.estimatedReady}.`;
+        const paymentDisclosure = paymentResult.payment.status === 'simulated'
+          ? 'The payment token was simulated and no money moved. '
+          : '';
+        const concise = `Your order was placed successfully at ${p.merchant.name}. ${paymentDisclosure}The total is ${paymentResult.order.pricing.total.toFixed(0)} dollars, ready in ${paymentResult.order.estimatedReady}.`;
         setVoiceCaption('🔊 ' + concise);
         await speak(concise);
       }
@@ -1384,14 +1375,10 @@ export default function CartPilotClient() {
   // Parse voice commands for payment method selection
   const parsePaymentMethod = (text: string): PaymentMethod | null => {
     const t = text.toLowerCase();
-    if (t.includes('upi') || t.includes('google pay') || t.includes('gpay') || t.includes('paytm') || t.includes('phonepe') || t.includes('phone pe')) {
-      return 'upi';
-    }
-    if (t.includes('card') || t.includes('credit') || t.includes('debit') || t.includes('visa') || t.includes('mastercard')) {
+    if (t.includes('upi') || t.includes('google pay') || t.includes('gpay') || t.includes('paytm') || t.includes('phonepe') || t.includes('phone pe') ||
+        t.includes('card') || t.includes('credit') || t.includes('debit') || t.includes('visa') || t.includes('mastercard') ||
+        t.includes('wallet') || t.includes('balance')) {
       return 'card';
-    }
-    if (t.includes('wallet') || t.includes('balance')) {
-      return 'wallet';
     }
     if (t.includes('cash') || t.includes('cod') || t.includes('delivery') || t.includes('pay later')) {
       return 'cod';
@@ -1489,15 +1476,15 @@ export default function CartPilotClient() {
 
     // Ask for payment method
     let paymentQuestion = await askAndListen(
-      'How would you like to pay? You can say UPI, Card, Wallet, or Cash on Delivery.'
+      'How would you like to pay? You can say demo card or Cash on Delivery.'
     );
 
     // Retry if no response
     if (!paymentQuestion) {
-      paymentQuestion = await askAndListen('Sorry, I didn\'t catch that. Choose UPI, Card, Wallet, or Cash on Delivery.');
+      paymentQuestion = await askAndListen('Sorry, I didn\'t catch that. Choose demo card or Cash on Delivery.');
     }
 
-    let chosenPaymentMethod: PaymentMethod = 'upi';
+    let chosenPaymentMethod: PaymentMethod = 'card';
 
     if (paymentQuestion) {
       const parsedMethod = parsePaymentMethod(paymentQuestion);
@@ -1505,19 +1492,17 @@ export default function CartPilotClient() {
         chosenPaymentMethod = parsedMethod;
         setSelectedPaymentMethod(parsedMethod);
       } else {
-        // Default to UPI if not understood.
-        await speak('UPI is selected.');
+        // Default to the free, clearly labelled simulation if not understood.
+        await speak('The demo tokenized card is selected. No money will move.');
       }
     } else {
       // No response, use default
-      await speak('UPI is selected.');
+      await speak('The demo tokenized card is selected. No money will move.');
     }
 
     setSelectedPaymentMethod(chosenPaymentMethod);
 
-    const methodName = chosenPaymentMethod === 'upi' ? 'UPI' :
-                      chosenPaymentMethod === 'card' ? 'Card' :
-                      chosenPaymentMethod === 'wallet' ? 'Wallet' : 'Cash on Delivery';
+    const methodName = chosenPaymentMethod === 'card' ? 'Demo tokenized card' : 'Cash on Delivery';
 
     await speak(`${methodName} is selected as your mode of payment.`);
     const finalConfirm = interpretYesNo(
@@ -1666,6 +1651,7 @@ export default function CartPilotClient() {
         reasoning: inventoryResult.spoken || `Switched to ${merchant.name}. ${merchant.offers[0]}`,
         hasAlternatives: isAlternative,
         alternativeMessage: inventoryResult.alternativeMessage,
+        provenance: inventoryResult.provenance,
       });
 
       setFlowStep('proposal');
@@ -1751,7 +1737,7 @@ export default function CartPilotClient() {
       <div className="dz-bnr-inr bg-secondary overlay-black-light" style={{ backgroundImage: "url('/images/background/bg1.jpg')" }}>
         <div className="container">
           <div className="dz-bnr-inr-entry">
-            <h1>Cart Pilot</h1>
+            <h1>Aisle AI Concierge</h1>
             <nav aria-label="breadcrumb" className="breadcrumb-row">
               <ul className="breadcrumb">
                 <li className="breadcrumb-item"><a href="/">Home</a></li>
@@ -1859,7 +1845,7 @@ export default function CartPilotClient() {
                           Just tell me what you need
                         </h5>
                         <p className="text-muted mb-0">
-                          I'll automatically find the best merchant, select the right products, and prepare everything for your confirmation. No clicking through menus - just tell me!
+                          I'll search the synthetic catalog, explain grounded options, and prepare a cart for your confirmation. Just tell me what you need.
                         </p>
                       </div>
 
@@ -1905,36 +1891,6 @@ export default function CartPilotClient() {
                           Voice isn’t available in this browser. Use Chrome or Edge for the voice assistant — or just type your request below.
                         </div>
                       )}
-
-                      {/* Bland.ai demo call — rings the demo number so a live customer can experience the agent by phone. */}
-                      <div className="text-center mb-4">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary rounded-pill px-4"
-                          onClick={triggerDemoCall}
-                          disabled={callStatus === 'calling'}
-                        >
-                          <i className={`fas ${callStatus === 'calling' ? 'fa-spinner fa-spin' : 'fa-phone-volume'} me-2`}></i>
-                          {callStatus === 'calling' ? 'Placing call…' : 'Get a Demo Call'}
-                        </button>
-                        <div className="small text-muted mt-2">
-                          Rings <strong>+91 84990&nbsp;77262</strong> for a live phone demo of the agent.
-                        </div>
-                        {callMessage && (
-                          <div
-                            className={`alert mt-3 mb-0 small ${
-                              callStatus === 'ok'
-                                ? 'alert-success'
-                                : callStatus === 'error'
-                                ? 'alert-warning'
-                                : 'alert-info'
-                            }`}
-                            role="alert"
-                          >
-                            {callMessage}
-                          </div>
-                        )}
-                      </div>
 
                       {/* Voice diagnostics — isolates TTS vs mic vs browser */}
                       <details className="bg-light rounded p-3 mb-4 small">
@@ -2412,7 +2368,18 @@ export default function CartPilotClient() {
                                   <div className="d-flex align-items-center">
                                     <img src={item.image} alt="" width="40" height="40" className="rounded me-2" />
                                     <div>
-                                      <span className="d-block">{item.name}</span>
+                                      <div className="d-flex align-items-center gap-2">
+                                        <span className="d-block fw-semibold">{item.name}</span>
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-info btn-sm py-0 px-2 rounded-pill"
+                                          style={{ fontSize: '0.7rem' }}
+                                          onClick={() => setProvenanceItem(item)}
+                                          title="View AI grounding, provenance, and deterministic checks"
+                                        >
+                                          <i className="fas fa-shield-alt me-1"></i>Why this item?
+                                        </button>
+                                      </div>
                                       <small className="text-muted">${item.price.toFixed(2)} each</small>
                                     </div>
                                   </div>
@@ -2505,22 +2472,7 @@ export default function CartPilotClient() {
                           Payment Method
                         </h6>
                         <div className="row g-2">
-                          <div className="col-6 col-md-3">
-                            <div
-                              className={`card h-100 ${selectedPaymentMethod === 'upi' ? 'border-primary bg-light' : ''}`}
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => setSelectedPaymentMethod('upi')}
-                            >
-                              <div className="card-body text-center py-3">
-                                <i className="fas fa-mobile-alt fa-lg mb-2 text-success"></i>
-                                <div className="small fw-bold">UPI</div>
-                                {selectedPaymentMethod === 'upi' && (
-                                  <i className="fas fa-check-circle text-primary position-absolute" style={{ top: '5px', right: '5px' }}></i>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6 col-md-3">
+                          <div className="col-6">
                             <div
                               className={`card h-100 ${selectedPaymentMethod === 'card' ? 'border-primary bg-light' : ''}`}
                               style={{ cursor: 'pointer' }}
@@ -2528,29 +2480,15 @@ export default function CartPilotClient() {
                             >
                               <div className="card-body text-center py-3">
                                 <i className="fas fa-credit-card fa-lg mb-2 text-primary"></i>
-                                <div className="small fw-bold">Card</div>
+                                <div className="small fw-bold">Demo token</div>
+                                <div className="text-muted" style={{ fontSize: '0.7rem' }}>No money moves</div>
                                 {selectedPaymentMethod === 'card' && (
                                   <i className="fas fa-check-circle text-primary position-absolute" style={{ top: '5px', right: '5px' }}></i>
                                 )}
                               </div>
                             </div>
                           </div>
-                          <div className="col-6 col-md-3">
-                            <div
-                              className={`card h-100 ${selectedPaymentMethod === 'wallet' ? 'border-primary bg-light' : ''}`}
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => setSelectedPaymentMethod('wallet')}
-                            >
-                              <div className="card-body text-center py-3">
-                                <i className="fas fa-wallet fa-lg mb-2 text-warning"></i>
-                                <div className="small fw-bold">Wallet</div>
-                                {selectedPaymentMethod === 'wallet' && (
-                                  <i className="fas fa-check-circle text-primary position-absolute" style={{ top: '5px', right: '5px' }}></i>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6 col-md-3">
+                          <div className="col-6">
                             <div
                               className={`card h-100 ${selectedPaymentMethod === 'cod' ? 'border-primary bg-light' : ''}`}
                               style={{ cursor: 'pointer' }}
@@ -2656,6 +2594,73 @@ export default function CartPilotClient() {
                         </div>
                       </div>
                     )}
+
+                    {/* Provenance & Explainability Modal */}
+                    {provenanceItem && (
+                      <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(3px)', zIndex: 1060 }}>
+                        <div className="modal-dialog modal-dialog-centered">
+                          <div className="modal-content shadow-lg border-0" style={{ borderRadius: 12, overflow: 'hidden' }}>
+                            <div className="modal-header bg-dark text-white py-3">
+                              <div className="d-flex align-items-center">
+                                <span className="badge bg-success me-2"><i className="fas fa-shield-alt me-1"></i>TRACE AVAILABLE</span>
+                                <h5 className="modal-title mb-0 fs-6">Why this item?</h5>
+                              </div>
+                              <button type="button" className="btn-close btn-close-white" onClick={() => setProvenanceItem(null)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                              <div className="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                                <img src={provenanceItem.image} alt="" width="52" height="52" className="rounded me-3 border" />
+                                <div>
+                                  <h6 className="mb-1 fw-bold text-dark">{provenanceItem.name}</h6>
+                                  <div className="text-muted small">Catalog Price: <span className="text-success fw-bold">${provenanceItem.price.toFixed(2)}</span></div>
+                                </div>
+                              </div>
+
+                              <div className="vstack gap-2">
+                                <div className="p-2 border rounded">
+                                  <div className="d-flex align-items-center justify-content-between mb-1">
+                                    <span className="small fw-bold text-primary"><i className="fas fa-microchip me-1"></i>Selection path</span>
+                                    <span className="badge bg-primary text-white">
+                                      {proposal.provenance?.selectionMode === 'model'
+                                        ? `${proposal.provenance.provider}: ${proposal.provenance.model}`
+                                        : 'Deterministic fallback'}
+                                    </span>
+                                  </div>
+                                  <p className="mb-0 small text-muted">
+                                    Matched against &quot;{userQuery || 'customer order'}&quot; using {proposal.provenance?.evidenceSource || 'the bounded product catalog'}. The selected ID is resolved back to a catalog record before display.
+                                  </p>
+                                </div>
+
+                                <div className="p-2 border rounded">
+                                  <div className="d-flex align-items-center justify-content-between mb-1">
+                                    <span className="small fw-bold text-success"><i className="fas fa-calculator me-1"></i>Deterministic Pricing Enforcement</span>
+                                    <span className="badge bg-success text-white">Deterministic</span>
+                                  </div>
+                                  <p className="mb-0 small text-muted">
+                                    Price of ${provenanceItem.price.toFixed(2)} comes from the catalog record. Cart totals are recomputed in application code rather than accepted from model text.
+                                  </p>
+                                </div>
+
+                                <div className="p-2 border rounded">
+                                  <div className="d-flex align-items-center justify-content-between mb-1">
+                                    <span className="small fw-bold text-info"><i className="fas fa-user-shield me-1"></i>Governance & Human Confirmation</span>
+                                    <span className="badge bg-info text-white">Guarded</span>
+                                  </div>
+                                  <p className="mb-0 small text-muted">
+                                    Email, phone, and payment-number patterns are redacted before model calls. This is risk reduction, not a guarantee that every identifier is detected. Order creation still requires explicit customer confirmation.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="modal-footer bg-light py-2">
+                              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setProvenanceItem(null)}>
+                                Close Inspector
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -2741,14 +2746,12 @@ export default function CartPilotClient() {
                         </div>
                         <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-2 mt-3">
                           <span className="badge bg-light text-dark border align-self-start" style={{ fontSize: '0.85rem', padding: '6px 10px' }}>
-                            {orderResult.payment.status === 'captured' && orderResult.payment.method === 'upi' ? (
-                              <><i className="fas fa-mobile-alt me-1"></i>UPI - {orderResult.payment.upiApp || 'UPI'}</>
-                            ) : orderResult.payment.status !== 'captured' && orderResult.payment.method === 'cod' ? (
+                            {orderResult.payment.method === 'cod' ? (
                               <><i className="fas fa-money-bill-wave me-1"></i>Cash on Delivery</>
-                            ) : orderResult.payment.status === 'captured' && orderResult.payment.method === 'wallet' ? (
-                              <><i className="fas fa-wallet me-1"></i>{orderResult.payment.walletType || 'Wallet'}</>
+                            ) : orderResult.payment.status === 'simulated' ? (
+                              <><i className="fas fa-shield-alt me-1"></i>Demo token · no money moved</>
                             ) : orderResult.payment.status === 'captured' ? (
-                              <><i className="fas fa-credit-card me-1"></i>{orderResult.payment.cardBrand || 'Card'}{orderResult.payment.last4 ? ` •••• ${orderResult.payment.last4}` : ''}</>
+                              <><i className="fas fa-credit-card me-1"></i>Provider-confirmed card</>
                             ) : (
                               <><i className="fas fa-wallet me-1"></i>{orderResult.payment.method.toUpperCase()}</>
                             )}
@@ -2756,8 +2759,8 @@ export default function CartPilotClient() {
                           <span className="small text-muted">
                             Mode of payment: {orderResult.payment.method.toUpperCase()}
                           </span>
-                          {orderResult.payment.status === 'captured' && orderResult.payment.tokenized !== false && (
-                            <small className="text-muted">Tokenized payment</small>
+                          {orderResult.payment.tokenized === true && (
+                            <small className="text-muted">Tokenized · Aisle stores no card number</small>
                           )}
                         </div>
                         {(orderResult.order.cookingInstructions ||
@@ -2774,7 +2777,7 @@ export default function CartPilotClient() {
                     </div>
 
                     {/* Loyalty card */}
-                    <div
+                    {orderResult.loyalty.pointsEarned > 0 && <div
                       className="mx-3 mb-3 d-flex align-items-center justify-content-between"
                       style={{ background: '#fff8e6', border: '1px solid #ffe08a', borderRadius: 14, padding: '14px 16px' }}
                     >
@@ -2796,7 +2799,7 @@ export default function CartPilotClient() {
                         <div style={{ fontSize: '1.4rem' }}>+{orderResult.loyalty.pointsEarned}</div>
                         <small><i className="fas fa-star"></i> pts</small>
                       </div>
-                    </div>
+                    </div>}
 
                     {receiptSummary && (
                       <div className="bg-light p-3 rounded mx-3 mb-3 text-start border-start border-primary border-4">
@@ -2918,12 +2921,8 @@ export default function CartPilotClient() {
                       <div className="mb-3">
                         <small className="text-muted fw-bold d-block mb-2">PAYMENT METHOD</small>
                         <div className="btn-group w-100" role="group">
-                          <input type="radio" className="btn-check" name="smartPayment" id="smart-upi" checked={selectedPaymentMethod === 'upi'} onChange={() => setSelectedPaymentMethod('upi')} />
-                          <label className="btn btn-outline-primary" htmlFor="smart-upi"><i className="fas fa-mobile-alt me-1"></i>UPI</label>
                           <input type="radio" className="btn-check" name="smartPayment" id="smart-card" checked={selectedPaymentMethod === 'card'} onChange={() => setSelectedPaymentMethod('card')} />
-                          <label className="btn btn-outline-primary" htmlFor="smart-card"><i className="fas fa-credit-card me-1"></i>Card</label>
-                          <input type="radio" className="btn-check" name="smartPayment" id="smart-wallet" checked={selectedPaymentMethod === 'wallet'} onChange={() => setSelectedPaymentMethod('wallet')} />
-                          <label className="btn btn-outline-primary" htmlFor="smart-wallet"><i className="fas fa-wallet me-1"></i>Wallet</label>
+                          <label className="btn btn-outline-primary" htmlFor="smart-card"><i className="fas fa-credit-card me-1"></i>Demo token</label>
                           <input type="radio" className="btn-check" name="smartPayment" id="smart-cod" checked={selectedPaymentMethod === 'cod'} onChange={() => setSelectedPaymentMethod('cod')} />
                           <label className="btn btn-outline-primary" htmlFor="smart-cod"><i className="fas fa-money-bill-wave me-1"></i>COD</label>
                         </div>
@@ -3046,12 +3045,8 @@ export default function CartPilotClient() {
                       <div className="mb-3">
                         <small className="text-muted fw-bold d-block mb-2">PAYMENT METHOD</small>
                         <div className="btn-group w-100" role="group">
-                          <input type="radio" className="btn-check" name="budgetPayment" id="budget-upi" checked={selectedPaymentMethod === 'upi'} onChange={() => setSelectedPaymentMethod('upi')} />
-                          <label className="btn btn-outline-success" htmlFor="budget-upi"><i className="fas fa-mobile-alt me-1"></i>UPI</label>
                           <input type="radio" className="btn-check" name="budgetPayment" id="budget-card" checked={selectedPaymentMethod === 'card'} onChange={() => setSelectedPaymentMethod('card')} />
-                          <label className="btn btn-outline-success" htmlFor="budget-card"><i className="fas fa-credit-card me-1"></i>Card</label>
-                          <input type="radio" className="btn-check" name="budgetPayment" id="budget-wallet" checked={selectedPaymentMethod === 'wallet'} onChange={() => setSelectedPaymentMethod('wallet')} />
-                          <label className="btn btn-outline-success" htmlFor="budget-wallet"><i className="fas fa-wallet me-1"></i>Wallet</label>
+                          <label className="btn btn-outline-success" htmlFor="budget-card"><i className="fas fa-credit-card me-1"></i>Demo token</label>
                           <input type="radio" className="btn-check" name="budgetPayment" id="budget-cod" checked={selectedPaymentMethod === 'cod'} onChange={() => setSelectedPaymentMethod('cod')} />
                           <label className="btn btn-outline-success" htmlFor="budget-cod"><i className="fas fa-money-bill-wave me-1"></i>COD</label>
                         </div>
@@ -3179,12 +3174,8 @@ export default function CartPilotClient() {
                         <div className="mb-3">
                           <small className="text-muted fw-bold d-block mb-2">PAYMENT METHOD</small>
                           <div className="btn-group w-100" role="group">
-                            <input type="radio" className="btn-check" name="predictPayment" id="predict-upi" checked={selectedPaymentMethod === 'upi'} onChange={() => setSelectedPaymentMethod('upi')} />
-                            <label className="btn btn-outline-warning" htmlFor="predict-upi"><i className="fas fa-mobile-alt me-1"></i>UPI</label>
                             <input type="radio" className="btn-check" name="predictPayment" id="predict-card" checked={selectedPaymentMethod === 'card'} onChange={() => setSelectedPaymentMethod('card')} />
-                            <label className="btn btn-outline-warning" htmlFor="predict-card"><i className="fas fa-credit-card me-1"></i>Card</label>
-                            <input type="radio" className="btn-check" name="predictPayment" id="predict-wallet" checked={selectedPaymentMethod === 'wallet'} onChange={() => setSelectedPaymentMethod('wallet')} />
-                            <label className="btn btn-outline-warning" htmlFor="predict-wallet"><i className="fas fa-wallet me-1"></i>Wallet</label>
+                            <label className="btn btn-outline-warning" htmlFor="predict-card"><i className="fas fa-credit-card me-1"></i>Demo token</label>
                             <input type="radio" className="btn-check" name="predictPayment" id="predict-cod" checked={selectedPaymentMethod === 'cod'} onChange={() => setSelectedPaymentMethod('cod')} />
                             <label className="btn btn-outline-warning" htmlFor="predict-cod"><i className="fas fa-money-bill-wave me-1"></i>COD</label>
                           </div>

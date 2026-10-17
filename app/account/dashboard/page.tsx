@@ -65,10 +65,15 @@ export default function DashboardPage() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/orders');
+      const session = await getAuthenticatedSession('customer');
+      if (!session) return;
+      const response = await fetch(`${backendUrl}/orders`, {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${session.token}` },
+      });
       if (response.ok) {
         const data = await response.json();
-        const orders = data.orders || [];
+        const orders = Array.isArray(data) ? data : [];
         setStats({
           totalOrders: orders.length,
           pendingOrders: orders.filter((o: any) => o.status === 'preparing' || o.status === 'confirmed').length,
@@ -185,7 +190,7 @@ export default function DashboardPage() {
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="me-2">
                             <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
                           </svg>
-                          Cart Pilot AI
+                          Aisle AI Concierge
                         </Link>
                         <Link href="/shop" className="btn btn-outline-secondary">
                           <i className="fa fa-shopping-bag me-2"></i>Browse Shop

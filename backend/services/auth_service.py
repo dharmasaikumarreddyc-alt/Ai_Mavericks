@@ -9,7 +9,7 @@ from sqlalchemy import select
 from fastapi import HTTPException, status
 
 from config import settings
-from database.models import UserDB, SpendingRulesDB
+from database.models import UserDB
 
 
 class AuthService:
@@ -79,27 +79,6 @@ class AuthService:
         )
         db.add(user)
         await db.flush()
-
-        # Create default spending rules
-        default_rules = SpendingRulesDB(
-            user_id=user.id,
-            monthly_budget=25000.0,
-            categories=[
-                {"category": "Groceries", "enabled": True, "limit": 8000.0},
-                {"category": "Health & Supplements", "enabled": True, "limit": 5000.0},
-                {"category": "Electronics", "enabled": True, "limit": 10000.0},
-                {"category": "Fashion", "enabled": False, "limit": 3000.0},
-            ],
-            guardrails={
-                "require_approval_above": 2000.0,
-                "block_international": False,
-                "require_2fa_above": 5000.0,
-                "auto_pause_on_suspicious": True
-            },
-            merchant_whitelist=[],
-            merchant_blacklist=[]
-        )
-        db.add(default_rules)
 
         await db.commit()
         await db.refresh(user)

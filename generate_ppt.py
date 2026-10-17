@@ -1,4 +1,4 @@
-"""Generate Agentic AI Checkout presentation."""
+"""Generate the accurate Aisle AI hackathon presentation."""
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
@@ -99,7 +99,7 @@ add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 add_rect(sl, 0, Inches(0.08), Inches(0.06), H - Inches(0.08), fill=GREEN)
 
 # Big title
-add_text(sl, "Agentic AI Checkout",
+add_text(sl, "Aisle AI",
          Inches(1.0), Inches(1.5), Inches(8), Inches(1.4),
          size=52, bold=True, color=BLACK)
 
@@ -107,15 +107,15 @@ add_text(sl, "Agentic AI Checkout",
 add_rect(sl, Inches(1.0), Inches(2.9), Inches(4.5), Inches(0.06), fill=GREEN)
 
 # Subtitle
-add_text(sl, "The 30-Second E-Commerce Revolution",
+add_text(sl, "Closed-Loop Commerce, From Intent to Action",
          Inches(1.0), Inches(3.1), Inches(9), Inches(0.7),
          size=26, bold=False, color=DARK_GRAY)
 
 # Description
 add_text(sl,
-         "A multi-agent AI system that autonomously finds merchants,\n"
-         "selects products, and completes checkout — transforming\n"
-         "shopping from manual effort to intelligent automation.",
+         "Gemini-assisted discovery prepares a grounded cart; deterministic\n"
+         "controls persist a customer-confirmed order; merchant signals\n"
+         "turn into evidence-grounded operational action.",
          Inches(1.0), Inches(3.9), Inches(8), Inches(1.5),
          size=17, color=GRAY)
 
@@ -131,7 +131,7 @@ for i, (label, icon) in enumerate([
     ("Find Merchants", "🔍"),
     ("Compare & Rank", "⚖️"),
     ("Talk to AI", "🎙️"),
-    ("Tokenized Pay", "🔒"),
+    ("Human Approval", "🔒"),
 ]):
     y = Inches(1.3) + i * Inches(1.25)
     add_text(sl, icon + "  " + label,
@@ -150,7 +150,7 @@ sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 
 # Title
-add_text(sl, "Agentic AI Checkout",
+add_text(sl, "Aisle AI",
          Inches(0.4), Inches(0.15), Inches(7), Inches(0.7),
          size=28, bold=True, color=BLACK)
 
@@ -159,7 +159,7 @@ add_rect(sl, Inches(0.4), Inches(1.0), Inches(2.8), Inches(0.45), fill=LIGHT_GRA
 add_text(sl, "Before", Inches(0.5), Inches(1.0), Inches(1.2), Inches(0.45), size=16, bold=True, color=BLACK)
 
 add_rect(sl, Inches(0.4), Inches(1.52), Inches(2.8), Inches(0.38), fill=LIGHT_GRAY)
-add_text(sl, "5 minutes and 12 clicks", Inches(0.5), Inches(1.54), Inches(2.6), Inches(0.35), size=12, bold=False, color=DARK_GRAY)
+add_text(sl, "Fragmented and repetitive", Inches(0.5), Inches(1.54), Inches(2.6), Inches(0.35), size=12, bold=False, color=DARK_GRAY)
 
 before_steps = ["manual browsing", "merchant search", "product comparison", "cart management"]
 for i, step in enumerate(before_steps):
@@ -178,9 +178,9 @@ add_rect(sl, Inches(4.0), Inches(1.0), Inches(2.8), Inches(0.45), fill=LIGHT_GRE
 add_text(sl, "After", Inches(4.1), Inches(1.0), Inches(1.2), Inches(0.45), size=16, bold=True, color=DARK_GREEN)
 
 add_rect(sl, Inches(4.0), Inches(1.52), Inches(2.8), Inches(0.38), fill=LIGHT_GREEN)
-add_text(sl, "30 seconds and 2 clicks", Inches(4.1), Inches(1.54), Inches(2.6), Inches(0.35), size=12, bold=False, color=DARK_GREEN)
+add_text(sl, "one request and one confirmation", Inches(4.1), Inches(1.54), Inches(2.9), Inches(0.35), size=12, bold=False, color=DARK_GREEN)
 
-after_steps = ["AI agents find merchants", "select products", "prepare order for\none-click confirmation"]
+after_steps = ["grounded catalog search", "Gemini-assisted selection", "explicit confirmation +\nmerchant fulfillment"]
 for i, step in enumerate(after_steps):
     y = Inches(2.1) + i * Inches(1.0)
     add_rect(sl, Inches(4.15), y, Inches(0.45), Inches(0.45), fill=LIGHT_GREEN, border=GREEN)
@@ -192,39 +192,39 @@ for i, step in enumerate(after_steps):
 # ---- Right panel ----
 add_rect(sl, Inches(7.2), Inches(0.9), Inches(5.85), Inches(5.9), fill=WHITE)
 
-add_text(sl, "Cart Pilot: The 30-Second\nE-Commerce Revolution",
+add_text(sl, "Aisle AI: Closed-Loop\nCommerce Copilot",
          Inches(7.4), Inches(1.0), Inches(5.5), Inches(1.1),
          size=22, bold=True, color=BLACK)
 
 add_text(sl,
-         "A multi-agent AI system that autonomously finds merchants, selects\n"
-         "products, and prepares orders — transforming online shopping from\n"
-         "manual labour to intelligent automation.",
+         "A governed commerce copilot that connects grounded product discovery,\n"
+         "explicit customer confirmation, persistent orders, merchant fulfillment,\n"
+         "and evidence-grounded operational insight.",
          Inches(7.4), Inches(2.15), Inches(5.5), Inches(1.1),
          size=13, color=DARK_GRAY)
 
 add_text(sl,
          "Manual friction destroys conversion rates and user patience. E-commerce\n"
-         "remains a labour-intensive chore — and that is the problem Cart Pilot\n"
+         "remains a labour-intensive chore — and that is the problem Aisle AI\n"
          "was built to solve.",
          Inches(7.4), Inches(3.35), Inches(5.5), Inches(1.0),
          size=13, color=GRAY)
 
 # Green highlight box
 add_rect(sl, Inches(7.4), Inches(4.45), Inches(5.5), Inches(1.15), fill=LIGHT_GREEN, border=GREEN)
-add_text(sl, "✓  Cart Pilot doesn't just speed up shopping — it redefines it.",
+add_text(sl, "✓  Aisle AI connects customer intent with merchant action.",
          Inches(7.55), Inches(4.5), Inches(5.2), Inches(0.5),
          size=13, bold=True, color=DARK_GREEN)
 add_text(sl,
-         "From 5 minutes to 30 seconds. From 12 clicks to 2.\nThe future of e-commerce is autonomous.",
+         "From fragmented browsing to one grounded request and explicit confirmation.\nCustomer intent now connects to merchant action.",
          Inches(7.55), Inches(4.98), Inches(5.2), Inches(0.55),
          size=12, color=DARK_GRAY)
 
 # Bottom three pillars
 for i, (icon, title, desc) in enumerate([
-    ("→", "Find Merchants",       "Agents scan and identify\nthe best sources instantly"),
-    ("→", "Select Products",      "Smart comparison based\non your intent"),
-    ("→", "One-Click Confirmation","Orders prepared and\nready for instant approval"),
+    ("→", "Discover",       "Search a bounded synthetic\ndemo catalog"),
+    ("→", "Compose",      "Gemini helps satisfy\nintent and constraints"),
+    ("→", "Close the Loop","Confirmed orders reach\nmerchant operations"),
 ]):
     x = Inches(0.4) + i * Inches(4.3)
     add_rect(sl, x, Inches(6.5), Inches(4.0), Inches(0.02), fill=GREEN)
@@ -257,7 +257,7 @@ add_text(sl, "Hands-Free Ordering — Just Speak, We Handle the Rest.",
 add_text(sl,
          "No browsing. No searching. No checkout forms.\n"
          "Simply tell the AI what you want — it finds the best merchant, compares options,\n"
-         "checks your budget rules, and completes payment. All in under 30 seconds.",
+         "checks your budget rules, and prepares an order for explicit confirmation.",
          Inches(0.4), Inches(2.45), Inches(8.5), Inches(1.2),
          size=15, color=DARK_GRAY)
 
@@ -269,11 +269,11 @@ add_text(sl, "Live Demo Conversation",
 
 convos = [
     ("🧑  You:",    "I have a serious coffee craving. Find me the best place on my way home.", DARK_GRAY, False),
-    ("🤖  AI:",     "Found 3 coffee shops on your route. Starbucks (0.1 mi) · Tower Cafe (0.3 mi) · Peet's (0.5 mi). Which would you like?", DARK_GREEN, False),
-    ("🧑  You:",    "Starbucks.", DARK_GRAY, False),
-    ("🤖  AI:",     "Adding a Medium Latte — $5.75. Paying via your saved card. Shall I place the order?", DARK_GREEN, False),
+    ("🤖  AI:",     "Found 3 synthetic demo merchants. Aisle Coffee Lab has your latte. Choose it?", DARK_GREEN, False),
+    ("🧑  You:",    "Aisle Coffee Lab.", DARK_GRAY, False),
+    ("🤖  AI:",     "Adding a Medium Latte — $5.75. Use a simulated token or COD?", DARK_GREEN, False),
     ("🧑  You:",    "Yes.", DARK_GRAY, False),
-    ("🤖  AI:",     "✓ Order confirmed! Loyalty points earned. Ready in ~5 mins.", GREEN, True),
+    ("🤖  AI:",     "✓ Order confirmed! The merchant can now begin preparation.", GREEN, True),
 ]
 for i, (who, msg, clr, bld) in enumerate(convos):
     y = Inches(4.3) + i * Inches(0.36)
@@ -287,10 +287,10 @@ add_text(sl, "What happened in the background",
          size=16, bold=True, color=BLACK)
 
 agents = [
-    ("Shopping Agent",    "Scanned every nearby merchant\ncatalog for coffee"),
-    ("Comparison Agent",  "Ranked by route proximity,\nrating, and price"),
-    ("Rules Agent",       "Checked your spending limits\nbefore showing options"),
-    ("Checkout Agent",    "Generated a tokenized payment\ntoken on approval"),
+    ("Catalog Retrieval", "Searched bounded synthetic\nmerchant records"),
+    ("Gemini Reasoning",   "Interpreted intent and explained\nthe grounded recommendation"),
+    ("Commerce Controls",  "Recomputed prices and required\nexplicit confirmation"),
+    ("Order Workflow",     "Persisted the order with honest\npayment status"),
 ]
 for i, (name, desc) in enumerate(agents):
     y = Inches(1.75) + i * Inches(1.1)
@@ -311,22 +311,22 @@ sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 add_rect(sl, 0, Inches(0.08), Inches(0.06), H - Inches(0.08), fill=GREEN)
 
-add_text(sl, "Multi-Agent Architecture",
+add_text(sl, "Governed Commerce Architecture",
          Inches(0.4), Inches(0.25), Inches(10), Inches(0.75),
          size=32, bold=True, color=BLACK)
-add_text(sl, "Four specialized AI agents working in concert to deliver a seamless checkout experience.",
+add_text(sl, "Gemini reasons over bounded evidence; deterministic services control consequential actions.",
          Inches(0.4), Inches(1.0), Inches(10), Inches(0.5),
          size=15, color=GRAY)
 
 agent_cards = [
-    ("🔍", "Shopping Agent",    LIGHT_GREEN, DARK_GREEN,
-     "Scans every onboarded merchant\ncatalog in real time. Surfaces\nrelevant items based on your request,\nlocation, and preferences."),
-    ("⚖️", "Comparison Agent",  RGBColor(0xEF, 0xF6, 0xFF), RGBColor(0x1D, 0x4E, 0xD8),
-     "Ranks results by price, distance,\nrating, and merchant reputation.\nPresents the top options with full\ntransparency."),
-    ("📋", "Rules Agent",       RGBColor(0xFF, 0xF7, 0xED), RGBColor(0xC2, 0x61, 0x0B),
-     "Validates every transaction against\nyour spending rules — monthly budget,\ncategory limits, and approval thresholds\n— before any option is shown."),
-    ("🔒", "Checkout Agent",    RGBColor(0xFD, 0xF2, 0xF8), RGBColor(0x86, 0x19, 0x7A),
-     "Generates a single-use tokenized\npayment credential. Your real card\nnumber is never exposed to the\nmerchant."),
+    ("🔍", "Search & Grounding", LIGHT_GREEN, DARK_GREEN,
+     "Retrieves synthetic catalog records.\nProduct, price and availability evidence\nstays bounded and inspectable."),
+    ("✨", "Gemini Planner", RGBColor(0xEF, 0xF6, 0xFF), RGBColor(0x1D, 0x4E, 0xD8),
+     "Interprets natural-language intent\nand explains choices. PII is redacted\nand failures use a labelled fallback."),
+    ("📋", "Commerce Controls", RGBColor(0xFF, 0xF7, 0xED), RGBColor(0xC2, 0x61, 0x0B),
+     "Recomputes prices and totals, checks\nroles and ownership, and requires an\nexplicit customer confirmation."),
+    ("🔒", "Order Workflow", RGBColor(0xFD, 0xF2, 0xF8), RGBColor(0x86, 0x19, 0x7A),
+     "Persists customer and merchant views.\nPayment is simulated-token or COD;\nfulfillment follows valid transitions."),
 ]
 
 for i, (icon, name, bg, accent, desc) in enumerate(agent_cards):
@@ -346,7 +346,7 @@ for i, (icon, name, bg, accent, desc) in enumerate(agent_cards):
 add_rect(sl, 0, H - Inches(0.08), W, Inches(0.08), fill=GREEN)
 
 # ─────────────────────────────────────────────
-# SLIDE 5 – Tokenized Payment & Security
+# SLIDE 5 – Responsible AI & Human Control
 # ─────────────────────────────────────────────
 sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
@@ -356,19 +356,19 @@ add_rect(sl, Inches(0.4), Inches(0.3), Inches(2.4), Inches(0.35), fill=GREEN)
 add_text(sl, "SECURITY", Inches(0.45), Inches(0.31), Inches(2.3), Inches(0.33),
          size=11, bold=True, color=WHITE)
 
-add_text(sl, "Tokenized Payment",
+add_text(sl, "Responsible AI Controls",
          Inches(0.4), Inches(0.8), Inches(7), Inches(0.85),
          size=38, bold=True, color=BLACK)
-add_text(sl, "Your real card number is never shared with any merchant.",
+add_text(sl, "Grounded assistance with deterministic controls and human approval.",
          Inches(0.4), Inches(1.65), Inches(8), Inches(0.5),
          size=17, color=DARK_GREEN, bold=True)
 
 flow_steps = [
     ("1", "Customer\nApproves",     "You confirm\nthe purchase"),
-    ("2", "Token\nGenerated",       "A one-time token\nis created"),
-    ("3", "Token\nSent",            "Only token goes\nto merchant"),
-    ("4", "Payment\nCompleted",     "Token expires\nimmediately"),
-    ("5", "Receipt +\nRewards",     "Customer gets\nconfirmation"),
+    ("2", "PII\nRedacted",          "Sensitive text is\nremoved from prompts"),
+    ("3", "Evidence\nGrounded",      "Catalog and metrics\nbound the answer"),
+    ("4", "Order\nPersisted",       "Simulated token\nor COD status"),
+    ("5", "Merchant\nControls",      "Status changes are\nexplicitly approved"),
 ]
 
 for i, (num, title, sub) in enumerate(flow_steps):
@@ -393,10 +393,10 @@ add_text(sl, "Why This Matters",
          size=16, bold=True, color=DARK_GREEN)
 
 benefits = [
-    "✓  Zero merchant card exposure — eliminates card-skimming risk",
-    "✓  Single-use token expires the moment payment is complete",
-    "✓  Even in a data breach, the token is worthless to attackers",
-    "✓  Full PCI-compliant flow — customer card details never transit merchant systems",
+    "✓  PII redaction before model calls and on model output",
+    "✓  Prompt-injection boundary for reviews and customer text",
+    "✓  Deterministic price, policy, authentication, and order controls",
+    "✓  Transparent fallbacks and prototype limitations",
 ]
 for i, b in enumerate(benefits):
     x = Inches(0.6) + (i % 2) * Inches(6.2)
@@ -406,33 +406,33 @@ for i, b in enumerate(benefits):
 add_rect(sl, 0, H - Inches(0.08), W, Inches(0.08), fill=GREEN)
 
 # ─────────────────────────────────────────────
-# SLIDE 6 – Loyalty & Merchant Console
+# SLIDE 6 – Demand Intelligence & Merchant Console
 # ─────────────────────────────────────────────
 sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 add_rect(sl, 0, Inches(0.08), Inches(0.06), H - Inches(0.08), fill=GREEN)
 
-add_text(sl, "Loyalty Rewards  &  Merchant Console",
+add_text(sl, "Demand Intelligence  &  Merchant Operations",
          Inches(0.4), Inches(0.25), Inches(11), Inches(0.75),
          size=30, bold=True, color=BLACK)
 
-# Loyalty left
+# Intelligence left
 add_rect(sl, Inches(0.4), Inches(1.1), Inches(5.9), Inches(5.5), fill=LIGHT_GREEN)
-add_text(sl, "🎁  Loyalty Rewards",
+add_text(sl, "📈  Demand Intelligence",
          Inches(0.6), Inches(1.2), Inches(5.5), Inches(0.6),
          size=20, bold=True, color=DARK_GREEN)
 add_text(sl,
-         "Every transaction automatically earns points.\n"
-         "No sign-up forms. No manual redemption.\n"
-         "The AI handles it all.",
+         "Historical order patterns become directional forecasts.\n"
+         "Gemini explains the evidence and suggests preparation,\n"
+         "while the merchant keeps decision authority.",
          Inches(0.6), Inches(1.9), Inches(5.5), Inches(1.0),
          size=14, color=DARK_GRAY)
 
 rewards = [
-    ("$1 spent",        "= 1 loyalty point"),
-    ("Points visible",  "instantly after order confirmation"),
-    ("Auto-applied",    "on next eligible purchase"),
-    ("No expiry",       "points never expire"),
+    ("Evidence",        "historical weekday and item patterns"),
+    ("Explainable",     "sample size and source shown to merchant"),
+    ("Actionable",      "stock-preparation guidance, not guarantees"),
+    ("Resilient",       "deterministic fallback if Gemini is unavailable"),
 ]
 for i, (k, v) in enumerate(rewards):
     y = Inches(3.1) + i * Inches(0.65)
@@ -448,16 +448,16 @@ add_text(sl, "🖥️  Merchant Console",
          Inches(6.9), Inches(1.2), Inches(5.8), Inches(0.6),
          size=20, bold=True, color=DARK_GRAY)
 add_text(sl,
-         "Real-time order visibility for every onboarded merchant.\n"
-         "No separate POS system needed.",
+         "Live application order visibility for the signed-in merchant,\n"
+         "with deterministic status transitions.",
          Inches(6.9), Inches(1.9), Inches(5.8), Inches(0.7),
          size=14, color=DARK_GRAY)
 
 console_steps = [
-    ("New Order Arrives",   "Instant notification with full order details"),
+    ("New Order Arrives",   "Persistent customer-confirmed order details"),
     ("Start Preparing",     "One click to accept and begin preparation"),
-    ("Mark Ready",          "Status updates pushed to customer in real time"),
-    ("Delivered",           "Order closed — payment already settled"),
+    ("Mark Ready",          "Status is persisted and visible to the customer"),
+    ("Delivered",           "Order closes with its honest payment status"),
 ]
 for i, (step, desc) in enumerate(console_steps):
     y = Inches(2.8) + i * Inches(0.78)
@@ -478,25 +478,25 @@ sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 add_rect(sl, 0, Inches(0.08), Inches(0.06), H - Inches(0.08), fill=GREEN)
 
-add_text(sl, "The Future of Commerce\nIs Autonomous.",
+add_text(sl, "The Future of Commerce\nIs Closed-Loop.",
          Inches(0.5), Inches(0.4), Inches(8), Inches(1.6),
          size=40, bold=True, color=BLACK)
 
 add_rect(sl, Inches(0.5), Inches(1.95), Inches(5.0), Inches(0.06), fill=GREEN)
 
 add_text(sl,
-         "Cart Pilot delivers a complete end-to-end agentic shopping experience —\n"
-         "from spoken intent to confirmed order — in under 30 seconds.",
+         "Aisle AI delivers a closed-loop shopping and merchant experience —\n"
+         "from spoken intent to confirmed order and operational action.",
          Inches(0.5), Inches(2.1), Inches(8.5), Inches(0.9),
          size=16, color=DARK_GRAY)
 
 summary = [
-    ("🎙️", "Hands-Free Ordering",     "Just talk — AI handles everything from search to payment"),
-    ("🔍", "Intelligent Discovery",    "Agents find the best local merchants and products instantly"),
-    ("📋", "Spend Rule Enforcement",   "Budget and category limits checked before any transaction"),
-    ("🔒", "Tokenized Security",       "One-use tokens keep your card details 100% private"),
-    ("🎁", "Automatic Loyalty",        "Points earned and applied without any manual effort"),
-    ("🖥️", "Merchant Dashboard",       "Real-time order management for every onboarded merchant"),
+    ("🎙️", "Conversational Ordering", "Talk or type; Gemini prepares a grounded cart for confirmation"),
+    ("🔍", "Intelligent Discovery",    "Gemini reasons over bounded synthetic catalog evidence"),
+    ("📋", "Deterministic Commerce",   "Prices, roles, confirmation, payment status and order transitions are controlled"),
+    ("🔒", "Responsible AI",           "PII redaction, grounding, role isolation, and human approval"),
+    ("📈", "Demand Intelligence",      "Directional forecasts explain the historical evidence used"),
+    ("🖥️", "Merchant Dashboard",       "Persistent order workflow and evidence-grounded customer insights"),
 ]
 
 for i, (icon, title, desc) in enumerate(summary):
@@ -513,7 +513,7 @@ for i, (icon, title, desc) in enumerate(summary):
 
 # Final tagline
 add_rect(sl, Inches(0.5), Inches(6.35), Inches(12.3), Inches(0.7), fill=GREEN)
-add_text(sl, "From intent to checkout in 30 seconds.  No multiple apps.  No friction.  Just AI.",
+add_text(sl, "From customer intent to merchant action — one transparent, Gemini-powered loop.",
          Inches(0.7), Inches(6.4), Inches(11.9), Inches(0.6),
          size=16, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 

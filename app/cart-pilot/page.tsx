@@ -4,8 +4,8 @@ import Footer from '../components/Footer';
 import CartPilotClient from './CartPilotClient';
 
 export const metadata: Metadata = {
-  title: 'Cart Pilot | Agentic AI Checkout',
-  description: 'Experience AI-powered shopping with our intelligent agents. Find, compare, and purchase from local merchants automatically.',
+  title: 'Gemini AI Concierge',
+  description: 'Use Gemini-assisted discovery and deterministic commerce tools, then explicitly confirm a prototype order.',
 };
 
 export default function CartPilotPage() {

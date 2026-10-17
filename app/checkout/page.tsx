@@ -6,7 +6,7 @@ import Link from 'next/link';
 import CheckoutClient from './CheckoutClient';
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Checkout | Checkout',
+  title: 'Confirm Order',
   description: 'Complete your order checkout',
 };
 

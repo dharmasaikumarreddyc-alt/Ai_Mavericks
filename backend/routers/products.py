@@ -3,28 +3,9 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from agents.base import MERCHANTS
+from services.catalog import search_catalog, transform_product
 
 router = APIRouter(prefix="/products", tags=["products"])
-
-
-def transform_product(product: dict, merchant: dict) -> dict:
-    """Transform merchant catalog item to frontend product format."""
-    return {
-        "id": f"{merchant['id']}_{product['id']}",  # Unique ID combining merchant and product
-        "name": product["name"],
-        "price": product["price"],
-        "originalPrice": product.get("originalPrice"),
-        "discount": product.get("discount"),
-        "image": product.get("image", ""),
-        "category": [product.get("category", merchant["category"])],
-        "tags": product.get("tags", []),
-        "description": product.get("description", ""),
-        "merchant": merchant["name"],
-        "merchant_id": merchant["id"],
-        "location": merchant.get("address", ""),
-        "rating": merchant.get("rating", 4.5),
-        "inStock": product.get("available", True)
-    }
 
 
 @router.get("")
@@ -43,43 +24,11 @@ async def get_products(
     - limit: Limit number of results
     - merchant_id: Filter by specific merchant
     """
-    products = []
-
-    # Get merchants to search
-    merchants_to_search = MERCHANTS.values()
-    if merchant_id:
-        merchant = MERCHANTS.get(merchant_id)
-        if not merchant:
-            return {"success": False, "products": [], "total": 0, "message": "Merchant not found"}
-        merchants_to_search = [merchant]
-
-    # Collect all products from merchant catalogs
-    for merchant in merchants_to_search:
-        for product in merchant.get("catalog", []):
-            # Transform to frontend format
-            transformed = transform_product(product, merchant)
-
-            # Apply filters
-            if category:
-                product_categories = [c.lower() for c in transformed["category"]]
-                if category.lower() not in product_categories:
-                    continue
-
-            if search and search.strip():
-                search_terms = search.lower().split()
-                searchable_text = (
-                    f"{transformed['name']} {transformed['description']} {transformed['merchant']} "
-                    f"{' '.join(transformed['category'])} {' '.join(transformed['tags'])}"
-                ).lower()
-                if not all(term in searchable_text for term in search_terms):
-                    continue
-
-            products.append(transformed)
-
-    total = len(products)
-    # Apply limit
-    if limit:
-        products = products[:limit]
+    if merchant_id and merchant_id not in MERCHANTS:
+        return {"success": False, "products": [], "total": 0, "message": "Merchant not found"}
+    all_products = search_catalog(category=category, search=search, merchant_id=merchant_id)
+    total = len(all_products)
+    products = all_products[:limit] if limit and limit > 0 else all_products
 
     return {
         "success": True,

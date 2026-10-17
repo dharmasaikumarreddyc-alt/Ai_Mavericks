@@ -48,6 +48,15 @@ interface ForecastItem {
   typicalPeakHour: number;
   typicalPeakTime: string;
 }
+interface ForecastAction {
+  id: string;
+  category: string;
+  title: string;
+  instruction: string;
+  priority: 'High' | 'Medium' | 'Low';
+  impact: string;
+}
+
 interface TodayForecast {
   weekday: string;
   forecastWindow: string;
@@ -57,6 +66,7 @@ interface TodayForecast {
   items: ForecastItem[];
   analysis: string;
   analysisSource: 'gemini' | 'evidence_fallback' | 'historical';
+  actions?: ForecastAction[];
 }
 
 interface DashboardData {
@@ -113,6 +123,13 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: '#10b981', cancelled: '#ef4444', preparing: '#3b82f6',
   pending: '#f59e0b', confirmed: '#06b6d4', ready: '#8b5cf6', dispatched: '#14b8a6',
 };
+const NEXT_ORDER_STATUS: Record<string, { status: string; label: string }> = {
+  pending: { status: 'confirmed', label: 'Confirm' },
+  confirmed: { status: 'preparing', label: 'Start preparing' },
+  preparing: { status: 'ready', label: 'Mark ready' },
+  ready: { status: 'dispatched', label: 'Dispatch' },
+  dispatched: { status: 'delivered', label: 'Mark delivered' },
+};
 
 function StatusBadge({ status }: { status: string }) {
   const bg = STATUS_COLORS[status] || '#6b7280';
@@ -153,6 +170,11 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
   const [forecastError, setForecastError] = useState('');
   const [forecastLoading, setForecastLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState('');
+  const [orderActionError, setOrderActionError] = useState('');
+  const [acceptedActions, setAcceptedActions] = useState<Record<string, string>>({});
+  const [acceptingActionId, setAcceptingActionId] = useState('');
+  const [actionLogError, setActionLogError] = useState('');
   const requestInFlight = useRef(false);
 
   const load = useCallback(async () => {
@@ -189,6 +211,17 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
       setData(json as DashboardData);
       setError('');
       setLastSync(new Date().toLocaleTimeString());
+      void fetch(`${backendUrl}/merchant/actions?limit=50`, {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${session.token}` },
+      }).then(async (actionResponse) => {
+        if (!actionResponse.ok) return;
+        const actions: { recommendationId: string; acceptedAt: string }[] = await actionResponse.json();
+        setAcceptedActions(Object.fromEntries(actions.map(action => [
+          action.recommendationId,
+          new Date(action.acceptedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        ])));
+      }).catch(() => undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load merchant analytics.');
     } finally {
@@ -197,6 +230,74 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
       setRefreshing(false);
     }
   }, [merchantId, router]);
+
+  const updateOrderStatus = async (order: RecentOrder, nextStatus: string) => {
+    let cancellationReason: string | undefined;
+    if (nextStatus === 'cancelled') {
+      cancellationReason = window.prompt('Why is this order being cancelled?')?.trim();
+      if (!cancellationReason) return;
+    }
+    setUpdatingOrderId(order.id);
+    setOrderActionError('');
+    try {
+      const session = await getAuthenticatedSession('merchant');
+      if (!session) {
+        router.replace('/merchant/login');
+        return;
+      }
+      const response = await fetch(`${backendUrl}/merchant/orders/${encodeURIComponent(order.id)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.token}` },
+        body: JSON.stringify({ status: nextStatus, cancellation_reason: cancellationReason }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.detail || 'Could not update this order.');
+      await load();
+    } catch (reason) {
+      setOrderActionError(reason instanceof Error ? reason.message : 'Could not update this order.');
+    } finally {
+      setUpdatingOrderId('');
+    }
+  };
+
+  const acceptForecastAction = async (action: ForecastAction) => {
+    const session = await getAuthenticatedSession('merchant');
+    if (!session || !forecast) {
+      setActionLogError('Please sign in again before accepting a recommendation.');
+      return;
+    }
+    setAcceptingActionId(action.id);
+    setActionLogError('');
+    try {
+      const response = await fetch(`${backendUrl}/merchant/actions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.token}`,
+        },
+        body: JSON.stringify({
+          recommendation_id: action.id,
+          category: action.category,
+          title: action.title,
+          instruction: action.instruction,
+          evidence: {
+            analysisSource: forecast.analysisSource,
+            sampleOrderCount: forecast.sampleOrderCount,
+            historyWeeksWithOrders: forecast.historyWeeksWithOrders,
+            forecastWindow: forecast.forecastWindow,
+          },
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.detail || 'Could not save this recommendation.');
+      const acceptedTime = new Date(result.acceptedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setAcceptedActions(previous => ({ ...previous, [action.id]: acceptedTime }));
+    } catch (reason) {
+      setActionLogError(reason instanceof Error ? reason.message : 'Could not save this recommendation.');
+    } finally {
+      setAcceptingActionId('');
+    }
+  };
 
   useEffect(() => {
     const initialLoad = window.setTimeout(() => { void load(); }, 0);
@@ -497,6 +598,84 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
                       </span>
                       <p>{forecast.analysis}</p>
                     </div>
+
+                    {/* Operational Action Cards: Closing the loop from AI insight to physical store action */}
+                    {forecast.actions && forecast.actions.length > 0 && (
+                      <div style={{ marginTop: 18, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#10b981', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                            <i className="fas fa-bolt" style={{ marginRight: 6 }} /> Recommended Merchant Actions (Closed-Loop)
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Human-approved action log</span>
+                        </div>
+                        {actionLogError && <p role="alert" style={{ color: '#fca5a5', fontSize: '0.8rem' }}>{actionLogError}</p>}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                          {forecast.actions.map((action) => {
+                            const isAccepted = Boolean(acceptedActions[action.id]);
+                            return (
+                              <div
+                                key={action.id}
+                                style={{
+                                  background: isAccepted ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.03)',
+                                  border: `1px solid ${isAccepted ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                  borderRadius: 8,
+                                  padding: '12px 14px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                }}
+                              >
+                                <div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: 12, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>
+                                      {action.category}
+                                    </span>
+                                    <span style={{ fontSize: '0.72rem', color: action.priority === 'High' ? '#f87171' : '#fbbf24', fontWeight: 600 }}>
+                                      {action.priority} Priority
+                                    </span>
+                                  </div>
+                                  <strong style={{ display: 'block', fontSize: '0.9rem', color: '#f8fafc', marginBottom: 4 }}>
+                                    {action.title}
+                                  </strong>
+                                  <p style={{ fontSize: '0.82rem', color: '#cbd5e1', margin: '0 0 6px 0', lineHeight: 1.4 }}>
+                                    {action.instruction}
+                                  </p>
+                                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: 10 }}>
+                                    <i className="fas fa-arrow-trend-up" style={{ marginRight: 5, color: '#10b981' }} />
+                                    {action.impact}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => { if (!isAccepted) void acceptForecastAction(action); }}
+                                  disabled={isAccepted || acceptingActionId === action.id}
+                                  style={{
+                                    cursor: isAccepted ? 'default' : 'pointer',
+                                    background: isAccepted ? '#10b981' : '#3b82f6',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    padding: '7px 12px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 6,
+                                    transition: 'all 0.2s',
+                                  }}
+                                >
+                                  <i className={`fas ${isAccepted ? 'fa-check-double' : 'fa-clipboard-check'}`} />
+                                  {isAccepted
+                                    ? `Accepted for staff review at ${acceptedActions[action.id]}`
+                                    : acceptingActionId === action.id ? 'Saving…' : 'Accept recommendation'}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
                 {forecast && forecast.items.length === 0 && (
@@ -636,10 +815,12 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
                   <i className="fas fa-receipt" style={{ marginRight: 8, color: '#3b82f6' }} />
                   Recent Orders — {merchant.name}
                 </h6>
+                <p className="text-muted">Process live orders from confirmation to delivery. Demo-history rows are read-only.</p>
+                {orderActionError && <div className="alert alert-danger" role="alert">{orderActionError}</div>}
                 <div className="merchant-dash-orders-table-wrap">
                   <table className="merchant-dash-orders-table">
                     <thead>
-                      <tr><th>Order ID</th><th>Items</th><th>Cooking instructions</th><th>Total</th><th>Status</th><th>Placed / dispatched</th><th>Cancelled at / reason</th></tr>
+                      <tr><th>Order ID</th><th>Items</th><th>Cooking instructions</th><th>Total</th><th>Status</th><th>Placed / dispatched</th><th>Cancelled at / reason</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                       {recentOrders.map(o => (
@@ -660,6 +841,22 @@ export default function MerchantDashboardClient({ merchantId }: { merchantId: st
                                 <span className="merchant-dash-cancel-tag">{o.cancellationReason}</span>
                               </>
                             ) : '—'}
+                          </td>
+                          <td>
+                            {o.isDemo ? <small className="text-muted">Demo · read only</small> : (
+                              <div className="d-flex flex-column gap-2" style={{ minWidth: 130 }}>
+                                {NEXT_ORDER_STATUS[o.status] && <button
+                                  type="button" className="btn btn-sm btn-primary"
+                                  disabled={updatingOrderId === o.id}
+                                  onClick={() => void updateOrderStatus(o, NEXT_ORDER_STATUS[o.status].status)}
+                                >{updatingOrderId === o.id ? 'Updating…' : NEXT_ORDER_STATUS[o.status].label}</button>}
+                                {['pending', 'confirmed', 'preparing', 'ready'].includes(o.status) && <button
+                                  type="button" className="btn btn-sm btn-outline-danger"
+                                  disabled={updatingOrderId === o.id}
+                                  onClick={() => void updateOrderStatus(o, 'cancelled')}
+                                >Cancel</button>}
+                              </div>
+                            )}
                           </td>
                         </tr>
                       ))}

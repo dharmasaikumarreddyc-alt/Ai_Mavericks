@@ -1,173 +1,122 @@
-# Aisle — Agentic AI Checkout
+# Aisle AI — The Closed-Loop Commerce Copilot
 
-A food-ordering prototype with a Next.js customer and merchant experience and a
-FastAPI backend for authentication, orders, merchant analytics, and AI features.
+> Turn every customer intent into an order, and every order into a merchant action.
 
-## Project layout
+Aisle AI is a Gemini-powered retail experience for the Google AI Builder Cup. Customers can describe what they need, discover grounded products, build budget-aware carts, and confirm an order. Merchants receive the order, process it through a controlled fulfillment workflow, and use Gemini to turn demand and review evidence into decisions.
+
+## Why it stands out
+
+Most commerce assistants end at a recommendation. Aisle AI closes the loop:
 
 ```text
-retail/
-├── app/                  # Next.js frontend and frontend API routes
-├── backend/              # FastAPI backend
-│   ├── .env.example      # Safe template for local backend configuration
-│   └── requirements.txt  # Python dependencies
-├── package.json          # Frontend scripts and dependencies
-└── package-lock.json     # Locked frontend dependency versions
+Customer intent → Gemini-assisted discovery → deterministic price/policy checks
+→ explicit confirmation → persistent order → merchant fulfillment
+→ grounded demand/review insight → merchant action
 ```
 
-## Prerequisites
+The product directly addresses conversational commerce, discovery, personalization, customer insight, demand planning, and operational efficiency without pretending the language model is a payment processor or source of truth.
 
-- **Node.js 20.9 or newer** and npm, for the frontend.
-- **Python 3.10 or newer** and pip, for the backend.
-- An AI provider API key only if you want to use AI-powered backend features.
+## Working capabilities
 
-Check the installed tools in PowerShell:
+- Gemini 3.8 Flash is the primary model across customer agents and merchant insights, with labelled deterministic fallbacks.
+- Conversational/voice discovery, smart cart, budget shop, order prediction, and receipt narration.
+- Catalog search across product names, descriptions, categories, tags, and merchants.
+- Separate customer and merchant authentication with correct cross-role redirection.
+- Persistent customer checkout and merchant-visible orders.
+- One honest payment story: free simulated one-time card token or COD; no PAN/CVV collection and no money movement in default mode.
+- Guarded order states: `pending → confirmed → preparing → ready → dispatched → delivered`, with validated cancellation paths.
+- Merchant dashboard with order processing, operational KPIs, directional demand forecast, grounded review intelligence, and a persisted human-acceptance log for recommendations.
+- PII redaction, untrusted-input boundaries, deterministic controls, metadata-only AI telemetry, and a public `/trust` experience.
+- Containerized Next.js and FastAPI services ready for Google Cloud Run.
 
-```powershell
-node --version
-npm --version
-python --version
+Card payment is deliberately marked `simulated`; COD is `not_collected`. Catalog, offers, ratings, merchant history, availability and forecasts are synthetic or directional and not guaranteed. See [GOVERNANCE.md](GOVERNANCE.md).
+
+## Architecture
+
+```text
+Next.js on Cloud Run
+  ├─ Customer + merchant experiences
+  ├─ Server-side Gemini agent routes
+  └─ Deterministic agent tools and fallbacks
+             │ authenticated HTTPS
+FastAPI on Cloud Run
+  ├─ Auth, cart, order and fulfillment APIs
+  ├─ Gemini merchant intelligence
+  ├─ Governance and role/ownership controls
+  └─ PostgreSQL (Neon for prototype; Cloud SQL-ready boundary)
+
+Secret Manager: Gemini key, database URL, JWT secret
 ```
 
-## Install dependencies
+## Run locally
 
-Use two PowerShell terminals, or complete both installs in one terminal.
-
-### Frontend — project root
-
-From the `retail` directory (the directory containing `package.json`):
+Requirements: Node.js 20.9+ (Node 24 recommended), npm, and Python 3.10+.
 
 ```powershell
 npm ci
-```
+Copy-Item .env.example .env.local
 
-This installs the locked Next.js, React, TypeScript, Tailwind CSS, and ESLint
-dependencies into the root `node_modules` directory.
-
-### Backend — `backend` directory
-
-```powershell
 cd backend
 python -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-The virtual environment and Python packages are kept under `backend\venv`.
-If PowerShell blocks virtual-environment activation, either allow scripts for
-your current PowerShell session:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\venv\Scripts\Activate.ps1
-```
-
-Or skip activation and use the virtual-environment Python executable directly:
-
-```powershell
 .\venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
 .\venv\Scripts\python.exe main.py
 ```
 
-## Configure the backend
-
-In the `backend` directory, copy the example configuration:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Open `backend\.env` in an editor and set a unique `SECRET_KEY`. For AI-backed
-features, add a key for at least one provider supported by the backend, such as
-`GOOGLE_API_KEY` or `GROQ_API_KEY`. The example file lists the supported
-variables and default development settings.
-
-Keep API keys and other secrets private. Do not paste them into source files,
-commit `.env`, or share them in screenshots. The backend can serve many
-non-AI endpoints without a provider key, but AI features need a configured
-provider.
-
-For local development, the example configuration uses SQLite at
-`backend\aisle.db`, allows the frontend origin at `http://localhost:3000`, and
-the backend initializes its development database on startup.
-
-## Run the application
-
-Start the backend first, then the frontend. Keep both terminals open.
-
-### Terminal 1 — backend
-
-From the `retail\backend` directory, with the virtual environment activated:
-
-```powershell
-python main.py
-```
-
-The API runs at `http://localhost:8000`. Interactive API documentation is at
-`http://localhost:8000/docs`, and the health check is
-`http://localhost:8000/health`.
-
-### Terminal 2 — frontend
-
-From the `retail` project root:
+In another terminal, from the repository root:
 
 ```powershell
 npm run dev
 ```
 
-Open `http://localhost:3000` in your browser. The frontend uses
-`http://localhost:8000` as the default backend URL. If your backend runs
-elsewhere, create a root-level `.env.local` containing the public backend URL:
+Add `GOOGLE_API_KEY` to both local env files. Never commit secrets. The web app runs on `http://localhost:3000`; API docs are at `http://localhost:8000/docs`.
 
-```dotenv
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-```
-
-Restart the frontend after changing `.env.local`. This URL is exposed to the
-browser; never put API keys or other secrets in `NEXT_PUBLIC_*` variables.
-
-To stop either server, press `Ctrl+C` in its terminal.
-
-## Useful commands
-
-Run these frontend commands from the project root:
+## Verification
 
 ```powershell
-npm run dev       # Start the development frontend
-npm run build     # Build the production frontend
-npm run start     # Serve a completed production build
-npm run lint      # Run ESLint
+npm run lint
+npm run build
+python -m unittest discover -s backend/tests -v
 ```
 
-Run backend database migrations from the `backend` directory when needed:
+Recommended demo smoke test:
+
+1. Sign in as a customer and search for a product.
+2. Ask AI Concierge for a budget-aware order and inspect its grounded choices.
+3. Confirm checkout; verify the card path says “simulated token” and “no money moved,” or use COD.
+4. Sign in as the linked merchant; open Orders and advance the live order to Ready.
+5. Return to the customer account and verify the same status.
+6. Show Gemini demand/review insight, its evidence source, and the Trust page.
+
+The latest small offline control/retrieval run is recorded in [EVAL_RESULTS.md](EVAL_RESULTS.md).
+It is intentionally not presented as a Gemini or production benchmark.
+
+## Deploy to Google Cloud Run
+
+Create these Secret Manager secrets first: `aisle-database-url`, `aisle-jwt-secret`, and `aisle-gemini-key`. Give the Cloud Run runtime service account Secret Manager access. Use a PostgreSQL async URL (for example `postgresql+asyncpg://...`) and a random JWT secret of at least 32 characters. The deployment keeps `PAYMENT_MODE=demo`, so it needs no paid gateway account.
 
 ```powershell
-python -m alembic upgrade head
+.\deploy-gcp.ps1 -ProjectId YOUR_GCP_PROJECT_ID
 ```
 
-The development server initializes the local SQLite database automatically.
-Production deployment requires running migrations as a separate deployment
-step; see [backend/README.md](./backend/README.md) for deployment, database
-migration, demo merchant, and API details.
+The script enables required APIs, deploys the backend and frontend from source, injects secrets at runtime, configures the generated frontend as the only CORS origin, and prints both URLs. Migrations should be run as a controlled Cloud Run Job before production traffic; development-only auto-initialization is intentionally disabled in production.
 
-## Checkout behavior
+## Submission checklist
 
-Checkout is prototype-only: selecting a payment method places the order without
-connecting to a payment gateway. Orders and customer-provided cooking
-instructions are saved for the customer and the merchant. Do not enter real
-payment credentials.
+- Public repository with no secrets and hackathon-period history.
+- Working Cloud Run frontend and API URLs.
+- PDF deck that accurately labels simulated tokenization, synthetic data, and directional forecasts.
+- Public demo video under three minutes: intent → tools → confirmation → merchant order → insight → responsible AI.
+- Rotate every credential ever pasted into chat or a screenshot before submission.
 
-## Troubleshooting
+No competition result can be guaranteed; this repository is designed to maximize the published technical, alignment, innovation, and UX criteria while keeping claims verifiable.
 
-- **Frontend cannot reach the backend:** confirm the backend is running at
-  `http://localhost:8000`, check `http://localhost:8000/health`, and verify
-  `NEXT_PUBLIC_BACKEND_URL` if you changed the backend address.
-- **`ModuleNotFoundError` or missing Python package:** activate the backend
-  virtual environment and rerun `pip install -r requirements.txt` from
-  `backend`.
-- **AI feature reports a provider error:** check that the provider key is set
-  in `backend\.env`, that the backend was restarted after the change, and that
-  the provider account has available quota.
-- **Port already in use:** stop the other process using port `3000` or `8000`,
-  or configure the relevant development server to use another port.
+## Prototype cost boundary
+
+- The default payment demo is entirely local and free; no financial transaction occurs.
+- Gemini Developer API offers limited free access for eligible models/regions, with quota limits and data-use terms. The configured key must be valid for the selected model.
+- Neon has a free plan suitable for a small demo database, subject to current quotas.
+- Cloud Run has a usage-based free tier, but Google Cloud setup can still require a billing account and charges apply beyond free quotas or for related services/egress.
+- Razorpay is optional and disabled. Test mode does not move money; live transactions are not free and require merchant onboarding.
+
+Always verify current provider terms immediately before the demo or deployment.

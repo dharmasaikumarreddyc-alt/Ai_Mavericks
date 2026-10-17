@@ -3,7 +3,7 @@ import MerchantDashboardClient from './MerchantDashboardClient';
 
 export const metadata: Metadata = {
   title: 'Store Analytics | Merchant Dashboard',
-  description: 'Real-time analytics for your store — weekly statistics, order insights, cancellation analysis, stock availability, and revenue breakdown.',
+  description: 'Application-backed demo analytics, order insights, cancellation analysis, stock signals, and revenue breakdown.',
 };
 
 export default async function MerchantDashboardPage({ params }: { params: Promise<{ merchantId: string }> }) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchProducts, getMerchantProducts, merchantsDB, type Product } from '../data';
-import { llmJSON, llmEnabled } from '../llm';
+import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/inventory
 // Inventory Agent - Picks the products from a merchant that best satisfy the request.
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Merchant not found' }, { status: 404 });
     }
 
-    // Fetch products (works for both local and DummyJSON merchants)
+    // Fetch products from the bounded local catalog.
     const allMerchantProducts = await getMerchantProducts(merchantId);
 
     // Try the real AI agent first; fall back to keyword matching.
@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
       !ai && matchingProducts.length === 0 ? allMerchantProducts.slice(0, 3) : [];
     const products = ai?.products ?? (matchingProducts.length > 0 ? matchingProducts : catalogAlternatives);
     const usedAI = Boolean(ai);
+    const configuredModel = llmDescriptor();
 
     const alternatives =
       ai?.alternatives ??
@@ -153,6 +154,13 @@ export async function POST(request: NextRequest) {
         hasAlternatives,
         alternatives,
         alternativeMessage,
+        provenance: {
+          selectionMode: usedAI ? 'model' : 'deterministic-fallback',
+          provider: usedAI ? configuredModel?.provider ?? null : null,
+          model: usedAI ? configuredModel?.model ?? null : null,
+          evidenceSource: 'bounded synthetic product catalog',
+          piiControls: ['email pattern', 'phone pattern', 'payment-number pattern'],
+        },
       },
     };
 

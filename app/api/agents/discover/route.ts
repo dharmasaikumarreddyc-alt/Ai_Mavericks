@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchMerchants, merchantsDB, type Merchant } from '../data';
-import { llmJSON, llmEnabled } from '../llm';
+import { llmDescriptor, llmJSON, llmEnabled } from '../llm';
 
 // POST /api/agents/discover
 // Merchant Discovery Agent - Finds & ranks relevant merchants for a natural-language request.
@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
     const merchants =
       ai?.merchants ?? fallbackMerchants.filter((m) => distanceOf(m) <= radius);
     const usedAI = Boolean(ai);
+    const configuredModel = llmDescriptor();
 
     const response = {
       success: true,
@@ -112,6 +113,12 @@ export async function POST(request: NextRequest) {
             : 'No merchants found for your query. Try broadening your search.',
         spoken: ai?.spoken,
         clarifyingQuestion: ai?.clarifyingQuestion,
+        provenance: {
+          selectionMode: usedAI ? 'model' : 'deterministic-fallback',
+          provider: usedAI ? configuredModel?.provider ?? null : null,
+          model: usedAI ? configuredModel?.model ?? null : null,
+          evidenceSource: 'bounded synthetic merchant catalog',
+        },
       },
     };
 

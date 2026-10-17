@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ProductModal from './ProductModal';
 import { getAuthenticatedSession } from '../lib/auth';
 
@@ -25,10 +25,13 @@ interface Product {
 
 export default function ProductList() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryKey = searchParams.toString();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [search, setSearch] = useState('');
 
   const fetchProducts = useCallback(async (category?: string, search?: string, signal?: AbortSignal) => {
     try {
@@ -65,12 +68,20 @@ export default function ProductList() {
         return;
       }
 
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(queryKey);
+      setSearch(params.get('search') || '');
       await fetchProducts(params.get('category') || undefined, params.get('search') || undefined, controller.signal);
     };
     void loadShop();
     return () => controller.abort();
-  }, [fetchProducts, router]);
+  }, [fetchProducts, queryKey, router]);
+
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const normalized = search.trim();
+    const url = normalized ? `/shop?search=${encodeURIComponent(normalized)}` : '/shop';
+    router.replace(url, { scroll: false });
+  };
 
   // Helper function to render star rating
   const renderStars = (rating: number) => {
@@ -85,11 +96,6 @@ export default function ProductList() {
       );
     }
     return stars;
-  };
-
-  // Helper to generate review count based on rating
-  const getReviewCount = (rating: number) => {
-    return Math.floor(rating * 100) + 50;
   };
 
   if (loading) {
@@ -112,6 +118,20 @@ export default function ProductList() {
 
   return (
     <>
+      <form className="aisle-shop-search" onSubmit={submitSearch} role="search">
+        <label htmlFor="shop-search">Search the synthetic demo catalog</label>
+        <div className="aisle-shop-search-row">
+          <input
+            id="shop-search"
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Try coffee, breakfast, bakery, dosa…"
+          />
+          <button type="submit" className="btn btn-secondary">Search</button>
+        </div>
+        <small>Matches product names, descriptions, categories, tags, and merchants.</small>
+      </form>
       {products.length === 0 && (
         <div className="alert alert-light text-center" role="status">
           No food or drinks match this search. Try coffee, bakery, breakfast, or dosa.
@@ -134,7 +154,7 @@ export default function ProductList() {
                   <div className="dz-header">
                     <div>
                       <h4 className="title mb-0">
-                        <Link href={`/shop/${product.id}`}>{product.name}</Link>
+                        <button type="button" className="btn p-0 border-0 text-start" onClick={() => setSelectedProduct(product)}>{product.name}</button>
                       </h4>
                       <ul className="dz-tags">
                         {product.category.map((cat, idx) => (
@@ -148,7 +168,7 @@ export default function ProductList() {
                       <ul className="dz-rating">
                         {renderStars(product.rating)}
                       </ul>
-                      <span><a href="#"> {getReviewCount(product.rating)} Review</a></span>
+                      <span className="small text-muted">Synthetic demo rating</span>
                     </div>
                   </div>
                   <div className="dz-body">
@@ -165,16 +185,10 @@ export default function ProductList() {
                         </div>
                       </div>
                       <div className="d-flex">
-                        <Link href="/shop" className="btn btn-secondary btn-md btn-icon">
+                        <button type="button" onClick={() => setSelectedProduct(product)} className="btn btn-secondary btn-md btn-icon">
                           <i className="icon feather icon-shopping-cart d-md-none d-block"></i>
-                          <span className="d-md-block d-none">Add to cart</span>
-                        </Link>
-                        <div className="bookmark-btn style-1">
-                          <input className="form-check-input" type="checkbox" id={`favoriteCheck${product.id}`} />
-                          <label className="form-check-label" htmlFor={`favoriteCheck${product.id}`}>
-                            <i className="fa-solid fa-heart"></i>
-                          </label>
-                        </div>
+                          <span className="d-md-block d-none">Choose options</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -205,19 +219,11 @@ export default function ProductList() {
                       <i className="fa-solid fa-eye d-md-none d-block"></i>
                       <span className="d-md-block d-none">Quick View</span>
                     </button>
-                    <div className="btn btn-primary meta-icon dz-wishicon">
-                      <i className="icon feather icon-heart dz-heart"></i>
-                      <i className="icon feather icon-heart-on dz-heart-fill"></i>
-                    </div>
-                    <div className="btn btn-primary meta-icon dz-carticon">
-                      <i className="flaticon flaticon-basket"></i>
-                      <i className="flaticon flaticon-shopping-basket-on dz-heart-fill"></i>
-                    </div>
                   </div>
                 </div>
                 <div className="dz-content">
                   <h5 className="title">
-                    <Link href={`/shop/${product.id}`}>{product.name}</Link>
+                    <button type="button" className="btn p-0 border-0" onClick={() => setSelectedProduct(product)}>{product.name}</button>
                   </h5>
                   <h5 className="price">${product.price.toFixed(2)}</h5>
                 </div>
@@ -252,19 +258,11 @@ export default function ProductList() {
                       <i className="fa-solid fa-eye d-md-none d-block"></i>
                       <span className="d-md-block d-none">Quick View</span>
                     </button>
-                    <div className="btn btn-primary meta-icon dz-wishicon">
-                      <i className="icon feather icon-heart dz-heart"></i>
-                      <i className="icon feather icon-heart-on dz-heart-fill"></i>
-                    </div>
-                    <div className="btn btn-primary meta-icon dz-carticon">
-                      <i className="flaticon flaticon-basket"></i>
-                      <i className="flaticon flaticon-shopping-basket-on dz-heart-fill"></i>
-                    </div>
                   </div>
                 </div>
                 <div className="dz-content">
                   <h5 className="title">
-                    <Link href={`/shop/${product.id}`}>{product.name}</Link>
+                    <button type="button" className="btn p-0 border-0" onClick={() => setSelectedProduct(product)}>{product.name}</button>
                   </h5>
                   <h5 className="price">${product.price.toFixed(2)}</h5>
                 </div>

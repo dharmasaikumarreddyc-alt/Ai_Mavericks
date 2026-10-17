@@ -6,8 +6,8 @@ import Link from 'next/link';
 import LoginClient from './LoginClient';
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Checkout | Login',
-  description: 'Login to your Agentic AI Checkout account',
+  title: 'Customer Login',
+  description: 'Sign in to your Aisle AI customer account.',
 };
 
 export default function LoginPage() {

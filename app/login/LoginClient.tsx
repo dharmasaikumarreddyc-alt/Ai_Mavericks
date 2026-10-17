@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { backendUrl } from '../lib/backend';
-import { saveAuthenticatedToken } from '../lib/auth';
+import { saveAuthenticatedToken, type AuthProfile } from '../lib/auth';
 
 export default function LoginClient() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -34,23 +33,28 @@ export default function LoginClient() {
 
       if (response.ok) {
         const data = await response.json();
-        const profileResponse = await fetch(`${backendUrl}/auth/me`, {
-          headers: { Authorization: `Bearer ${data.access_token}` },
-        });
-        if (!profileResponse.ok) {
+        const profile: AuthProfile = {
+          id: data.id,
+          email: data.email,
+          name: data.name,
+          role: data.role,
+          merchant_id: data.merchant_id,
+        };
+        if (!profile.id || !profile.email || !['customer', 'merchant'].includes(profile.role)) {
           throw new Error('Could not load your account profile.');
         }
-        const profile: { role: 'customer' | 'merchant'; merchant_id: string | null } = await profileResponse.json();
-        if (profile.role !== 'customer') {
-          setError('Customer sign-in only. This is a merchant account; use the merchant portal below.');
+        if (profile.role === 'merchant' && profile.merchant_id) {
+          saveAuthenticatedToken('merchant', data.access_token, profile);
+          window.dispatchEvent(new Event('authChanged'));
+          router.replace(`/merchant/dashboard/${encodeURIComponent(profile.merchant_id)}`);
           return;
         }
-        saveAuthenticatedToken('customer', data.access_token);
+        saveAuthenticatedToken('customer', data.access_token, profile);
 
         // Notify other components that auth state changed
         window.dispatchEvent(new Event('authChanged'));
 
-        router.push('/shop');
+        router.replace('/shop');
       } else {
         const errorData = await response.json();
         setError(errorData.detail || 'Invalid email or password');
@@ -104,27 +108,9 @@ export default function LoginClient() {
             </div>
           </div>
         </div>
-        <div className="form-row d-flex justify-content-between m-b30">
-          <div className="form-group">
-            <div className="custom-control custom-checkbox">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="basic_checkbox_1"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="basic_checkbox_1">
-                Remember Me
-              </label>
-            </div>
-          </div>
-          <div className="form-group">
-            <Link href="/forgot-password" className="text-primary">
-              Forgot Password
-            </Link>
-          </div>
-        </div>
+        <p className="small text-muted m-b30">
+          Password reset is not enabled in this prototype. Do not reuse a personal password.
+        </p>
         <div className="text-center">
           <button
             type="submit"

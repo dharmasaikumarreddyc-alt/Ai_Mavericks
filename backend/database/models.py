@@ -235,3 +235,24 @@ class MerchantReviewDB(Base):
     review = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, index=True)
     is_demo = Column(Boolean, nullable=False, default=False, index=True)
+
+
+class MerchantActionDB(Base):
+    """Auditable merchant acceptance of an advisory recommendation.
+
+    Acceptance does not claim that inventory or a physical preparation task was
+    executed; downstream operational integration is intentionally out of scope
+    for this prototype.
+    """
+
+    __tablename__ = "merchant_actions"
+
+    id = Column(String, primary_key=True, default=lambda: generate_id("ACT-"))
+    merchant_id = Column(String, ForeignKey("merchant_profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    recommendation_id = Column(String, nullable=False, index=True)
+    category = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    instruction = Column(Text, nullable=False)
+    evidence = Column(JSON, nullable=False, default=dict)
+    status = Column(String, nullable=False, default="accepted_for_review", index=True)
+    accepted_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)

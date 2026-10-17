@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+backend/venv
+backend/.venv
+**/__pycache__
+**/*.pyc
+**/.env*
+*.pptx
+*.pdf

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { backendUrl } from '../lib/backend';
-import { saveAuthenticatedToken } from '../lib/auth';
+import { saveAuthenticatedToken, type AuthProfile } from '../lib/auth';
 
 export default function RegisterClient() {
   const [name, setName] = useState('');
@@ -38,17 +38,19 @@ export default function RegisterClient() {
         return;
       }
 
-      const profileResponse = await fetch(`${backendUrl}/auth/me`, {
-        cache: 'no-store',
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-      const profile = await profileResponse.json();
-      if (!profileResponse.ok || profile.role !== 'customer') {
+      const profile: AuthProfile = {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        role: data.role,
+        merchant_id: data.merchant_id,
+      };
+      if (!profile.id || !profile.email || profile.role !== 'customer') {
         setError('Customer registration could not be verified. Please use customer sign-in.');
         return;
       }
 
-      saveAuthenticatedToken('customer', data.access_token);
+      saveAuthenticatedToken('customer', data.access_token, profile);
       window.dispatchEvent(new Event('authChanged'));
       router.push('/shop');
     } catch (err) {

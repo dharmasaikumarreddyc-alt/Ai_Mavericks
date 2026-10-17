@@ -33,12 +33,12 @@ export interface Product {
 }
 
 // =====================================================
-// LOCAL FOOD & BEVERAGE MERCHANTS (Original)
+// SYNTHETIC DEMO MERCHANTS — no affiliation with real businesses.
 // =====================================================
 export const localMerchantsDB: Merchant[] = [
   {
     id: 'cafe-verde',
-    name: 'Starbucks Coffee Company',
+    name: 'Aisle Coffee Lab',
     type: 'Coffee Shop',
     category: ['coffee', 'cafe', 'breakfast', 'vegan', 'healthy'],
     distance: '0.1 mi',
@@ -46,12 +46,12 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/cafe-verde.jpg',
     offers: ['10% off orders above $10', 'Free coffee with breakfast combo'],
     prepTime: '7-10 min',
-    address: '3550 Lenox Rd NE, Atlanta, GA 30326',
+    address: '100 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
     id: 'bean-scene-coffee',
-    name: 'Truffles Cafe',
+    name: 'Bean Scene Coffee',
     type: 'Coffee Shop',
     category: ['coffee', 'cafe', 'breakfast', 'bakery'],
     distance: '0.3 mi',
@@ -59,12 +59,12 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/bean-scene-coffee.jpg',
     offers: ['Happy Hour 3-5 PM: 20% off', 'Student discount 15%'],
     prepTime: '5-10 min',
-    address: '3500 Lenox Rd NE, Atlanta, GA 30326',
+    address: '110 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
     id: 'green-leaf-bistro',
-    name: 'Tower Cafe',
+    name: 'Green Leaf Bistro',
     type: 'Health Restaurant',
     category: ['salads', 'healthy', 'vegan', 'lunch', 'organic'],
     distance: '0.2 mi',
@@ -72,12 +72,12 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/green-leaf-bistro.jpg',
     offers: ['Buy 1 Get 1 on salads (Mon-Wed)', '15% off organic items'],
     prepTime: '12-18 min',
-    address: '3530 Lenox Rd NE, Atlanta, GA 30326',
+    address: '120 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
     id: 'daily-fresh-mart',
-    name: "Peet's Coffee & Tea",
+    name: 'Daily Fresh Roasters',
     type: 'Coffee Shop',
     category: ['coffee', 'tea', 'espresso', 'organic', 'roasts'],
     distance: '0.4 mi',
@@ -85,7 +85,7 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/daily-fresh-mart.jpg',
     offers: ['Free delivery on all orders', '10% off on first order'],
     prepTime: '5-10 min',
-    address: '3393 Peachtree Rd NE, Atlanta, GA 30326',
+    address: '140 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
@@ -98,7 +98,7 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/curry.jpg',
     offers: ['20% off on Biryani combos', 'Free dessert above $15'],
     prepTime: '15-25 min',
-    address: '3580 Lenox Rd NE, Atlanta, GA 30326',
+    address: '150 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
@@ -111,7 +111,7 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/dosa.jpg',
     offers: ['Breakfast combo at $7.99', 'Filter coffee free with meals'],
     prepTime: '8-15 min',
-    address: '3424 Peachtree Rd NE, Atlanta, GA 30326',
+    address: '160 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
   {
@@ -124,14 +124,14 @@ export const localMerchantsDB: Merchant[] = [
     image: '/images/products/cake.jpg',
     offers: ['15% off on birthday cakes', 'Buy 2 Get 1 on pastries'],
     prepTime: '5-8 min',
-    address: '3500 Peachtree Rd NE, Atlanta, GA 30326',
+    address: '170 Demo Market St, Atlanta, GA 30326',
     isOpen: true,
   },
 ];
 
 // Local food products
 export const localProductsDB: Product[] = [
-  // Cafe Verde Products (Starbucks)
+  // Aisle Coffee Lab products
   { id: 'cv-1', merchantId: 'cafe-verde', name: 'Vegan Avocado Toast', price: 8.50, description: 'Sourdough with smashed avocado, cherry tomatoes & microgreens', image: '/images/products/avocado-toast.jpg', category: 'Breakfast', tags: ['vegan', 'healthy', 'breakfast', 'avocado', 'toast'], inStock: true, quantity: 50 },
   { id: 'cv-2', merchantId: 'cafe-verde', name: 'Oat Milk Latte', price: 5.75, description: 'Double shot espresso with creamy oat milk', image: '/images/products/latte.jpg', category: 'Drinks', tags: ['vegan', 'coffee', 'latte', 'oat'], inStock: true, quantity: 999 },
   { id: 'cv-3', merchantId: 'cafe-verde', name: 'Vegan Buddha Bowl', price: 12.50, description: 'Quinoa, roasted veggies, hummus & tahini dressing', image: '/images/products/buddha-bowl.jpg', category: 'Breakfast', tags: ['vegan', 'healthy', 'protein', 'bowl'], inStock: true, quantity: 30 },
@@ -140,20 +140,20 @@ export const localProductsDB: Product[] = [
   { id: 'cv-6', merchantId: 'cafe-verde', name: 'Cappuccino', price: 5.50, description: 'Classic cappuccino with steamed milk foam', image: '/images/products/cappuccino.jpg', category: 'Drinks', tags: ['coffee', 'cappuccino'], inStock: true, quantity: 999 },
   { id: 'cv-7', merchantId: 'cafe-verde', name: 'Blueberry Muffin', price: 3.75, description: 'Fresh baked muffin with juicy blueberries', image: '/images/products/blueberry-muffin.jpg', category: 'Bakery', tags: ['bakery', 'muffin', 'blueberry'], inStock: true, quantity: 45 },
 
-  // Bean Scene Coffee Products (Truffles Cafe)
+  // Bean Scene Coffee products
   { id: 'bs-1', merchantId: 'bean-scene-coffee', name: 'Signature Cold Brew', price: 5.50, description: '18-hour slow steeped cold brew', image: '/images/products/cold-brew.jpg', category: 'Drinks', tags: ['coffee', 'cold brew', 'signature'], inStock: true, quantity: 999 },
   { id: 'bs-2', merchantId: 'bean-scene-coffee', name: 'Vegan Breakfast Platter', price: 14.50, description: 'Toast, avocado, mushrooms, tomatoes & hash browns', image: '/images/products/breakfast-platter.jpg', category: 'Breakfast', tags: ['vegan', 'healthy', 'breakfast', 'platter'], inStock: true, quantity: 20 },
   { id: 'bs-3', merchantId: 'bean-scene-coffee', name: 'Espresso Shot', price: 3.50, description: 'Single origin espresso', image: '/images/products/espresso.jpg', category: 'Drinks', tags: ['coffee', 'espresso', 'strong'], inStock: true, quantity: 999 },
   { id: 'bs-4', merchantId: 'bean-scene-coffee', name: 'Pancakes Stack', price: 10.50, description: 'Fluffy pancakes with maple syrup and butter', image: '/images/products/pancakes.jpg', category: 'Breakfast', tags: ['breakfast', 'pancakes', 'sweet'], inStock: true, quantity: 25 },
   { id: 'bs-5', merchantId: 'bean-scene-coffee', name: 'Belgian Waffles', price: 11.00, description: 'Crispy waffles with fresh berries', image: '/images/products/waffles.jpg', category: 'Breakfast', tags: ['breakfast', 'waffles', 'berries'], inStock: true, quantity: 20 },
 
-  // Green Leaf Bistro Products (Tower Cafe)
+  // Green Leaf Bistro products
   { id: 'gl-1', merchantId: 'green-leaf-bistro', name: 'Mediterranean Salad', price: 11.50, description: 'Mixed greens, olives, feta, cucumber & olive oil dressing', image: '/images/products/mediterranean-salad.jpg', category: 'Salads', tags: ['salad', 'healthy', 'mediterranean'], inStock: true, quantity: 30 },
   { id: 'gl-2', merchantId: 'green-leaf-bistro', name: 'Quinoa Power Bowl', price: 13.50, description: 'Protein-packed quinoa with roasted chickpeas & veggies', image: '/images/products/quinoa-bowl.jpg', category: 'Bowls', tags: ['vegan', 'protein', 'healthy', 'bowl', 'quinoa'], inStock: true, quantity: 25 },
   { id: 'gl-3', merchantId: 'green-leaf-bistro', name: 'Smoothie Bowl', price: 10.50, description: 'Acai, banana, berries & granola topping', image: '/images/products/smoothie-bowl.jpg', category: 'Breakfast', tags: ['vegan', 'fruits', 'breakfast', 'smoothie', 'acai'], inStock: true, quantity: 30 },
   { id: 'gl-4', merchantId: 'green-leaf-bistro', name: 'Caesar Salad', price: 10.75, description: 'Crisp romaine with parmesan and croutons', image: '/images/products/caesar-salad.jpg', category: 'Salads', tags: ['salad', 'caesar', 'classic'], inStock: true, quantity: 35 },
 
-  // Daily Fresh Mart Products (Peet's Coffee & Tea)
+  // Daily Fresh Roasters products
   { id: 'df-1', merchantId: 'daily-fresh-mart', name: "Major Dickason's Blend", price: 5.25, description: 'Rich, smooth, and complex dark roast coffee', image: '/images/products/cold-brew.jpg', category: 'Drinks', tags: ['coffee', 'dark roast', 'signature'], inStock: true, quantity: 999 },
   { id: 'df-2', merchantId: 'daily-fresh-mart', name: 'Caffe Latte', price: 5.75, description: 'Espresso with steamed milk', image: '/images/products/latte.jpg', category: 'Drinks', tags: ['coffee', 'latte', 'espresso'], inStock: true, quantity: 999 },
   { id: 'df-3', merchantId: 'daily-fresh-mart', name: 'Chai Tea Latte', price: 5.50, description: 'Spiced black tea with steamed milk', image: '/images/products/tea.jpg', category: 'Drinks', tags: ['tea', 'chai', 'latte'], inStock: true, quantity: 999 },

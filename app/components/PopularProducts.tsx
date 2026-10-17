@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import ProductModal from './ProductModal';
 
 interface Product {
@@ -113,19 +112,11 @@ export default function PopularProducts() {
                     <i className="fa-solid fa-eye d-md-none d-block"></i>
                     <span className="d-md-block d-none">Quick View</span>
                   </button>
-                  <div className="btn btn-primary meta-icon dz-wishicon">
-                    <i className="icon feather icon-heart dz-heart"></i>
-                    <i className="icon feather icon-heart-on dz-heart-fill"></i>
-                  </div>
-                  <div className="btn btn-primary meta-icon dz-carticon">
-                    <i className="flaticon flaticon-basket"></i>
-                    <i className="flaticon flaticon-basket-on dz-heart-fill"></i>
-                  </div>
                 </div>
               </div>
               <div className="dz-content">
                 <h5 className="title">
-                  <Link href={`/shop/${product.id}`}>{product.name}</Link>
+                  <button type="button" className="btn p-0 border-0" onClick={() => setSelectedProduct(product)}>{product.name}</button>
                 </h5>
                 <h5 className="price">${product.price.toFixed(2)}</h5>
               </div>

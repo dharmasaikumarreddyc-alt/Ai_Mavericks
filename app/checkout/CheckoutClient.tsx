@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { backendUrl } from '../lib/backend';
 import { getAuthenticatedSession } from '../lib/auth';
+import { completeCheckout, type CheckoutPaymentMethod } from '../lib/secure-checkout';
 import {
   formatCustomerAddress,
   readCustomerAddresses,
@@ -33,6 +34,8 @@ interface PlacedOrder {
   merchantName: string;
   total: number;
   paymentMethod: string;
+  paymentStatus: string;
+  moneyMoved: boolean;
 }
 
 const emptyAddress: CustomerAddress = {
@@ -53,7 +56,7 @@ export default function CheckoutClient() {
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [address, setAddress] = useState<CustomerAddress>(emptyAddress);
   const [instructions, setInstructions] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'wallet' | 'cod'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>('card');
   const [placedOrders, setPlacedOrders] = useState<PlacedOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -74,7 +77,7 @@ export default function CheckoutClient() {
         if (!cancelled) {
           setAddresses(savedAddresses);
           setAddress(preferredAddress || emptyAddress);
-          setInstructions(localStorage.getItem('cartCookingInstructions') || '');
+          setInstructions(sessionStorage.getItem('cartCookingInstructions') || '');
         }
 
         const response = await fetch(`${backendUrl}/cart`, {
@@ -141,35 +144,31 @@ export default function CheckoutClient() {
       for (const item of cart.items) {
         groups.set(item.merchant_id, [...(groups.get(item.merchant_id) || []), item]);
       }
+      if (paymentMethod === 'card' && groups.size > 1) {
+        throw new Error('The secure card demo supports one merchant per payment. Split this cart or choose cash on delivery.');
+      }
       const orders: PlacedOrder[] = [];
       for (const [merchantId, items] of groups) {
-        const response = await fetch(`${backendUrl}/payments/checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.token}`,
-          },
-          body: JSON.stringify({
-            merchantId,
-            items: items.map((item) => ({ productId: item.product_id, quantity: item.quantity })),
-            paymentMethod,
-            deliveryAddress,
-            cookingInstructions: instructions.trim(),
-          }),
+        const data = await completeCheckout(session.token, {
+          merchantId,
+          items: items.map((item) => ({ productId: item.product_id, quantity: item.quantity })),
+          paymentMethod,
+          deliveryAddress,
+          cookingInstructions: instructions.trim(),
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || data.error || 'Could not place your order.');
         if (!data.order?.orderId) throw new Error('The order service returned an invalid response.');
         orders.push({
           orderId: data.order.orderId,
           merchantName: data.order.merchantName,
           total: data.order.pricing.total,
           paymentMethod: data.payment.method,
+          paymentStatus: data.payment.status,
+          moneyMoved: data.payment.moneyMoved === true,
         });
       }
 
       setPlacedOrders(orders);
-      localStorage.removeItem('cartCookingInstructions');
+      sessionStorage.removeItem('cartCookingInstructions');
       const clearResponse = await fetch(`${backendUrl}/cart/clear`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.token}` },
@@ -200,8 +199,14 @@ export default function CheckoutClient() {
             <section key={order.orderId} className="border rounded p-3 mb-3">
               <h5 className="mb-1">{order.merchantName}</h5>
               <p className="text-muted mb-2">
-                Order #{order.orderId} · ${order.total.toFixed(2)} · Mode of payment: {order.paymentMethod.toUpperCase()}
+                Order #{order.orderId} · ${order.total.toFixed(2)} · Mode: {order.paymentMethod.toUpperCase()}
               </p>
+              {order.paymentStatus === 'simulated' && (
+                <div className="alert alert-info py-2">
+                  Demo token authorized. No money moved and Aisle received no card number.
+                </div>
+              )}
+              {order.moneyMoved && <p className="text-success small">Provider-confirmed payment captured.</p>}
               <Link href={`/account/orders/${order.orderId}`} className="btn btn-outline-primary">
                 View order, rate & review
               </Link>
@@ -285,20 +290,21 @@ export default function CheckoutClient() {
               value={instructions}
               onChange={(event) => {
                 setInstructions(event.target.value);
-                localStorage.setItem('cartCookingInstructions', event.target.value);
+                sessionStorage.setItem('cartCookingInstructions', event.target.value);
               }}
               placeholder="Add cooking instructions (optional)"
             />
           </section>
 
           <section className="card card-body">
-            <h4 className="mb-3">Payment preference</h4>
+            <h4 className="mb-2">Payment</h4>
+            <p className="text-muted small">
+              The free demo uses a simulated provider token. It never asks for or stores a card number.
+            </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
               {([
                 ['cod', 'Cash on delivery'],
-                ['upi', 'UPI'],
-                ['card', 'Card'],
-                ['wallet', 'Wallet'],
+                ['card', 'Demo tokenized card · no money moves'],
               ] as const).map(([method, label]) => (
                 <div key={method} style={{ minWidth: 0 }}>
                   <label
@@ -336,7 +342,7 @@ export default function CheckoutClient() {
             <p className="small text-muted mt-2">Final fees and totals are calculated by the order service.</p>
             {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
             <button type="submit" className="btn btn-secondary w-100 mt-2" disabled={submitting}>
-              {submitting ? 'Placing order…' : 'PLACE ORDER'}
+              {submitting ? 'Placing order…' : paymentMethod === 'card' ? 'AUTHORIZE DEMO TOKEN & ORDER' : 'PLACE COD ORDER'}
             </button>
           </section>
         </aside>

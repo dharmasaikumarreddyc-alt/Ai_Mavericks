@@ -178,12 +178,12 @@ export default function OrdersPage() {
                       </svg>
                     </div>
                     <h5 className="mb-3">No orders yet</h5>
-                    <p className="text-muted mb-4">You haven&apos;t placed any orders yet. Start shopping with Cart Pilot!</p>
+                    <p className="text-muted mb-4">You haven&apos;t placed any orders yet. Start with the Aisle AI Concierge.</p>
                     <Link href="/cart-pilot" className="btn btn-secondary">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="me-2">
                         <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
                       </svg>
-                      Try Cart Pilot AI
+                      Try Aisle AI Concierge
                     </Link>
                   </div>
                 ) : (

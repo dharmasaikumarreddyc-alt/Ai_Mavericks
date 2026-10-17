@@ -50,8 +50,8 @@ export default function AddressPage() {
   }, [router]);
 
   const fetchAddresses = () => {
-    // Load from localStorage
-    const saved = localStorage.getItem('userAddresses');
+    // Prototype privacy boundary: delivery PII lasts only for this browser tab session.
+    const saved = sessionStorage.getItem('userAddresses');
     if (saved) {
       setAddresses(JSON.parse(saved));
     } else {
@@ -98,7 +98,7 @@ export default function AddressPage() {
     }
 
     setAddresses(updatedAddresses);
-    localStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
+    sessionStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
     window.dispatchEvent(new Event('addressesChanged'));
 
     resetForm();
@@ -116,7 +116,7 @@ export default function AddressPage() {
 
     const updatedAddresses = addresses.filter(addr => addr.id !== id);
     setAddresses(updatedAddresses);
-    localStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
+    sessionStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
     setMessage('Address deleted successfully!');
   };
 
@@ -126,7 +126,7 @@ export default function AddressPage() {
       isDefault: addr.id === id,
     }));
     setAddresses(updatedAddresses);
-    localStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
+    sessionStorage.setItem('userAddresses', JSON.stringify(updatedAddresses));
     setMessage('Default address updated!');
   };
 
@@ -198,6 +198,7 @@ export default function AddressPage() {
                       </button>
                     )}
                   </div>
+                  <p className="small text-muted">Prototype privacy: addresses stay only in this browser tab session and are cleared when the session ends.</p>
 
                   {message && (
                     <div className="alert alert-success alert-dismissible fade show" role="alert">

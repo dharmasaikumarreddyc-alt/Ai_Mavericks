@@ -44,46 +44,6 @@ export default function CartClient() {
     };
   }, []);
 
-  useEffect(() => {
-    // Initialize bootstrap-touchspin for quantity inputs
-    if (cart && cart.items.length > 0) {
-      const timer = setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).$) {
-          const $ = (window as any).$;
-          try {
-            $('input[name="demo_vertical2"]').each(function(this: any) {
-              const $input = $(this);
-              if (!$input.data('TouchSpin')) {
-                $input.TouchSpin({
-                  verticalbuttons: true,
-                  verticalup: '<i class="ti-plus"></i>',
-                  verticaldown: '<i class="ti-minus"></i>',
-                  min: 1,
-                  max: 100,
-                });
-
-                // Handle value change
-                $input.on('change', function(this: any) {
-                  const newValue = parseInt($(this).val()) || 1;
-                  const itemKey = $(this).closest('tr').find('.product-item-name').text();
-                  // Find matching cart item and update
-                  const cartItem = cart.items.find(item => item.name === itemKey.trim());
-                  if (cartItem) {
-                    updateQuantity(cartItem.merchant_id, cartItem.product_id, newValue);
-                  }
-                });
-              }
-            });
-          } catch (e) {
-            console.debug('TouchSpin initialization skipped:', e);
-          }
-        }
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [cart]);
-
   const fetchCart = async () => {
     try {
       const session = await getAuthenticatedSession('customer');
@@ -238,20 +198,19 @@ export default function CartClient() {
                     <td className="product-item-price">${item.price.toFixed(2)}</td>
                     <td className="product-item-quantity">
                       <div className="quantity btn-quantity style-1 me-3">
-                        <input
-                          type="text"
-                          value={item.quantity}
-                          name="demo_vertical2"
-                          readOnly
-                        />
-                        <div className="quantity-controls" style={{ display: 'none' }}>
+                        <div className="quantity-controls d-flex align-items-center gap-2">
                           <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
                             onClick={() => updateQuantity(item.merchant_id, item.product_id, item.quantity - 1)}
                             disabled={isUpdating || item.quantity <= 1}
                           >
                             -
                           </button>
+                          <span aria-live="polite">{item.quantity}</span>
                           <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
                             onClick={() => updateQuantity(item.merchant_id, item.product_id, item.quantity + 1)}
                             disabled={isUpdating}
                           >
@@ -262,16 +221,15 @@ export default function CartClient() {
                     </td>
                     <td className="product-item-totle">${itemSubtotal.toFixed(2)}</td>
                     <td className="product-item-close">
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeItem(item.merchant_id, item.product_id);
-                        }}
+                      <button
+                        type="button"
+                        className="btn btn-link p-0"
+                        aria-label={`Remove ${item.name}`}
+                        onClick={() => removeItem(item.merchant_id, item.product_id)}
                         style={{ pointerEvents: isUpdating ? 'none' : 'auto' }}
                       >
                         <i className="ti-close"></i>
-                      </a>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -279,49 +237,20 @@ export default function CartClient() {
             </tbody>
           </table>
         </div>
-        <div className="row shop-form m-t30">
-          <div className="col-md-6">
-            <div className="form-group">
-              <div className="input-group mb-0">
-                <input name="dzEmail" required type="text" className="form-control" placeholder="Coupon Code" />
-                <div className="input-group-addon">
-                  <button name="submit" value="Submit" type="submit" className="btn coupon">
-                    Apply Coupon
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 text-end">
-            <Link href="/shop" className="btn btn-secondary">UPDATE CART</Link>
-          </div>
-        </div>
+        <div className="text-end m-t30"><Link href="/shop" className="btn btn-outline-secondary">Continue shopping</Link></div>
       </div>
       <div className="col-lg-4">
         <h4 className="title mb15">Cart Total</h4>
         <div className="cart-detail">
-          <Link href="#" className="btn btn-outline-secondary w-100 m-b20">Bank Offer 5% Cashback</Link>
-          <div className="icon-bx-wraper style-4 m-b15">
-            <div className="icon-bx">
-              <i className="flaticon flaticon-ship"></i>
-            </div>
-            <div className="icon-content">
-              <span className="font-14">FREE</span>
-              <h6 className="dz-title">Enjoy The Product</h6>
-            </div>
-          </div>
-          <div className="save-text">
-            <i className="icon feather icon-check-circle"></i>
-            <span className="m-l10">You will save ${(cart.subtotal * 0.05).toFixed(2)} on this order</span>
-          </div>
+          <p className="small text-muted">Delivery, service fee and tax are recalculated by the checkout service.</p>
           <table>
             <tbody>
               <tr className="total">
                 <td>
-                  <h6 className="mb-0">Total</h6>
+                  <h6 className="mb-0">Cart subtotal</h6>
                 </td>
                 <td className="price">
-                  ${(cart.subtotal >= 100 ? cart.subtotal : cart.subtotal + 10).toFixed(2)}
+                  ${cart.subtotal.toFixed(2)}
                 </td>
               </tr>
             </tbody>
