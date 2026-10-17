@@ -8,7 +8,7 @@ router = APIRouter(prefix="/governance", tags=["AI Governance"])
 @router.get("")
 async def governance_manifest():
     return {
-        "product": "Aisle AI",
+        "product": "Loopora",
         "modelPurpose": "Shopping assistance and merchant decision support",
         "controls": {
             "pii": "Email, phone and payment-like values are redacted before model calls and from outputs.",

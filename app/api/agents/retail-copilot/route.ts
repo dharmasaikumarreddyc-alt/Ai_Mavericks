@@ -312,7 +312,7 @@ export async function POST(request: NextRequest) {
       governance: {
         piiRedactions,
         imageReceived: Boolean(image),
-        imageRetention: image ? 'Not persisted by Aisle AI; provider handling is governed by Gemini API terms.' : 'No image supplied.',
+        imageRetention: image ? 'Not persisted by Loopora; provider handling is governed by Gemini API terms.' : 'No image supplied.',
         catalogBoundary: 'Every displayed product id, price, and stock count comes from the bounded synthetic catalog.',
         customerConfirmationRequired: true,
         autonomousChanges: false,

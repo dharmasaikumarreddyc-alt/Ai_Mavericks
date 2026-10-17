@@ -144,7 +144,7 @@ export default function MerchantLoginClient() {
       </div>
 
       <footer className="merchant-login-footer">
-        <span>© Aisle Merchant Workspace</span>
+        <span>© Loopora Merchant Workspace</span>
         <Link href="/login">Customer sign in <i className="fas fa-arrow-right" /></Link>
       </footer>
     </main>

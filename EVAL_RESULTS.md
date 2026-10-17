@@ -23,11 +23,11 @@ These are in-process checks over a fixed synthetic catalog and deterministic hel
 `backend/evidence/impact_benchmark.py` evaluates 20 fixed shopping scenarios using an explicit interaction-count model. This is **not observed human timing** and must not be presented as a user-study result.
 
 - Baseline modeled mean interactions: **8.00**
-- Aisle modeled mean interactions: **4.15**
-- Total modeled interactions: **160 baseline vs 83 Aisle**
+- Loopora modeled mean interactions: **4.15**
+- Total modeled interactions: **160 baseline vs 83 Loopora**
 - Mean per-scenario modeled reduction: **46.1%**
 
-The model is intentionally inspectable: baseline counts search/filter, item inspection/addition, cart review and checkout; Aisle counts need description, grounded-basket review, approval and checkout, plus an explicit substitution approval when needed.
+The model is intentionally inspectable: baseline counts search/filter, item inspection/addition, cart review and checkout; Loopora counts need description, grounded-basket review, approval and checkout, plus an explicit substitution approval when needed.
 
 ## Directional Forecast Backtest
 

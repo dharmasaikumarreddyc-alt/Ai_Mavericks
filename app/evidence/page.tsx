@@ -6,7 +6,7 @@ import PolicySimulator from './PolicySimulator';
 
 export const metadata: Metadata = {
   title: 'Evidence & Architecture',
-  description: 'Inspect Aisle AI workflow ownership, verified offline controls, architecture, and prototype limitations.',
+  description: 'Inspect Loopora workflow ownership, verified offline controls, architecture, and prototype limitations.',
 };
 
 const workflow = [

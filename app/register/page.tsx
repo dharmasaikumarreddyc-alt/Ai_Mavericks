@@ -7,7 +7,7 @@ import RegisterClient from './RegisterClient';
 
 export const metadata: Metadata = {
   title: 'Create Account',
-  description: 'Create an Aisle AI customer account.',
+  description: 'Create an Loopora customer account.',
 };
 
 export default function RegisterPage() {

@@ -1,6 +1,6 @@
-# Aisle API
+# Loopora API
 
-FastAPI service for Aisle's supported closed-loop prototype: customer authentication,
+FastAPI service for Loopora's supported closed-loop prototype: customer authentication,
 catalog/cart APIs, persistent orders, merchant fulfillment, reviews, governed Gemini
 insights, and an explicitly simulated payment-token path.
 
@@ -62,7 +62,7 @@ python -m alembic upgrade head
 python seed_merchant_demo.py
 ```
 
-This creates the fictional Aisle Coffee Lab account plus explicitly marked synthetic history.
+This creates the fictional Loopora Coffee Lab account plus explicitly marked synthetic history.
 The seed is idempotent and refuses to overwrite non-demo data. Forecasts and review summaries
 are decision support, not guarantees.
 

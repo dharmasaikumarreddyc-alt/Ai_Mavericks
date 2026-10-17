@@ -2,7 +2,7 @@
 
 ## Verdict
 
-Aisle AI is aligned to one coherent Retail & Commerce use case:
+Loopora is aligned to one coherent Retail & Commerce use case:
 
 `customer intent → Gemini proposal → deterministic commerce validation → explicit customer approval → persistent order → merchant fulfillment → grounded merchant insight → human-reviewed merchant action`
 
@@ -14,7 +14,7 @@ Aisle AI is aligned to one coherent Retail & Commerce use case:
 - Customer checkout persists orders through authenticated backend APIs; merchant fulfillment reads the same persisted lifecycle.
 - Default card checkout is simulated tokenization with no PAN/CVV collection and no money movement; COD is not collected.
 - Merchant dashboard is ownership-scoped, uses guarded state transitions, grounded review text, directional forecast evidence, and persisted human acceptance of recommendations.
-- Original marketplace visual system is retained, while template-only navigation, social links, fake support/contact claims, fashion/blog content, and dead `.html` destinations have been removed or redirected to real Aisle AI routes.
+- Original marketplace visual system is retained, while template-only navigation, social links, fake support/contact claims, fashion/blog content, and dead `.html` destinations have been removed or redirected to real Loopora routes.
 - Repository evidence includes deterministic control tests, modeled interaction benchmark, synthetic held-out forecast backtest, production build, lint, dependency audit, backend tests, migrations, and full-stack Copilot smoke.
 
 ## Still not proven

@@ -38,7 +38,7 @@ export interface Product {
 export const localMerchantsDB: Merchant[] = [
   {
     id: 'cafe-verde',
-    name: 'Aisle Coffee Lab',
+    name: 'Loopora Coffee Lab',
     type: 'Coffee Shop',
     category: ['coffee', 'cafe', 'breakfast', 'vegan', 'healthy'],
     distance: '0.1 mi',
@@ -131,7 +131,7 @@ export const localMerchantsDB: Merchant[] = [
 
 // Local food products
 export const localProductsDB: Product[] = [
-  // Aisle Coffee Lab products
+  // Loopora Coffee Lab products
   { id: 'cv-1', merchantId: 'cafe-verde', name: 'Vegan Avocado Toast', price: 8.50, description: 'Sourdough with smashed avocado, cherry tomatoes & microgreens', image: '/images/products/avocado-toast.jpg', category: 'Breakfast', tags: ['vegan', 'healthy', 'breakfast', 'avocado', 'toast'], inStock: true, quantity: 50 },
   { id: 'cv-2', merchantId: 'cafe-verde', name: 'Oat Milk Latte', price: 5.75, description: 'Double shot espresso with creamy oat milk', image: '/images/products/latte.jpg', category: 'Drinks', tags: ['vegan', 'coffee', 'latte', 'oat'], inStock: true, quantity: 999 },
   { id: 'cv-3', merchantId: 'cafe-verde', name: 'Vegan Buddha Bowl', price: 12.50, description: 'Quinoa, roasted veggies, hummus & tahini dressing', image: '/images/products/buddha-bowl.jpg', category: 'Breakfast', tags: ['vegan', 'healthy', 'protein', 'bowl'], inStock: true, quantity: 30 },

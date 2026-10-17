@@ -27,7 +27,7 @@ The application exposes the same evidence boundary at `/evidence`: verified repo
 - Production frontend build, backend source compilation, backend unit tests, and fresh-database Alembic migrations are CI-gated.
 - Production dependencies are audited at critical severity in CI; Next.js is on patched 16.4.2.
 - CI now runs a full-stack Copilot smoke covering jury-page render, deterministic outage recovery, budget control, human-confirmation governance, and prompt-injection blocking.
-- A 20-scenario modeled interaction benchmark reports 8.00 baseline vs 4.15 Aisle mean interactions, a 46.1% mean modeled reduction. This is explicitly not a human timing study.
+- A 20-scenario modeled interaction benchmark reports 8.00 baseline vs 4.15 Loopora mean interactions, a 46.1% mean modeled reduction. This is explicitly not a human timing study.
 - A held-out synthetic directional forecast backtest reports MAE 0.571 units and WAPE 2.33% over seven days. This is explicitly not production forecast accuracy.
 - Default payment is an explicitly simulated one-time token with no PAN/CVV collection or money movement; COD remains not collected.
 

@@ -6,7 +6,7 @@ import PopularProducts from './components/PopularProducts';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Aisle AI — Closed-Loop Commerce Copilot',
+  title: 'Loopora — Closed-Loop Commerce Copilot',
   description: 'A governed Gemini commerce copilot connecting grounded customer discovery, deterministic validation, explicit approval, persistent fulfillment, and merchant intelligence.',
 };
 

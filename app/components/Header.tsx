@@ -72,7 +72,7 @@ export default function Header() {
         <div className="main-bar clearfix">
           <div className="container clearfix d-lg-flex d-block align-items-center">
             <div className="logo-header logo-dark">
-              <Link href="/" aria-label="Aisle AI home"><img src="/images/logo.svg" alt="Aisle AI" /></Link>
+              <Link href="/" aria-label="Loopora home"><img src="/images/logo.svg" alt="Loopora" /></Link>
             </div>
 
             <button
@@ -89,7 +89,7 @@ export default function Header() {
 
             <div className="header-nav w3menu navbar-collapse collapse justify-content-start" id="navbarNavDropdown">
               <div className="logo-header">
-                <Link href="/" aria-label="Aisle AI home"><img src="/images/logo.svg" alt="Aisle AI" /></Link>
+                <Link href="/" aria-label="Loopora home"><img src="/images/logo.svg" alt="Loopora" /></Link>
               </div>
               <ul className="nav navbar-nav">
                 {navLink('/', 'Home')}

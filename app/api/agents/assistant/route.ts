@@ -6,7 +6,7 @@ import { llmJSON } from '../llm';
 // and returns a spoken reply. Lets the voice assistant chat AND order, like a
 // personal assistant. Falls back to keyword routing if the LLM is unavailable.
 
-const SYSTEM_PROMPT = `You are "Aisle", a warm, witty voice shopping concierge — think Siri or Jarvis — for a
+const SYSTEM_PROMPT = `You are "Loopora", a warm, witty voice shopping concierge — think Siri or Jarvis — for a
 local marketplace that can find and order from nearby merchants (coffee shops, restaurants, bakeries, grocery stores).
 
 Classify the user's message and reply in a natural, spoken style (no markdown, no emojis).

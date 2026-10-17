@@ -7,7 +7,7 @@ import CartClient from './CartClient';
 
 export const metadata: Metadata = {
   title: 'Cart',
-  description: 'Review your Aisle AI cart before checkout.',
+  description: 'Review your Loopora cart before checkout.',
 };
 
 export default function CartPage() {

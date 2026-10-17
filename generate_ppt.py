@@ -1,4 +1,4 @@
-"""Generate the accurate Aisle AI hackathon presentation."""
+"""Generate the accurate Loopora hackathon presentation."""
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
@@ -99,7 +99,7 @@ add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 add_rect(sl, 0, Inches(0.08), Inches(0.06), H - Inches(0.08), fill=GREEN)
 
 # Big title
-add_text(sl, "Aisle AI",
+add_text(sl, "Loopora",
          Inches(1.0), Inches(1.5), Inches(8), Inches(1.4),
          size=52, bold=True, color=BLACK)
 
@@ -150,7 +150,7 @@ sl = prs.slides.add_slide(BLANK)
 add_rect(sl, 0, 0, W, Inches(0.08), fill=GREEN)
 
 # Title
-add_text(sl, "Aisle AI",
+add_text(sl, "Loopora",
          Inches(0.4), Inches(0.15), Inches(7), Inches(0.7),
          size=28, bold=True, color=BLACK)
 
@@ -192,7 +192,7 @@ for i, step in enumerate(after_steps):
 # ---- Right panel ----
 add_rect(sl, Inches(7.2), Inches(0.9), Inches(5.85), Inches(5.9), fill=WHITE)
 
-add_text(sl, "Aisle AI: Closed-Loop\nCommerce Copilot",
+add_text(sl, "Loopora: Closed-Loop\nCommerce Copilot",
          Inches(7.4), Inches(1.0), Inches(5.5), Inches(1.1),
          size=22, bold=True, color=BLACK)
 
@@ -205,14 +205,14 @@ add_text(sl,
 
 add_text(sl,
          "Manual browsing and repeated comparison add friction to the shopping journey.\n"
-         "Aisle AI reduces those repeated steps by connecting grounded discovery,\n"
+         "Loopora reduces those repeated steps by connecting grounded discovery,\n"
          "explicit confirmation, and merchant operations in one governed flow.",
          Inches(7.4), Inches(3.35), Inches(5.5), Inches(1.0),
          size=13, color=GRAY)
 
 # Green highlight box
 add_rect(sl, Inches(7.4), Inches(4.45), Inches(5.5), Inches(1.15), fill=LIGHT_GREEN, border=GREEN)
-add_text(sl, "✓  Aisle AI connects customer intent with merchant action.",
+add_text(sl, "✓  Loopora connects customer intent with merchant action.",
          Inches(7.55), Inches(4.5), Inches(5.2), Inches(0.5),
          size=13, bold=True, color=DARK_GREEN)
 add_text(sl,
@@ -269,8 +269,8 @@ add_text(sl, "Live Demo Conversation",
 
 convos = [
     ("🧑  You:",    "I have a serious coffee craving. Find me the best place on my way home.", DARK_GRAY, False),
-    ("🤖  AI:",     "Found 3 synthetic demo merchants. Aisle Coffee Lab has your latte. Choose it?", DARK_GREEN, False),
-    ("🧑  You:",    "Aisle Coffee Lab.", DARK_GRAY, False),
+    ("🤖  AI:",     "Found 3 synthetic demo merchants. Loopora Coffee Lab has your latte. Choose it?", DARK_GREEN, False),
+    ("🧑  You:",    "Loopora Coffee Lab.", DARK_GRAY, False),
     ("🤖  AI:",     "Adding a Medium Latte — $5.75. Use a simulated token or COD?", DARK_GREEN, False),
     ("🧑  You:",    "Yes.", DARK_GRAY, False),
     ("🤖  AI:",     "✓ Order confirmed! The merchant can now begin preparation.", GREEN, True),
@@ -485,7 +485,7 @@ add_text(sl, "The Future of Commerce\nIs Closed-Loop.",
 add_rect(sl, Inches(0.5), Inches(1.95), Inches(5.0), Inches(0.06), fill=GREEN)
 
 add_text(sl,
-         "Aisle AI delivers a closed-loop shopping and merchant experience —\n"
+         "Loopora delivers a closed-loop shopping and merchant experience —\n"
          "from spoken intent to confirmed order and operational action.",
          Inches(0.5), Inches(2.1), Inches(8.5), Inches(0.9),
          size=16, color=DARK_GRAY)
