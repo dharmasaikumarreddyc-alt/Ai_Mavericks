@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   frontend-build:
-    name: Frontend production build
+    name: Frontend production build and E2E smoke
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -35,6 +35,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Run full-stack Copilot smoke
+        run: npm run test:e2e-smoke
 
   frontend-lint:
     name: Frontend lint
@@ -57,7 +60,7 @@ jobs:
         run: npm run lint
 
   backend:
-    name: Backend tests and migrations
+    name: Backend tests, evidence benchmarks and migrations
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -85,6 +88,12 @@ jobs:
 
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
+
+      - name: Run modeled interaction benchmark
+        run: python evidence/impact_benchmark.py
+
+      - name: Run synthetic held-out forecast backtest
+        run: python evidence/forecast_backtest.py
 
       - name: Rehearse migrations on a fresh database
         env:
