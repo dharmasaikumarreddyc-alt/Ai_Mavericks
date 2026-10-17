@@ -1,10 +1,10 @@
 param(
   [Parameter(Mandatory=$true)][string]$ProjectId,
   [string]$Region = "asia-south1",
-  [string]$BackendService = "aisle-api",
-  [string]$WebService = "aisle-web",
-  [string]$SchemaJob = "aisle-schema-init",
-  [string]$SeedJob = "aisle-demo-seed",
+  [string]$BackendService = "loopora-api",
+  [string]$WebService = "loopora-web",
+  [string]$SchemaJob = "loopora-schema-init",
+  [string]$SeedJob = "loopora-demo-seed",
   [switch]$SeedDemo
 )
 
@@ -22,8 +22,6 @@ foreach ($SecretName in $RequiredSecrets) {
   if ($LASTEXITCODE -ne 0) { throw "Required Secret Manager secret is missing: $SecretName" }
 }
 
-# Deploy the API with production validation from its first public revision. A
-# temporary non-wildcard HTTPS origin is replaced after the web URL is known.
 $BootstrapCors = '["https://bootstrap.invalid"]'
 gcloud run deploy $BackendService --source backend --region $Region --allow-unauthenticated `
   --set-env-vars "ENVIRONMENT=production,DEBUG=false,GOOGLE_MODEL=gemini-3.8-flash,PAYMENT_MODE=demo,PAYMENT_CURRENCY=USD,CORS_ORIGINS=$BootstrapCors" `
@@ -31,8 +29,6 @@ gcloud run deploy $BackendService --source backend --region $Region --allow-unau
 $BackendUrl = gcloud run services describe $BackendService --region $Region --format "value(status.url)"
 $BackendImage = gcloud run services describe $BackendService --region $Region --format "value(spec.template.spec.containers[0].image)"
 
-# Apply reviewed Alembic migrations using the exact backend image that serves
-# traffic. The command is safe to rerun and upgrades an existing demo database.
 gcloud run jobs deploy $SchemaJob --image $BackendImage --region $Region `
   --command "alembic" --args "upgrade,head" --max-retries 1 --task-timeout 10m `
   --set-env-vars "ENVIRONMENT=production,DEBUG=false,CORS_ORIGINS=$BootstrapCors" `
@@ -48,8 +44,8 @@ if ($SeedDemo) {
 }
 
 gcloud run deploy $WebService --source . --region $Region --allow-unauthenticated `
-  --set-build-env-vars "NEXT_PUBLIC_BACKEND_URL=$BackendUrl" `
-  --set-env-vars "NEXT_PUBLIC_BACKEND_URL=$BackendUrl,GOOGLE_MODEL=gemini-3.8-flash" `
+  --set-build-env-vars "NEXT_PUBLIC_BACKEND_URL=$BackendUrl,BACKEND_URL=$BackendUrl" `
+  --set-env-vars "NEXT_PUBLIC_BACKEND_URL=$BackendUrl,BACKEND_URL=$BackendUrl,GOOGLE_MODEL=gemini-3.8-flash" `
   --set-secrets "GOOGLE_API_KEY=aisle-gemini-key:latest"
 $WebUrl = gcloud run services describe $WebService --region $Region --format "value(status.url)"
 
