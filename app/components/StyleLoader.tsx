@@ -7,33 +7,58 @@ export default function StyleLoader() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Force reload CSS on route change by checking if stylesheets are loaded
-    const checkAndLoadStyles = () => {
-      const stylesheets = [
-        '/vendor/magnific-popup/magnific-popup.min.css',
-        '/vendor/bootstrap-select/dist/css/bootstrap-select.min.css',
-        '/vendor/swiper/swiper-bundle.min.css',
-        '/vendor/animate/animate.css',
-        '/vendor/lightgallery/dist/css/lightgallery.css',
-        '/vendor/lightgallery/dist/css/lg-thumbnail.css',
-        '/vendor/lightgallery/dist/css/lg-zoom.css',
-        '/vendor/nouislider/nouislider.min.css',
-        '/css/style.css',
-        '/css/skin/skin-1.css',
+    const stylesheets = [
+      '/vendor/magnific-popup/magnific-popup.min.css',
+      '/vendor/bootstrap-select/dist/css/bootstrap-select.min.css',
+      '/vendor/swiper/swiper-bundle.min.css',
+      '/vendor/animate/animate.css',
+      '/vendor/lightgallery/dist/css/lightgallery.css',
+      '/vendor/lightgallery/dist/css/lg-thumbnail.css',
+      '/vendor/lightgallery/dist/css/lg-zoom.css',
+      '/vendor/nouislider/nouislider.min.css',
+      '/css/style.css',
+      '/css/skin/skin-1.css',
+    ];
+
+    stylesheets.forEach((href) => {
+      const existing = document.querySelector(`link[href="${href}"]`);
+      if (!existing) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
+
+    // The original Pixio landing is intentionally retained for visual parity.
+    // Repoint the few legacy template-only anchors so every visible CTA stays
+    // inside the real Aisle AI prototype rather than navigating to dead .html pages.
+    if (pathname === '/') {
+      const replacements: Array<[string, string]> = [
+        ['a.service-btn[href="#"]', '/copilot-lab'],
+        ['.category-section > a.icon-button[href$=".html"]', '/shop'],
+        ['.video-section a.icon-button[href="#"]', '/copilot-lab'],
+        ['.companies-section a.icon-button[href$=".html"]', '/evidence'],
       ];
-
-      stylesheets.forEach((href) => {
-        const existing = document.querySelector(`link[href="${href}"]`);
-        if (!existing) {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = href;
-          document.head.appendChild(link);
-        }
+      replacements.forEach(([selector, href]) => {
+        document.querySelectorAll<HTMLAnchorElement>(selector).forEach((anchor) => anchor.setAttribute('href', href));
       });
-    };
 
-    checkAndLoadStyles();
+      const railLinks = document.querySelectorAll<HTMLAnchorElement>('.banner-social-media a');
+      const railTargets = [
+        { href: '/copilot-lab', label: 'Live Copilot' },
+        { href: '/evidence', label: 'Evidence' },
+        { href: '/trust', label: 'Trust' },
+      ];
+      railLinks.forEach((anchor, index) => {
+        const target = railTargets[index];
+        if (!target) return;
+        anchor.href = target.href;
+        anchor.textContent = target.label;
+        anchor.removeAttribute('target');
+        anchor.removeAttribute('rel');
+      });
+    }
   }, [pathname]);
 
   return null;

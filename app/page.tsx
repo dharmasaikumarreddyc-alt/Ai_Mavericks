@@ -6,8 +6,8 @@ import PopularProducts from './components/PopularProducts';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Checkout | Home',
-  description: 'Experience the future of local shopping with AI-powered product discovery and automated checkout. Connect with local merchants, discover fresh products, and enjoy seamless AI-driven purchasing.',
+  title: 'Aisle AI — Closed-Loop Commerce Copilot',
+  description: 'A governed Gemini commerce copilot connecting grounded customer discovery, deterministic validation, explicit approval, persistent fulfillment, and merchant intelligence.',
 };
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
 										<h1 className="offer-title mb-0" data-swiper-parallax="-20">Your AI-Powered <span className="text-primary d-flex align-items-center"><svg className="m-r10" xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 68 68" fill="none">
 											<path d="M34 0L43.6167 24.3833L68 34L43.6167 43.6167L34 68L24.3833 43.6167L0 34L24.3833 24.3833L34 0Z" fill="var(--primary)"/>
 										  </svg>Marketplace</span>for Everyday Shopping.</h1>
-										<p className="sub-title mb-0" data-swiper-parallax="-40">Smart AI agents find the best from <span>local merchants</span> near you!</p>												
+										<p className="sub-title mb-0" data-swiper-parallax="-40">Gemini proposes grounded options; <span>deterministic controls</span> verify commerce facts before you approve.</p>												
 									</div>
 									<div className="content-btn" data-swiper-parallax="-60">
 										<Link className="btn btn-secondary me-3" href="/login">GET STARTED</Link>
@@ -55,7 +55,7 @@ export default function Home() {
 										</div>
 										<div className="dz-info">
 											<h5 className="dz-title">Fresh Organic Coffee</h5>
-											<h6 className="price text-primary">$80</h6>
+											<h6 className="price text-primary">Synthetic demo</h6>
 											<div className="btn btn-primary meta-icon dz-carticon">
 												<i className="flaticon flaticon-basket"></i>
 												<i className="flaticon flaticon-basket-on dz-heart-fill"></i>
@@ -87,17 +87,17 @@ export default function Home() {
 				<div className="banner-social-media style-2 left">
 					<ul>
 						<li>
-							<a href="https://www.instagram.com/dexignzone/" target="_blank">Instagram</a>
+							<a href="/copilot-lab">Live Copilot</a>
 						</li>
 						<li>
-							<a href="https://www.facebook.com/dexignzone" target="_blank">Facebook</a>
+							<a href="/evidence">Evidence</a>
 						</li>
 						<li>
-							<a href="https://twitter.com/dexignzones" target="_blank">twitter</a>
+							<a href="/trust">Trust</a>
 						</li>
 					</ul>
 				</div>
-				<a href="#" className="service-btn btn-dark">Let's talk</a>
+				<a href="/copilot-lab" className="service-btn btn-dark">Live Copilot</a>
 			</div>
 		</div>		
 		{/* Swiper Banner End */}
@@ -156,7 +156,7 @@ export default function Home() {
 					</div>
 				</div>
 			</div>
-			<a className="icon-button" href="shop-with-category.html">
+			<a className="icon-button" href="/shop">
 				<div className="text-row word-rotate-box c-black border-white">
 					<span className="word-rotate">category - category -</span>
 					<svg className="badge__emoji" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -179,7 +179,7 @@ export default function Home() {
 			<div className="video-wrapper bg-parallax" style={{backgroundImage: "url('/images/background/bg2.jpg')"}}>
 				<div className="container">
 					<div className="d-flex justify-content-center">
-						<a className="icon-button" href="#">
+						<a className="icon-button" href="/copilot-lab">
 							<div className="text-row word-rotate-box border-white c-black">
 								<span className="word-rotate">shop - shop - shop - shop -</span>
 								<svg className="badge__emoji" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -331,11 +331,11 @@ export default function Home() {
 				<div className="row justify-content-between align-items-end">
 					<div className="col-lg-8 col-md-8 col-sm-12">
 						<div className="section-head style-2 wow fadeInUp m-0" data-wow-delay="0.1s">
-							<h2 className="title text-white">We're growing with 6.3k trusted local merchants</h2>
+							<h2 className="title text-white">One governed loop from customer intent to merchant action</h2>
 						</div>
 					</div>
 					<div className="col-lg-4 col-md-4 col-sm-12 text-md-center m-b30 wow fadeInUp" data-wow-delay="0.2s">	
-						<a className="icon-button d-md-inline-block d-none" href="blog-tag.html">
+						<a className="icon-button d-md-inline-block d-none" href="/evidence">
 							<div className="text-row word-rotate-box c-black border-secondary bg-secondary">
 								<span className="word-rotate">partner - partner - </span>
 								<svg className="badge__emoji" xmlns="http://www.w3.org/2000/svg" width="86" height="86" viewBox="0 0 86 86" fill="none">
@@ -351,70 +351,70 @@ export default function Home() {
 				<div className="tag-slider style-1 wow fadeInUp" data-wow-delay="0.2s" id="tagSlider">
 					<div className="item-wrap">	
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo1.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo2.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo3.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo4.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo5.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo6.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo7.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo8.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo1.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo2.png" alt="" /> 
 								</div>
@@ -425,70 +425,70 @@ export default function Home() {
 				<div className="tag-slider wow fadeInUp" data-wow-delay="0.4s" id="tagSlider2">
 					<div className="item-wrap">	
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo1.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo2.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo3.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo4.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo5.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo6.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo7.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo8.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo1.png" alt="" /> 
 								</div>
 							</a>
 						</div>
 						<div className="item">
-							<a href="#" className="companies-wrapper">
+							<a href="/evidence" className="companies-wrapper">
 								<div className="companies-media">
 									<img src="/images/companies/logo2.png" alt="" /> 
 								</div>
