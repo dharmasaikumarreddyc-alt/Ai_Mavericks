@@ -1,78 +1,181 @@
-# Loopora — The Closed-Loop Commerce Copilot
+# Loopora — Governed Agentic Commerce Copilot
 
-> Turn every customer intent into an order, and every order into a merchant action.
+**AI Builder Cup 2026 · Retail & Commerce**
 
-Loopora is a Gemini-powered retail experience for the Google AI Builder Cup. Customers describe what they need, discover grounded products, build budget-aware carts, and explicitly confirm an order. Merchants receive the same persistent order, process it through a controlled fulfillment workflow, and use Gemini-assisted evidence to support operational decisions.
+Loopora is a Gemini-powered commerce copilot that turns customer intent into a grounded, budget-aware shopping plan and then closes the loop into merchant fulfillment and operational insight.
 
-## Why it stands out
+The core idea is simple: **GenAI handles ambiguity and planning; deterministic systems retain commerce truth; humans retain consequential authority.**
 
-Most commerce assistants stop at recommendation. Loopora closes the loop:
+---
+
+## The problem
+
+Modern shopping assistants are good at conversation but often stop at recommendation. Real commerce requires much more:
+
+- product discovery grounded in an actual catalog,
+- budget and dietary constraints,
+- current stock validation,
+- safe recovery when a plan becomes invalid,
+- explicit customer confirmation,
+- persistent order state,
+- merchant fulfillment,
+- operational recommendations that remain reviewable by humans.
+
+Loopora connects those steps into one governed experience.
+
+## What makes Loopora different
 
 ```text
-Customer intent / optional image
-→ Gemini interpretation and planning
-→ application-owned commerce tools
-→ deterministic price / stock / budget validation
-→ bounded repair when a plan becomes invalid
-→ explicit customer confirmation
-→ persistent order
-→ merchant fulfillment
-→ grounded merchant insight
-→ human-reviewed merchant action
+Customer text / optional image
+        ↓
+Gemini intent + multimodal interpretation
+        ↓
+Gemini bounded tool planning
+        ↓
+Application-owned catalog / inventory tools
+        ↓
+Deterministic price / stock / budget / policy validation
+        ↓
+Validator feedback → bounded Gemini repair when needed
+        ↓
+Explicit customer confirmation
+        ↓
+Persistent order + merchant fulfillment
+        ↓
+Evidence-backed merchant recommendation
+        ↓
+Human accept / reject
 ```
 
-The model helps interpret, plan, rank, explain, and repair proposals. Deterministic services remain authoritative for product IDs, prices, stock, budgets, authentication, payments, order state, and operational changes.
+Gemini may interpret, rank, explain and request bounded tools. It does **not** own authoritative product IDs, prices, stock, totals, payment state, order state or merchant operational changes.
 
-## Judge it in 3 minutes
+## 3-minute judge path
 
-Open `/copilot-lab` and follow one story instead of touring every dashboard:
+Use one coherent story instead of touring every feature.
 
-1. Run a constrained mission such as **“Build a vegan breakfast with coffee under $20. Prefer something healthy.”** Optionally add the synthetic sample image.
-2. Verify that the UI explicitly labels **live Gemini** versus **deterministic fallback**, then inspect bounded tool planning and the decision trace.
-3. Trigger **Stockout rescue** to show deterministic validation rejecting a stale plan, Gemini receiving bounded repair feedback, and the repaired basket being revalidated.
-4. Trigger **Attack test** to show prompt injection blocked before model/tool execution.
-5. Return to the valid basket and show deterministic budget compliance plus explicit human confirmation before checkout or merchant action.
+1. Open `/cart-pilot#visual-copilot` (or `/copilot-lab`, which redirects there).
+2. Run: **“Build a vegan breakfast with coffee under $20. Prefer something healthy.”**
+3. Optionally add the synthetic sample image to demonstrate multimodal interpretation.
+4. Inspect the decision trace: Gemini planning → application grounding → deterministic validation.
+5. Trigger **Stockout rescue** and show the validator rejecting the stale plan, Gemini requesting repair, and the replacement being revalidated.
+6. Trigger **Attack test** and show prompt injection blocked before model/tool execution.
+7. Return to the valid basket and continue to the customer-confirmed checkout flow.
+8. Open the merchant workspace and show the same order moving through fulfillment with evidence-backed, human-reviewed operational guidance.
 
-The full timed demo script and claims discipline are in [`docs/HACKATHON_DEMO.md`](docs/HACKATHON_DEMO.md). For a claim-to-code audit trail, see [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md).
+Detailed demo guidance: [`docs/HACKATHON_DEMO.md`](docs/HACKATHON_DEMO.md)
+
+Fast claim-to-code audit: [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md)
 
 ## Core capabilities
 
-- Gemini 3.8 Flash as the primary GenAI model.
-- Multimodal retail copilot for text plus optional pantry, shelf, meal, or product images.
-- Bounded Gemini tool planning over catalog search, inventory checks, constraint validation, and substitution requests.
-- Deterministic validation of catalog IDs, price, stock, budget, dietary tags, and approval requirements.
-- Validator-to-repair flow for stockout recovery.
-- Visible decision trace that shows model, application, deterministic-control, and human ownership without exposing chain-of-thought.
-- Conversational and voice-assisted shopping flows.
-- Persistent authenticated customer checkout and merchant-visible orders.
-- Guarded order lifecycle: `pending → confirmed → preparing → ready → dispatched → delivered` with validated cancellation paths.
-- Merchant dashboard with order processing, directional demand evidence, grounded review intelligence, and human acceptance/rejection of recommendations.
-- Prompt-injection blocking, PII redaction, bounded model inputs, transparent fallback behavior, and public trust/evidence surfaces.
-- Simulated one-time payment token or COD in prototype mode; no PAN/CVV collection and no money movement in the default demo path.
-- Smart-cart merchant caps and optimization objectives are deterministic, normalized, and exposed in response metadata.
-- Budget shopping has a hard total-budget guard and uses the same USD convention as the synthetic catalog.
+- **Gemini 3.8 Flash** as the primary GenAI model.
+- Multimodal shopping from text plus optional pantry, shelf, meal or product images.
+- Bounded Gemini function/tool planning for catalog discovery and repair flows.
+- Catalog-grounded product selection with deterministic price, stock, budget and dietary-tag validation.
+- Validator-to-repair workflow for stockout recovery.
+- Transparent **live Gemini vs deterministic fallback** labeling.
+- Visible decision trace showing ownership by Gemini, application code, deterministic controls and humans.
+- Prompt-injection blocking and request-level PII redaction before model access.
+- Voice-assisted and conversational shopping flows.
+- Authenticated customer checkout with persistent order state.
+- Controlled order lifecycle:
+  `pending → confirmed → preparing → ready → dispatched → delivered`
+- Merchant order processing and directional inventory/demand evidence.
+- Human accept/reject boundary for merchant operational recommendations.
+- Smart-cart merchant caps and optimization metadata enforced by deterministic code.
+- Hard total-budget enforcement across shopping flows.
+- Simulated payment-token/COD prototype path without PAN/CVV collection or autonomous money movement.
 
-Catalog, stock, merchant history, ratings, offers, and forecast data used in the prototype are synthetic or directional and are labelled accordingly.
+## Google AI + cloud usage
+
+Loopora uses Google technologies where they materially support the experience rather than adding integrations only for breadth.
+
+- **Gemini API** — intent interpretation, multimodal understanding, bounded tool planning and validator-guided repair.
+- **Google Cloud Run** — deployment target for the application/API stack.
+- **Google Cloud Secret Manager / runtime environment configuration** — intended production boundary for model credentials and service configuration.
+
+The prototype deliberately keeps commerce invariants in deterministic application code even when Gemini participates in planning.
 
 ## Architecture
 
 ```text
-Next.js
-  ├─ Customer + merchant experiences
-  ├─ Gemini retail copilot routes
-  ├─ Application-owned tools
-  └─ Deterministic validation / fallback
+Next.js application
+  ├─ Customer shopping + CartPilot
+  ├─ Multimodal Gemini retail copilot
+  ├─ Application-owned commerce tools
+  ├─ Deterministic validator / fallback
+  └─ Merchant experience
              │ authenticated HTTPS
-FastAPI
-  ├─ Auth, cart, order and fulfillment APIs
+FastAPI backend
+  ├─ Authentication
+  ├─ Cart and order APIs
+  ├─ Fulfillment state machine
   ├─ Merchant intelligence
-  ├─ Governance / ownership controls
   └─ PostgreSQL persistence
 ```
 
+### Agent authority boundary
+
+| Decision | Owner |
+|---|---|
+| Interpret ambiguous customer need | Gemini |
+| Interpret optional retail image | Gemini |
+| Request bounded discovery/repair tools | Gemini |
+| Product ID / catalog truth | Application |
+| Price / stock truth | Application |
+| Budget and policy validation | Deterministic control |
+| Order / payment / inventory mutation | Application + explicit human action |
+| Merchant operational recommendation execution | Human |
+
+## What judges can verify
+
+| Claim | Evidence |
+|---|---|
+| Real Google Gemini provider is required for live-model evaluation | `scripts/evaluate_gemini.mjs` |
+| Deterministic fallback is not counted as Gemini success | `scripts/evaluate_gemini.mjs` |
+| Representative cases expect actual tool requests | `evidence/gemini_cases.json` |
+| Catalog / stock / budget remain authoritative outside the model | `app/api/agents/retail-copilot/route.ts` |
+| Stockout repair is revalidated before display | `app/api/agents/retail-copilot/route.ts` |
+| Prompt injection can be blocked pre-model | `app/api/agents/guardrails.ts` + copilot route |
+| Human confirmation remains required | runtime governance response + UI flow |
+| Deterministic commerce invariants have regressions | `scripts/evaluate_commerce_guards.mjs` |
+| Impact evidence is explicitly modeled/synthetic | `backend/evidence/` + `docs/EVALUATION.md` |
+
+See [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md) for the complete audit map.
+
+## Evaluation and verification
+
+Install frontend dependencies and run the normal checks:
+
+```bash
+npm ci
+npm run lint
+npm run build
+npm run test:e2e-smoke
+npm run eval:commerce-guards
+```
+
+Backend verification:
+
+```bash
+python -m unittest discover -s backend/tests -v
+python backend/evidence/impact_benchmark.py
+python backend/evidence/forecast_backtest.py
+```
+
+Live Gemini evaluation:
+
+```bash
+npm run eval:gemini
+```
+
+A valid `GOOGLE_API_KEY` is required for live Gemini evaluation. The evaluator intentionally refuses to treat deterministic fallback as successful Gemini quality.
+
 ## Run locally
 
-Requirements: Node.js 20.9+, npm, and Python 3.10+.
+### Frontend
+
+Requirements: Node.js 20.9+ and npm.
 
 ```bash
 npm ci
@@ -80,7 +183,13 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Backend:
+Add `GOOGLE_API_KEY` to the local environment file. Never commit secrets.
+
+Frontend: `http://localhost:3000`
+
+### Backend
+
+Requirements: Python 3.10+.
 
 ```bash
 cd backend
@@ -91,51 +200,46 @@ alembic upgrade head
 python main.py
 ```
 
-Add `GOOGLE_API_KEY` to both local environment files. Never commit secrets.
-
-Frontend: `http://localhost:3000`
-
 Backend API docs: `http://localhost:8000/docs`
 
-## Verification
+## Governance and responsible AI
 
-```bash
-npm run lint
-npm run build
-python -m unittest discover -s backend/tests -v
-npm run test:e2e-smoke
-npm run eval:commerce-guards
-```
+Loopora is designed so model usefulness does not become model authority.
 
-Live Gemini evaluation:
+- Model input is bounded.
+- Common request-level PII is redacted before model access.
+- Obvious prompt-injection patterns can be blocked before model/tool execution.
+- Model-proposed catalog facts are re-resolved against application-owned data.
+- Budgets and policy constraints are recomputed deterministically.
+- Substitutions are proposals, not silent swaps.
+- Chain-of-thought is neither exposed nor required.
+- Customer confirmation remains mandatory before consequential checkout actions.
+- Merchant recommendations remain review-only.
+- Images are bounded and are not persisted by Loopora application storage.
 
-```bash
-npm run eval:gemini
-```
+Full governance detail: [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md)
 
-`eval:commerce-guards` verifies deterministic commerce invariants such as merchant-cap enforcement, optimization propagation, USD consistency, hard total-budget enforcement, and fail-closed invalid constraints. `eval:gemini` separately requires a valid Gemini key and refuses to count deterministic fallback as successful live-model quality.
+## Evidence boundaries
 
-## Judge demo path
+Catalog data, stock counts, merchant records/history, ratings, offers, demand scenarios and forecasting inputs used in this prototype are **synthetic or directional demo data** unless explicitly stated otherwise.
 
-1. Open `/copilot-lab`.
-2. Enter a constrained shopping mission and optionally add a non-sensitive retail image.
-3. Inspect Gemini planning, grounded products, deterministic totals, validator results, and the decision trace.
-4. Trigger Stockout rescue to show validator feedback and a bounded repair path.
-5. Trigger Attack test to show pre-model prompt-injection blocking.
-6. Continue to authenticated customer confirmation and create the order.
-7. Open the linked merchant experience and advance the same order through fulfillment.
-8. Show evidence-backed merchant insight and explicit human review.
-9. Use `/evidence` and `/trust` for architecture, evaluation boundaries, and governance.
+The repository does **not** present modeled interaction reduction or synthetic forecast backtests as observed production conversion, revenue lift or production forecasting accuracy.
 
-## Evidence and governance
+Evaluation methodology: [`docs/EVALUATION.md`](docs/EVALUATION.md)
 
-- `docs/JURY_EVIDENCE.md` — claim-to-code audit trail and the fastest technical review path.
-- `docs/HACKATHON_DEMO.md` — timed 3-minute judge script, scoring focus, and claims discipline.
-- `docs/GENAI_ARCHITECTURE.md` — Gemini/tool/validator/human control architecture.
-- `docs/EVALUATION.md` — evaluation methodology and known evidence boundaries.
-- `docs/GOVERNANCE.md` — data, model, payment, and human-oversight controls.
-- `evidence/gemini_cases.json` — adversarial and representative Gemini evaluation cases.
-- `scripts/evaluate_commerce_guards.mjs` — reproducible deterministic commerce-invariant checks.
-- `backend/evidence/` — reproducible deterministic impact and forecasting benchmarks.
+## Repository guide
 
-No competition result is guaranteed. The repository is designed to make its claims inspectable and to separate measured evidence from synthetic/demo behavior.
+- `app/` — Next.js customer, copilot and merchant experiences.
+- `app/api/agents/` — Gemini integration, guardrails and governed retail copilot orchestration.
+- `backend/` — FastAPI services, persistence and evidence benchmarks.
+- `docs/JURY_EVIDENCE.md` — claim → implementation → verification map.
+- `docs/GENAI_ARCHITECTURE.md` — GenAI and agent architecture.
+- `docs/GOVERNANCE.md` — responsible-AI and authority boundaries.
+- `docs/HACKATHON_DEMO.md` — judge demo script.
+- `docs/EVALUATION.md` — evidence methodology and limitations.
+- `evidence/gemini_cases.json` — representative/adversarial live-model cases.
+- `.github/workflows/ci.yml` — automated build, lint, regression and backend verification.
+
+## Submission status
+
+This branch is prepared as the submission snapshot for **AI Builder Cup 2026 — Retail & Commerce**. The current implementation is intended to demonstrate governed agentic commerce, not to claim production readiness or guaranteed competition placement.
