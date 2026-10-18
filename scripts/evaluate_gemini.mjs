@@ -12,6 +12,15 @@ function containsExpectedTag(payload, expectedTags) {
   return expectedTags.some((tag) => haystack.includes(String(tag).toLowerCase()));
 }
 
+function normalizeToolNames(value) {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((item) => typeof item === 'string' && item.length > 0))];
+}
+
+function traceStep(payload, id) {
+  return (payload.trace || []).find((step) => step?.id === id) || null;
+}
+
 let passed = 0;
 let modelCases = 0;
 let agenticCases = 0;
@@ -36,6 +45,11 @@ for (const test of cases) {
 
   let ok = true;
   const reasons = [];
+  const requestedTools = normalizeToolNames(payload.agent?.requestedTools);
+  const expectedTools = normalizeToolNames(test.expectedTools);
+  const missingExpectedTools = expectedTools.filter((name) => !requestedTools.includes(name));
+  let toolPlanningVerified = false;
+
   if (test.expectedBlocked) {
     ok = response.status === 400 && payload.blocked === true;
     if (!ok) reasons.push('expected pre-model block');
@@ -52,22 +66,46 @@ for (const test of cases) {
           ok = false;
           reasons.push('fallback mode not used');
         }
-      } else if (payload.mode === 'gemini-multimodal') {
+      } else if (payload.mode === 'gemini-multimodal' && payload.model?.provider === 'Google Gemini') {
         modelCases += 1;
       } else {
         ok = false;
-        reasons.push('live Gemini was not used');
+        reasons.push('verified Google Gemini mode was not used');
       }
 
       if (test.expectAgentic !== false && test.scenario !== 'model-outage') {
-        const hasAgentTrace = (payload.trace || []).some((step) => step.id === 'agent-tools');
-        const hasAgentContract = payload.agent?.architecture && payload.agent?.chainOfThoughtExposed === false;
-        if (!hasAgentTrace || !hasAgentContract) {
+        const agentTrace = traceStep(payload, 'agent-tools');
+        const groundingTrace = traceStep(payload, 'grounding');
+        const hasAgentContract = typeof payload.agent?.architecture === 'string'
+          && payload.agent.architecture.length > 0
+          && payload.agent?.chainOfThoughtExposed === false;
+        const hasFunctionCallEvidence = payload.agent?.functionCalling === true
+          && requestedTools.length > 0
+          && agentTrace?.status === 'passed';
+        const hasApplicationGrounding = groundingTrace?.status === 'passed';
+
+        if (!hasAgentContract) {
           ok = false;
-          reasons.push('agentic tool-planning evidence missing');
-        } else {
-          agenticCases += 1;
+          reasons.push('agent contract missing');
         }
+        if (!hasFunctionCallEvidence) {
+          ok = false;
+          reasons.push('bounded Gemini function-call request evidence missing');
+        }
+        if (!hasApplicationGrounding) {
+          ok = false;
+          reasons.push('application grounding trace missing');
+        }
+        if (missingExpectedTools.length > 0) {
+          ok = false;
+          reasons.push(`expected Gemini tool request missing: ${missingExpectedTools.join(', ')}`);
+        }
+
+        toolPlanningVerified = hasAgentContract
+          && hasFunctionCallEvidence
+          && hasApplicationGrounding
+          && missingExpectedTools.length === 0;
+        if (toolPlanningVerified) agenticCases += 1;
       }
 
       if (!payload.totals?.withinBudget) {
@@ -82,7 +120,15 @@ for (const test of cases) {
           ok = false;
           reasons.push('expected validator/repair loop did not run');
         }
-        const repaired = (payload.trace || []).some((step) => step.id === 'validator-2' && step.status === 'passed');
+        const repairTrace = traceStep(payload, 'repair-plan');
+        const geminiRequestedRepair = repairTrace?.status === 'passed'
+          && typeof repairTrace?.detail === 'string'
+          && repairTrace.detail.includes('Gemini requested a bounded substitution');
+        if (!geminiRequestedRepair) {
+          ok = false;
+          reasons.push('Gemini substitution-tool request was not verified');
+        }
+        const repaired = traceStep(payload, 'validator-2')?.status === 'passed';
         if (!repaired) {
           ok = false;
           reasons.push('repaired plan did not pass deterministic validation');
@@ -105,7 +151,10 @@ for (const test of cases) {
     id: test.id,
     ok,
     mode: payload.mode || null,
-    tools: payload.agent?.requestedTools || [],
+    modelProvider: payload.model?.provider || null,
+    requestedTools,
+    expectedTools,
+    toolPlanningVerified,
     validatorPassed: payload.agent?.validatorPassed ?? null,
     repairAttempts: payload.agent?.repairAttempts ?? 0,
     reasons,
@@ -117,22 +166,22 @@ console.log(JSON.stringify({
   passed,
   passRatePct: Number((passed / cases.length * 100).toFixed(1)),
   liveGeminiCases: modelCases,
-  agenticCases,
+  verifiedToolPlanningCases: agenticCases,
   validatorPasses,
   repairCases,
   injectionBlocks,
   fallbackCases,
   evidenceDimensions: [
-    'live Gemini use',
-    'custom tool-planning trace',
-    'grounded catalog output',
+    'verified Google Gemini provider use',
+    'bounded Gemini function-call request evidence',
+    'application catalog-grounding trace',
     'deterministic budget/policy validation',
-    'validator-to-repair loop',
+    'verified Gemini substitution request + validator-to-repair loop',
     'prompt-injection blocking',
     'model-outage fallback',
     'human-confirmation governance',
   ],
-  note: 'A valid GOOGLE_API_KEY is required for non-fallback cases. This harness refuses to count deterministic fallback as live Gemini quality and reports measured behavior only.',
+  note: 'A valid GOOGLE_API_KEY is required for non-fallback cases. This harness refuses to count deterministic fallback as live Gemini quality, requires actual function-call requests for agentic cases, and reports only evidence present in the runtime response.',
   results,
 }, null, 2));
 
