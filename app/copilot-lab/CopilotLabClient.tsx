@@ -281,7 +281,7 @@ export default function CopilotLabClient() {
                 <div className="copilot-basket">
                   {result.basket.map((item) => (
                     <article key={item.id}>
-                      <div className="copilot-product-image"><img src={item.image} alt="" /><span>Gemini-ranked match</span></div>
+                      <div className="copilot-product-image"><img src={item.image} alt="" /><span>{result.mode === 'gemini-multimodal' ? 'Gemini-guided · deterministic grounding' : 'Deterministic fallback match'}</span></div>
                       <div className="copilot-product-body">
                         {item.substitution && <p className="copilot-substitution"><i className="fas fa-arrows-rotate" /> Substitute for {item.substitution.for} · approval required</p>}
                         <small>{item.merchantName} · {item.id}</small>
