@@ -66,11 +66,11 @@ for (const test of cases) {
           ok = false;
           reasons.push('fallback mode not used');
         }
-      } else if (payload.mode === 'gemini-multimodal' && payload.model?.provider === 'Google Gemini') {
+      } else if (payload.mode === 'gemini-multimodal' && payload.model?.provider === 'Google Vertex AI') {
         modelCases += 1;
       } else {
         ok = false;
-        reasons.push('verified Google Gemini mode was not used');
+        reasons.push('verified Google Vertex AI mode was not used');
       }
 
       if (test.expectAgentic !== false && test.scenario !== 'model-outage') {
@@ -90,7 +90,7 @@ for (const test of cases) {
         }
         if (!hasFunctionCallEvidence) {
           ok = false;
-          reasons.push('bounded Gemini function-call request evidence missing');
+          reasons.push('bounded Vertex AI Gemini function-call evidence missing');
         }
         if (!hasApplicationGrounding) {
           ok = false;
@@ -98,7 +98,7 @@ for (const test of cases) {
         }
         if (missingExpectedTools.length > 0) {
           ok = false;
-          reasons.push(`expected Gemini tool request missing: ${missingExpectedTools.join(', ')}`);
+          reasons.push(`expected Vertex AI Gemini tool request missing: ${missingExpectedTools.join(', ')}`);
         }
 
         toolPlanningVerified = hasAgentContract
@@ -126,7 +126,7 @@ for (const test of cases) {
           && repairTrace.detail.includes('Gemini requested a bounded substitution');
         if (!geminiRequestedRepair) {
           ok = false;
-          reasons.push('Gemini substitution-tool request was not verified');
+          reasons.push('Vertex AI Gemini substitution-tool request was not verified');
         }
         const repaired = traceStep(payload, 'validator-2')?.status === 'passed';
         if (!repaired) {
@@ -165,23 +165,23 @@ console.log(JSON.stringify({
   total: cases.length,
   passed,
   passRatePct: Number((passed / cases.length * 100).toFixed(1)),
-  liveGeminiCases: modelCases,
+  liveVertexAICases: modelCases,
   verifiedToolPlanningCases: agenticCases,
   validatorPasses,
   repairCases,
   injectionBlocks,
   fallbackCases,
   evidenceDimensions: [
-    'verified Google Gemini provider use',
-    'bounded Gemini function-call request evidence',
+    'verified Google Vertex AI provider use',
+    'bounded Vertex AI Gemini function-call evidence',
     'application catalog-grounding trace',
     'deterministic budget/policy validation',
-    'verified Gemini substitution request + validator-to-repair loop',
+    'verified Vertex AI Gemini substitution request + validator-to-repair loop',
     'prompt-injection blocking',
     'model-outage fallback',
     'human-confirmation governance',
   ],
-  note: 'A valid GOOGLE_API_KEY is required for non-fallback cases. This harness refuses to count deterministic fallback as live Gemini quality, requires actual function-call requests for agentic cases, and reports only evidence present in the runtime response.',
+  note: 'Live cases require Vertex AI configuration (GOOGLE_CLOUD_PROJECT plus Cloud Run service identity, or a short-lived VERTEX_ACCESS_TOKEN for local evaluation). This harness refuses to count deterministic fallback as live Vertex AI quality and requires actual function-call evidence for agentic cases.',
   results,
 }, null, 2));
 
