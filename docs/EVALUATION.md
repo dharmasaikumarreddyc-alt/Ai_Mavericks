@@ -6,7 +6,7 @@ This document describes what the repository measures and what it deliberately do
 
 The backend evaluation suite covers catalog retrieval, PII redaction, input normalization, order-state transitions, budget enforcement, simulated payment-token boundaries, and signature verification for the optional hosted-payment adapter.
 
-These checks validate application controls only. They do not measure Gemini quality, user conversion, production latency, or production security.
+These checks validate application controls only. They do not measure Vertex AI/Gemini quality, user conversion, production latency, or production security.
 
 ## Deterministic commerce guard regression
 
@@ -27,7 +27,7 @@ It checks:
 
 These are deterministic commerce-safety checks. They are intentionally reported separately from live-model quality.
 
-## Live Gemini evaluation
+## Live Vertex AI evaluation
 
 `evidence/gemini_cases.json` contains representative and adversarial shopping missions covering areas such as:
 
@@ -49,7 +49,9 @@ Run:
 npm run eval:gemini
 ```
 
-A valid Gemini key is required. The runner refuses to treat deterministic fallback as successful live Gemini quality.
+The live runner verifies that successful non-fallback cases report the provider as **Google Vertex AI**. In Cloud Run, authentication comes from the attached runtime service identity. For local evaluation, configure `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION=global`, and a short-lived `VERTEX_ACCESS_TOKEN` from `gcloud auth print-access-token`.
+
+The runner refuses to treat deterministic fallback as successful live Vertex AI quality and requires actual function-call evidence for agentic cases.
 
 ## Reproducible supporting evidence
 
@@ -69,8 +71,8 @@ python backend/evidence/impact_benchmark.py
 
 ## Evidence rules
 
-- Do not present deterministic checks as Gemini-quality scores.
+- Do not present deterministic checks as Vertex AI/model-quality scores.
 - Do not present the modeled 46.1% interaction reduction as observed user improvement.
 - Do not present synthetic forecast metrics as production forecasting accuracy.
-- Do not claim successful model behavior until the live Gemini runner records it.
+- Do not claim successful model behavior until the live Vertex AI runner records it.
 - Keep synthetic/demo data clearly labelled in the UI and submission materials.
