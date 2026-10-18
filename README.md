@@ -33,7 +33,7 @@ Open `/copilot-lab` and follow one story instead of touring every dashboard:
 4. Trigger **Attack test** to show prompt injection blocked before model/tool execution.
 5. Return to the valid basket and show deterministic budget compliance plus explicit human confirmation before checkout or merchant action.
 
-The full timed demo script and claims discipline are in [`docs/HACKATHON_DEMO.md`](docs/HACKATHON_DEMO.md).
+The full timed demo script and claims discipline are in [`docs/HACKATHON_DEMO.md`](docs/HACKATHON_DEMO.md). For a claim-to-code audit trail, see [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md).
 
 ## Core capabilities
 
@@ -129,6 +129,7 @@ npm run eval:gemini
 
 ## Evidence and governance
 
+- `docs/JURY_EVIDENCE.md` — claim-to-code audit trail and the fastest technical review path.
 - `docs/HACKATHON_DEMO.md` — timed 3-minute judge script, scoring focus, and claims discipline.
 - `docs/GENAI_ARCHITECTURE.md` — Gemini/tool/validator/human control architecture.
 - `docs/EVALUATION.md` — evaluation methodology and known evidence boundaries.
