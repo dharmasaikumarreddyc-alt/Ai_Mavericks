@@ -2,7 +2,7 @@
 
 **AI Builder Cup 2026 · Retail & Commerce**
 
-Loopora is a Gemini-powered commerce copilot that turns customer intent into a grounded, budget-aware shopping plan and then closes the loop into merchant fulfillment and operational insight.
+Loopora is a **Vertex AI-powered** commerce copilot that uses Gemini 3.8 Flash to turn customer intent into a grounded, budget-aware shopping plan and then closes the loop into merchant fulfillment and operational insight.
 
 The core idea is simple: **GenAI handles ambiguity and planning; deterministic systems retain commerce truth; humans retain consequential authority.**
 
@@ -28,15 +28,15 @@ Loopora connects those steps into one governed experience.
 ```text
 Customer text / optional image
         ↓
-Gemini intent + multimodal interpretation
+Vertex AI (Gemini 3.8 Flash) intent + multimodal interpretation
         ↓
-Gemini bounded tool planning
+Vertex AI bounded function/tool planning
         ↓
 Application-owned catalog / inventory tools
         ↓
 Deterministic price / stock / budget / policy validation
         ↓
-Validator feedback → bounded Gemini repair when needed
+Validator feedback → bounded Vertex AI repair when needed
         ↓
 Explicit customer confirmation
         ↓
@@ -47,7 +47,7 @@ Evidence-backed merchant recommendation
 Human accept / reject
 ```
 
-Gemini may interpret, rank, explain and request bounded tools. It does **not** own authoritative product IDs, prices, stock, totals, payment state, order state or merchant operational changes.
+Gemini on Vertex AI may interpret, rank, explain and request bounded tools. It does **not** own authoritative product IDs, prices, stock, totals, payment state, order state or merchant operational changes.
 
 ## 3-minute judge path
 
@@ -56,8 +56,8 @@ Use one coherent story instead of touring every feature.
 1. Open `/cart-pilot#visual-copilot` (or `/copilot-lab`, which redirects there).
 2. Run: **“Build a vegan breakfast with coffee under $20. Prefer something healthy.”**
 3. Optionally add the synthetic sample image to demonstrate multimodal interpretation.
-4. Inspect the decision trace: Gemini planning → application grounding → deterministic validation.
-5. Trigger **Stockout rescue** and show the validator rejecting the stale plan, Gemini requesting repair, and the replacement being revalidated.
+4. Inspect the decision trace: Vertex AI planning → application grounding → deterministic validation.
+5. Trigger **Stockout rescue** and show the validator rejecting the stale plan, Vertex AI requesting repair, and the replacement being revalidated.
 6. Trigger **Attack test** and show prompt injection blocked before model/tool execution.
 7. Return to the valid basket and continue to the customer-confirmed checkout flow.
 8. Open the merchant workspace and show the same order moving through fulfillment with evidence-backed, human-reviewed operational guidance.
@@ -68,13 +68,14 @@ Fast claim-to-code audit: [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md)
 
 ## Core capabilities
 
-- **Gemini 3.8 Flash** as the primary GenAI model.
+- **Google Vertex AI** as the primary GenAI platform, serving **Gemini 3.8 Flash**.
+- Cloud Run service-identity authentication with short-lived Google Cloud access tokens; no Gemini API key is required in production.
 - Multimodal shopping from text plus optional pantry, shelf, meal or product images.
-- Bounded Gemini function/tool planning for catalog discovery and repair flows.
+- Bounded Vertex AI function/tool planning for catalog discovery and repair flows.
 - Catalog-grounded product selection with deterministic price, stock, budget and dietary-tag validation.
 - Validator-to-repair workflow for stockout recovery.
-- Transparent **live Gemini vs deterministic fallback** labeling.
-- Visible decision trace showing ownership by Gemini, application code, deterministic controls and humans.
+- Transparent **live Vertex AI vs deterministic fallback** evidence.
+- Visible decision trace showing ownership by the model, application code, deterministic controls and humans.
 - Prompt-injection blocking and request-level PII redaction before model access.
 - Voice-assisted and conversational shopping flows.
 - Authenticated customer checkout with persistent order state.
@@ -90,23 +91,24 @@ Fast claim-to-code audit: [`docs/JURY_EVIDENCE.md`](docs/JURY_EVIDENCE.md)
 
 Loopora uses Google technologies where they materially support the experience rather than adding integrations only for breadth.
 
-- **Gemini API** — intent interpretation, multimodal understanding, bounded tool planning and validator-guided repair.
-- **Google Cloud Run** — deployment target for the application/API stack.
-- **Google Cloud Secret Manager / runtime environment configuration** — intended production boundary for model credentials and service configuration.
+- **Vertex AI** — Gemini 3.8 Flash inference for intent interpretation, multimodal understanding, bounded function/tool planning and validator-guided repair.
+- **Cloud Run** — deployment target for the web and API stack.
+- **Cloud IAM / Cloud Run service identity** — least-privilege `roles/aiplatform.user` authentication to Vertex AI with short-lived tokens.
+- **Secret Manager** — backend database, JWT and optional demo credentials; model access no longer depends on a stored API key.
 
-The prototype deliberately keeps commerce invariants in deterministic application code even when Gemini participates in planning.
+The prototype deliberately keeps commerce invariants in deterministic application code even when Vertex AI participates in planning.
 
 ## Architecture
 
 ```text
-Next.js application
+Next.js application on Cloud Run
   ├─ Customer shopping + CartPilot
-  ├─ Multimodal Gemini retail copilot
+  ├─ Vertex AI retail copilot (Gemini 3.8 Flash)
   ├─ Application-owned commerce tools
   ├─ Deterministic validator / fallback
   └─ Merchant experience
              │ authenticated HTTPS
-FastAPI backend
+FastAPI backend on Cloud Run
   ├─ Authentication
   ├─ Cart and order APIs
   ├─ Fulfillment state machine
@@ -118,9 +120,9 @@ FastAPI backend
 
 | Decision | Owner |
 |---|---|
-| Interpret ambiguous customer need | Gemini |
-| Interpret optional retail image | Gemini |
-| Request bounded discovery/repair tools | Gemini |
+| Interpret ambiguous customer need | Vertex AI (Gemini) |
+| Interpret optional retail image | Vertex AI (Gemini) |
+| Request bounded discovery/repair tools | Vertex AI (Gemini) |
 | Product ID / catalog truth | Application |
 | Price / stock truth | Application |
 | Budget and policy validation | Deterministic control |
@@ -131,8 +133,9 @@ FastAPI backend
 
 | Claim | Evidence |
 |---|---|
-| Real Google Gemini provider is required for live-model evaluation | `scripts/evaluate_gemini.mjs` |
-| Deterministic fallback is not counted as Gemini success | `scripts/evaluate_gemini.mjs` |
+| Real Google Vertex AI provider is required for live-model evaluation | `scripts/evaluate_gemini.mjs` |
+| Cloud Run authenticates with a dedicated Vertex AI service identity, not a model API-key secret | `deploy-gcp.ps1` |
+| Deterministic fallback is not counted as Vertex AI success | `scripts/evaluate_gemini.mjs` |
 | Representative cases expect actual tool requests | `evidence/gemini_cases.json` |
 | Catalog / stock / budget remain authoritative outside the model | `app/api/agents/retail-copilot/route.ts` |
 | Stockout repair is revalidated before display | `app/api/agents/retail-copilot/route.ts` |
@@ -163,27 +166,28 @@ python backend/evidence/impact_benchmark.py
 python backend/evidence/forecast_backtest.py
 ```
 
-Live Gemini evaluation:
+Live Vertex AI evaluation:
 
 ```bash
 npm run eval:gemini
 ```
 
-A valid `GOOGLE_API_KEY` is required for live Gemini evaluation. The evaluator intentionally refuses to treat deterministic fallback as successful Gemini quality.
+In Cloud Run, Vertex AI uses the attached service identity automatically. For local evaluation, set `GOOGLE_CLOUD_PROJECT`, keep `GOOGLE_CLOUD_LOCATION=global`, and supply a short-lived `VERTEX_ACCESS_TOKEN` from `gcloud auth print-access-token`. The evaluator intentionally refuses to treat deterministic fallback as successful Vertex AI quality.
 
 ## Run locally
 
 ### Frontend
 
-Requirements: Node.js 20.9+ and npm.
+Requirements: Node.js 20.9+, npm and Google Cloud CLI for live Vertex AI calls.
 
 ```bash
 npm ci
 cp .env.example .env.local
+export VERTEX_ACCESS_TOKEN="$(gcloud auth print-access-token)"
 npm run dev
 ```
 
-Add `GOOGLE_API_KEY` to the local environment file. Never commit secrets.
+Set your Google Cloud project in `.env.local`. Never commit access tokens or service-account keys.
 
 Frontend: `http://localhost:3000`
 
@@ -216,6 +220,7 @@ Loopora is designed so model usefulness does not become model authority.
 - Customer confirmation remains mandatory before consequential checkout actions.
 - Merchant recommendations remain review-only.
 - Images are bounded and are not persisted by Loopora application storage.
+- Vertex AI access is granted through a dedicated Cloud Run identity with `roles/aiplatform.user`; no service-account key is committed or injected.
 
 Full governance detail: [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md)
 
@@ -230,8 +235,9 @@ Evaluation methodology: [`docs/EVALUATION.md`](docs/EVALUATION.md)
 ## Repository guide
 
 - `app/` — Next.js customer, copilot and merchant experiences.
-- `app/api/agents/` — Gemini integration, guardrails and governed retail copilot orchestration.
+- `app/api/agents/` — Vertex AI integration, guardrails and governed retail copilot orchestration.
 - `backend/` — FastAPI services, persistence and evidence benchmarks.
+- `deploy-gcp.ps1` — Cloud Run + Vertex AI/IAM deployment path.
 - `docs/JURY_EVIDENCE.md` — claim → implementation → verification map.
 - `docs/GENAI_ARCHITECTURE.md` — GenAI and agent architecture.
 - `docs/GOVERNANCE.md` — responsible-AI and authority boundaries.
